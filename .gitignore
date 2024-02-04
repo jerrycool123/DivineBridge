@@ -1,6 +1,6 @@
 .turbo
-build/**
-dist/**
-.next/**
+build/
+dist/
+.next/
 node_modules/
 .env
