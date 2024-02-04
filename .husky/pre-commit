@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+pnpm syncpack list-mismatches
+pnpm syncpack format && git add .
+
+pnpm lint-staged

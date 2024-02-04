@@ -1,0 +1,9 @@
+{
+  "name": "@divine-bridge/prettier-config-custom",
+  "version": "0.0.1",
+  "dependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "prettier": "^3.2.5"
+  },
+  "main": "./.prettierrc.json"
+}

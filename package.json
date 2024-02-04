@@ -1,0 +1,34 @@
+{
+  "name": "divine-bridge",
+  "version": "0.0.1",
+  "devDependencies": {
+    "husky": "^9.0.10",
+    "lint-staged": "^15.2.1",
+    "syncpack": "^12.3.0",
+    "turbo": "^1.12.2"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "*.{mjs,cjs,js,ts,tsx,jsx}": [
+      "eslint"
+    ],
+    "*.{json,md,html,mjs,cjs,js,jsx,ts,tsx}": [
+      "prettier --write"
+    ]
+  },
+  "packageManager": "pnpm@8.15.1",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky"
+  },
+  "syncpack": {
+    "dependencyTypes": [
+      "dev",
+      "overrides",
+      "peer",
+      "pnpmOverrides",
+      "prod",
+      "resolutions"
+    ]
+  }
+}
