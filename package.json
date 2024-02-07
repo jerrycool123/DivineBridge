@@ -18,6 +18,9 @@
   },
   "packageManager": "pnpm@8.15.1",
   "scripts": {
+    "dev": "turbo run dev",
+    "format": "turbo run format",
+    "lint": "turbo run lint",
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky"
   },

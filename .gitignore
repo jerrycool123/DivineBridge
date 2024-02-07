@@ -1,6 +1,12 @@
 .turbo
 build/
+.build/
+.esbuild/
 dist/
 .next/
 node_modules/
 .env
+.env.bak
+.env.*.local
+.serverless/
+.aws-lambda-rie/

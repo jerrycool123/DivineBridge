@@ -12,7 +12,7 @@
   ],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "import", "prettier"],
-  "ignorePatterns": ["**/build/**"],
+  "ignorePatterns": ["**/build/**", "**/dist/**", "**/node_modules/**"],
   "rules": {
     "eqeqeq": ["error", "always"],
     "@typescript-eslint/no-explicit-any": "error",
@@ -33,6 +33,7 @@
         "checksVoidReturn": false
       }
     ],
+    "@typescript-eslint/require-await": "off",
     "prettier/prettier": "error"
   },
   "parserOptions": {
