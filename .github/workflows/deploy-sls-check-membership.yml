@@ -8,9 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/sls-check-membership
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,11 +25,11 @@ jobs:
         run: pnpm install
 
       - name: Load environment variables
-        run: echo "${{ secrets.SLS_CHECK_MEMBERSHIP_ENV }}" | base64 --decode >> .env.production.local
+        run: echo "${{ secrets.SLS_CHECK_MEMBERSHIP_ENV }}" | base64 --decode >> ./apps/sls-check-membership/.env.production.local
 
       - name: Deploy to AWS Lambda
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
-        run: npx serverless deploy --stage production
+        run: pnpm -F sls-check-membership run deploy
