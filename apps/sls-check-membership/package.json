@@ -1,0 +1,33 @@
+{
+  "name": "sls-check-membership",
+  "version": "0.0.1",
+  "dependencies": {
+    "@discordjs/rest": "^2.2.0",
+    "@divine-bridge/common": "workspace:^",
+    "dayjs": "^1.11.10",
+    "discord-api-types": "^0.37.69",
+    "discord.js": "^14.14.1",
+    "esbuild": "^0.20.0",
+    "mongoose": "^8.1.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@divine-bridge/eslint-config-custom": "workspace:^",
+    "@divine-bridge/prettier-config-custom": "workspace:^",
+    "@types/aws-lambda": "^8.10.133",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import-esm": "^1.2.1",
+    "prettier": "^3.2.5",
+    "serverless": "^3.38.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-esbuild": "^1.51.0",
+    "typescript": "^5.3.3"
+  },
+  "main": "index.js",
+  "scripts": {
+    "deploy": "serverless deploy --stage production",
+    "dev:auth": "serverless invoke local --function check-auth-membership --path invoke-local.json",
+    "dev:screenshot": "serverless invoke local --function check-screenshot-membership --path invoke-local.json"
+  },
+  "type": "module"
+}

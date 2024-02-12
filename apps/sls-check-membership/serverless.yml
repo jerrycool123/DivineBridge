@@ -1,0 +1,26 @@
+service: sls-check-membership
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+functions:
+  check-auth-membership:
+    handler: src/index.checkAuthMembership
+    timeout: 900
+    url: true
+  check-screenshot-membership:
+    handler: src/index.checkScreenshotMembership
+    timeout: 900
+    url: true
+
+plugins:
+  - serverless-esbuild
+  - serverless-dotenv-plugin
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    format: cjs
+    outputFileExtension: .cjs

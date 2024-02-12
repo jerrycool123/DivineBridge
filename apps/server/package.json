@@ -1,11 +1,20 @@
 {
-  "name": "@divine-bridge/common",
+  "name": "server",
   "version": "0.0.1",
   "dependencies": {
-    "gaxios": "^6.2.0",
+    "@divine-bridge/common": "workspace:^",
+    "@sapphire/framework": "^5.0.7",
+    "@sapphire/plugin-api": "^6.1.1",
+    "@sapphire/plugin-logger": "^4.0.2",
+    "axios": "^1.6.7",
+    "csv-writer": "^1.6.0",
+    "dayjs": "^1.11.10",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
     "google-auth-library": "^9.6.3",
     "googleapis": "^132.0.0",
     "mongoose": "^8.1.1",
+    "p-queue": "^8.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -17,14 +26,13 @@
     "tsup": "^8.0.1",
     "typescript": "^5.3.3"
   },
-  "exports": "./dist/index.js",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "tsup ./src/index.ts --format esm --dts-resolve --minify",
-    "dev": "tsup ./src/index.ts --format esm --dts-resolve --watch",
+    "build": "tsup --minify",
+    "dev": "rm -rf ./dist && tsup --watch ./src --onSuccess \"pnpm start\"",
     "format": "prettier --write .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "node ./dist/index.js"
   },
-  "type": "module",
-  "types": "./dist/index.d.ts"
+  "type": "module"
 }

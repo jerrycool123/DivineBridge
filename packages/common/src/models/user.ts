@@ -10,6 +10,9 @@ export interface UserAttrs {
 
 export interface UserDoc extends UserAttrs, Document<string> {
   _id: string;
+  preference: {
+    language: string;
+  };
   youtube: {
     id: string;
     title: string;
@@ -36,6 +39,13 @@ const userSchema = new Schema<UserDoc>(
       avatar: {
         type: String,
         required: true,
+      },
+    },
+    preference: {
+      language: {
+        type: String,
+        required: true,
+        default: 'eng',
       },
     },
     youtube: {

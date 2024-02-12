@@ -6,7 +6,8 @@ dist/
 .next/
 node_modules/
 .env
+.env.production
 .env.bak
 .env.*.local
 .serverless/
-.aws-lambda-rie/
+.aws.env

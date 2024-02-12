@@ -8,6 +8,7 @@ export interface YouTubeChannelAttrs {
     customUrl: string;
     thumbnail: string;
   };
+  memberOnlyVideoIds: string[];
 }
 
 export interface YouTubeChannelDoc extends YouTubeChannelAttrs, Document<string> {
@@ -42,6 +43,11 @@ const youtubeChannelSchema = new Schema<YouTubeChannelDoc>(
         type: String,
         required: true,
       },
+    },
+    memberOnlyVideoIds: {
+      type: [String],
+      default: [],
+      required: true,
     },
   },
   {

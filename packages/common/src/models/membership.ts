@@ -3,7 +3,7 @@ import { Document, Model, Schema, Types, model } from 'mongoose';
 export interface MembershipAttrs {
   user: string; // Ref: User
   membershipRole: string; // Ref: MembershipRole
-  type: 'screenshot' | 'auth' | 'live_chat';
+  type: 'manual' | 'screenshot' | 'auth' | 'live_chat';
   begin: Date;
   end: Date;
 }
@@ -32,7 +32,7 @@ const membershipSchema = new Schema<MembershipDoc>(
     },
     type: {
       type: String,
-      enum: ['screenshot', 'auth', 'live_chat'],
+      enum: ['manual', 'screenshot', 'auth', 'live_chat'],
       required: true,
     },
     begin: {
