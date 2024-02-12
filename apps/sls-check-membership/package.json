@@ -27,7 +27,8 @@
   "scripts": {
     "deploy": "serverless deploy --stage production",
     "dev:auth": "serverless invoke local --function check-auth-membership --path invoke-local.json",
-    "dev:screenshot": "serverless invoke local --function check-screenshot-membership --path invoke-local.json"
+    "dev:screenshot": "serverless invoke local --function check-screenshot-membership --path invoke-local.json",
+    "package": "serverless package --stage production"
   },
   "type": "module"
 }

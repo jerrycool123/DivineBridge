@@ -4,6 +4,10 @@ provider:
   name: aws
   runtime: nodejs20.x
 
+package:
+  include:
+    - node_modules/@divine-bridge/common/**
+
 functions:
   check-auth-membership:
     handler: src/index.checkAuthMembership
