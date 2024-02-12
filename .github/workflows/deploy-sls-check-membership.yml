@@ -15,8 +15,11 @@ jobs:
     outputs:
       deploy: ${{ steps.filter.outputs.deploy }}
     steps:
-      # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter path
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
