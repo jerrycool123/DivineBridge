@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build @divine-bridge/common
+        run: pnpm -F @divine-bridge/common run build
+
       - name: Load environment variables
         run: echo "${{ secrets.SLS_CHECK_MEMBERSHIP_ENV }}" | base64 --decode >> ./apps/sls-check-membership/.env.production.local
 

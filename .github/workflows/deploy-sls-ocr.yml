@@ -8,9 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/sls-ocr
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,11 +25,11 @@ jobs:
         run: pnpm install
 
       - name: Load environment variables
-        run: echo "${{ secrets.SLS_OCR_ENV }}" | base64 --decode >> .env.production.local
+        run: echo "${{ secrets.SLS_OCR_ENV }}" | base64 --decode >> ./apps/sls-ocr/.env.production.local
 
       - name: Deploy to AWS Lambda
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
-        run: npx serverless deploy --stage production
+        run: pnpm -F sls-ocr run deploy
