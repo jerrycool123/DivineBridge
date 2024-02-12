@@ -1,0 +1,43 @@
+.navbar {
+  height: 56px;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  background-color: #3a4149;
+  color: white;
+  border-bottom: 1px solid #23282c;
+  z-index: 100;
+}
+
+.brand {
+  color: #3bb4ff;
+}
+
+.brand:hover {
+  color: #7acafc;
+}
+
+.signInButton {
+  height: 2.25rem !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-size: 14px !important;
+}
+
+.user {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.user:hover {
+  background-color: #555f6b;
+}
+
+.username {
+  color: #e2e9f1;
+}
+
+.avatar {
+  height: 2.25rem;
+  width: 2.25rem;
+}

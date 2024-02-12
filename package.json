@@ -18,11 +18,13 @@
   },
   "packageManager": "pnpm@8.15.1",
   "scripts": {
+    "build": "turbo run build",
     "dev": "turbo run dev",
     "format": "turbo run format",
     "lint": "turbo run lint",
     "preinstall": "npx only-allow pnpm",
-    "prepare": "husky"
+    "prepare": "husky",
+    "start": "turbo run start"
   },
   "syncpack": {
     "dependencyTypes": [

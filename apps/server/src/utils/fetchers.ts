@@ -2,6 +2,15 @@ import { container } from '@sapphire/framework';
 import { Guild, GuildBasedChannel, GuildMember } from 'discord.js';
 
 export namespace Fetchers {
+  export const fetchGuild = async (guildId: string): Promise<Guild | null> => {
+    try {
+      return await container.client.guilds.fetch(guildId);
+    } catch (error) {
+      container.logger.error(error);
+    }
+    return null;
+  };
+
   export const fetchBotGuildMember = async (guild: Guild) => {
     try {
       return await guild.members.fetchMe();

@@ -89,12 +89,12 @@ export namespace Utils {
     logChannel,
     payload,
   }: {
-    guildOwner?: GuildMember;
-    logChannel?: GuildTextBasedChannel;
+    guildOwner: GuildMember | null;
+    logChannel: GuildTextBasedChannel | null;
     payload: MessageCreateOptions;
   }): Promise<boolean> => {
     // Try to send event log to the log channel
-    if (logChannel !== undefined) {
+    if (logChannel !== null) {
       try {
         await logChannel.send(payload);
         return true;
@@ -105,7 +105,7 @@ export namespace Utils {
     }
 
     // If the log is failed to send, try to DM the guild owner about the removal
-    if (guildOwner !== undefined) {
+    if (guildOwner !== null) {
       try {
         const content = payload.content !== undefined ? `\n\n${payload.content}` : '';
         await guildOwner.send({

@@ -9,7 +9,6 @@ export class GuildUpdateListener extends Listener<typeof Events.GuildUpdate> {
   }
 
   public async run(_oldGuild: Guild, newGuild: Guild) {
-    console.log('GuildUpdateListener');
     await Database.upsertGuild({
       id: newGuild.id,
       name: newGuild.name,

@@ -54,7 +54,7 @@ export namespace Validators {
     ) {
       return {
         success: false,
-        error: `The bot does not enough permission to send messages in the log channel.`,
+        error: `The bot doesn't have enough permission to send messages in the log channel.`,
       };
     }
 

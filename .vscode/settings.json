@@ -1,8 +1,13 @@
 {
   "files.exclude": {
-    // "**/node_modules": true,
-    "**/.turbo": true
+    "**/node_modules": true,
+    "**/.turbo": true,
+    "**/.next": true
   },
+  "eslint.workingDirectories": [
+    { "pattern": "apps/*/" },
+    { "pattern": "packages/*/" }
+  ],
   "javascript.validate.enable": false,
   "typescript.preferences.quoteStyle": "single"
 }

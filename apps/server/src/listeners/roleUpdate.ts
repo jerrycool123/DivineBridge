@@ -9,7 +9,6 @@ export class RoleUpdateListener extends Listener<typeof Events.GuildRoleUpdate> 
   }
 
   public async run(_oldRole: Role, newRole: Role) {
-    console.log('RoleUpdateListener');
     await Database.updateMembershipRole({
       id: newRole.id,
       name: newRole.name,

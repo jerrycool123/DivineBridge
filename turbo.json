@@ -3,11 +3,13 @@
   "pipeline": {
     "dev": {
       "dependsOn": ["@divine-bridge/common#build"],
+      "dotEnv": [".env.development.local", ".env"],
       "cache": false
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "build/**", "dist/**"]
+      "outputs": [".next/**", "build/**", "dist/**"],
+      "dotEnv": [".env.production.local", ".env"]
     },
     "start": {
       "dependsOn": ["^build"]

@@ -1,5 +1,4 @@
 .turbo
-build/
 .build/
 .esbuild/
 dist/

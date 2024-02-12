@@ -15,9 +15,7 @@ import { DiscordService } from './discord.js';
 export namespace MembershipService {
   export const addMembership = async (args: {
     guild: Guild;
-    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
-      youtube: YouTubeChannelDoc;
-    };
+    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube' | 'guild'>;
     member: GuildMember;
     type: MembershipDoc['type'];
     begin: dayjs.Dayjs;
@@ -96,12 +94,11 @@ export namespace MembershipService {
   };
 
   export const removeMembership = async (args: {
-    guild: Guild;
-    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
-      youtube: YouTubeChannelDoc;
-    };
-    membershipDoc: MembershipDoc;
+    guild: Guild | string;
+    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'>;
+    membershipDoc: Omit<MembershipDoc, 'membershipRole'>;
     removeReason: string;
+    /** If `true`, even when the role is not removed in Discord, we still remove the membership record in DB. */
     continueOnError?: boolean;
   }): Promise<
     | {
@@ -117,26 +114,36 @@ export namespace MembershipService {
     const { guild, membershipDoc, membershipRoleDoc, removeReason, continueOnError = false } = args;
     const { user: userId } = membershipDoc;
     const { _id: membershipRoleId } = membershipRoleDoc;
+    const guildId = typeof guild === 'string' ? guild : guild.id;
 
-    // Remove the role from the user
+    // Fetch guild member
+    let member: GuildMember | null = null;
+    if (typeof guild !== 'string') {
+      member = await Fetchers.fetchGuildMember(guild, membershipDoc.user);
+    }
+
+    // Remove the role from the member
     let roleRemoved = false;
-    const member = await Fetchers.fetchGuildMember(guild, membershipDoc.user);
     if (member !== null) {
       try {
         await member.roles.remove(membershipRoleId);
         roleRemoved = true;
       } catch (error) {
         container.logger.error(error);
-        if (continueOnError === false) {
-          return {
-            success: false,
-            error: 'Failed to remove the role from the member.',
-          };
-        } else {
-          container.logger.error(
-            `Failed to remove role <@&${membershipRoleId}> from user <@${userId}> in guild ${member.guild.id}.`,
-          );
-        }
+      }
+    }
+
+    // If the role is not removed, we can continue or stop
+    if (roleRemoved === false) {
+      if (continueOnError === false) {
+        return {
+          success: false,
+          error: 'Failed to remove the role from the member.',
+        };
+      } else {
+        container.logger.error(
+          `Failed to remove role <@&${membershipRoleId}> from user <@${userId}> in guild ${member !== null ? member.guild.id : guildId}.`,
+        );
       }
     }
 
@@ -191,7 +198,6 @@ export namespace MembershipService {
             membershipDoc,
             membershipRoleDoc,
             removeReason,
-            // Even when the role is not removed in Discord, we still remove the membership record in DB
             continueOnError: true,
           }),
         ),

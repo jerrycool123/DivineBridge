@@ -31,7 +31,8 @@ export const checkAuthMembership = async (
 
   await Logger.sysLog(`Start checking auth membership.`, 'check-auth-membership');
   await dbConnect();
-  let removalCount = 0;
+  let removalCount = 0,
+    removalFailCount = 0;
 
   // Get auth memberships from DB
   const membershipDocs = await MembershipCollection.find({
@@ -86,17 +87,18 @@ export const checkAuthMembership = async (
     }
 
     // Get YouTube channel from DB
-    const youTubeChannelId = membershipRoleDoc.youtube;
-    const youTubeChannelDoc = await YouTubeChannelCollection.findById(youTubeChannelId);
-    if (youTubeChannelDoc === null) {
+    const youtubeChannelId = membershipRoleDoc.youtube;
+    const youtubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
+    if (youtubeChannelDoc === null) {
       await Logger.sysLog(
-        `Failed to find the YouTube channel \`${youTubeChannelId}\` which the role <@&${membershipRoleId}> belongs to in the database.`,
+        `Failed to find the YouTube channel \`${youtubeChannelId}\` which the role <@&${membershipRoleId}> belongs to in the database.`,
         'check-auth-membership',
       );
       continue;
     }
 
     // Check membership
+    const failedRoleRemovalUserIds: string[] = [];
     for (const membershipDoc of membershipDocGroup) {
       const userId = membershipDoc.user;
       const userDoc = userId in userDocRecord ? userDocRecord[userId] : null;
@@ -112,8 +114,8 @@ export const checkAuthMembership = async (
         let retry: number;
         for (retry = 0; retry < 3 && verifySuccess === false; retry++) {
           const randomVideoId =
-            youTubeChannelDoc.memberOnlyVideoIds[
-              Math.floor(Math.random() * youTubeChannelDoc.memberOnlyVideoIds.length)
+            youtubeChannelDoc.memberOnlyVideoIds[
+              Math.floor(Math.random() * youtubeChannelDoc.memberOnlyVideoIds.length)
             ];
           const googleApi = new GoogleAPI(Env.GOOGLE_CLIENT_ID, Env.GOOGLE_CLIENT_SECRET);
           const result = await googleApi.verifyYouTubeMembership(refreshToken, randomVideoId);
@@ -129,7 +131,7 @@ export const checkAuthMembership = async (
             // ! Unknown error, currently we let it pass
             verifySuccess = true;
             await Logger.sysLog(
-              `An unknown error occurred while verifying the user's membership for the YouTube channel \`${youTubeChannelDoc.profile.title}\` via Google API.`,
+              `An unknown error occurred while verifying the user's membership for the YouTube channel \`${youtubeChannelDoc.profile.title}\` via Google API.`,
               'check-auth-membership',
             );
           }
@@ -137,7 +139,7 @@ export const checkAuthMembership = async (
         if (retry === 3) {
           // ! Failed more than 3 times, currently we let it pass
           await Logger.sysLog(
-            `Failed to verify the user's membership for the YouTube channel \`${youTubeChannelDoc.profile.title}\` via Google API after retry 3 times.`,
+            `Failed to verify the user's membership for the YouTube channel \`${youtubeChannelDoc.profile.title}\` via Google API after retry 3 times.`,
             'check-auth-membership',
           );
           continue;
@@ -155,24 +157,41 @@ export const checkAuthMembership = async (
       // If not, and the end date is before today, remove the user's membership
       const endDate = dayjs.utc(membershipDoc.end).startOf('day');
       if (endDate.isBefore(currentDate, 'date')) {
-        await removeMembership({
+        const roleRemoved = await removeMembership({
           guildId,
           membershipDoc,
           membershipRoleDoc,
           removeReason: 'we cannot verify your membership from YouTube API',
         });
+        if (roleRemoved === false) {
+          failedRoleRemovalUserIds.push(userId);
+          removalFailCount += 1;
+        }
         removalCount += 1;
       }
+    }
+
+    // Send log to the log channel if there are failed role removals
+    if (failedRoleRemovalUserIds.length > 0) {
+      await Logger.guildLog(guildDoc, {
+        content:
+          `[Auth membership check]\n` +
+          `Following are the users whose membership has expired, ` +
+          `but the bot failed to remove their membership role <@&${membershipRoleId}>:\n` +
+          failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
+          `\n\nPlease manually remove the role from these users, and check if the bot has correct permissions.`,
+      });
     }
   }
 
   await Logger.sysLog(
-    `Finished checking auth membership.\n` + `Removed ${removalCount} expired memberships.`,
+    `Finished checking auth membership.\n` +
+      `Removed ${removalCount} memberships (${removalFailCount} failed).`,
     'check-auth-membership',
   );
   return {
     statusCode: 200,
-    body: JSON.stringify({ removalCount }),
+    body: JSON.stringify({ removalCount, removalFailCount }),
     headers: { 'Content-Type': 'application/json' },
   };
 };

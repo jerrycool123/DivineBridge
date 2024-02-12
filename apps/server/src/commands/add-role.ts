@@ -41,7 +41,7 @@ export class AddRoleCommand extends Command {
     const focusedOption = interaction.options.getFocused(true);
     if (focusedOption.name === 'keyword') {
       const keyword = focusedOption.value;
-      const youTubeChannelDocs = await YouTubeChannelCollection.find({
+      const youtubeChannelDocs = await YouTubeChannelCollection.find({
         $or: [
           { _id: { $regex: keyword, $options: 'i' } },
           { 'profile.title': { $regex: keyword, $options: 'i' } },
@@ -49,7 +49,7 @@ export class AddRoleCommand extends Command {
         ],
       });
       await interaction.respond(
-        youTubeChannelDocs.map((channel) => ({
+        youtubeChannelDocs.map((channel) => ({
           name: `${channel.profile.title} (${channel.profile.customUrl})`,
           value: channel._id,
         })),
@@ -74,8 +74,8 @@ export class AddRoleCommand extends Command {
 
     // Get YouTube channel by selected channel ID
     const keyword = options.getString('keyword', true);
-    const youTubeChannelDoc = await YouTubeChannelCollection.findById(keyword);
-    if (youTubeChannelDoc === null) {
+    const youtubeChannelDoc = await YouTubeChannelCollection.findById(keyword);
+    if (youtubeChannelDoc === null) {
       return await interaction.editReply({
         content: `YouTube channel not found. You can use the \`/add-youtube-channel\` command to add a new channel to the bot's supported list.`,
       });
@@ -83,7 +83,7 @@ export class AddRoleCommand extends Command {
 
     // Check if the role is already assigned to the channel
     const oldMembershipRoleDoc = await MembershipRoleCollection.findOne({
-      $or: [{ _id: role.id }, { youtube: youTubeChannelDoc._id }],
+      $or: [{ _id: role.id }, { youtube: youtubeChannelDoc._id }],
     }).populate<{
       youtube: YouTubeChannelDoc | null;
     }>('youtube');
@@ -95,7 +95,7 @@ export class AddRoleCommand extends Command {
 
     // Ask for confirmation
     const confirmResult = await Utils.awaitUserConfirm(interaction, 'add-role', {
-      content: `Are you sure you want to add the membership role <@&${role.id}> for the YouTube channel \`${youTubeChannelDoc.profile.title}\`?`,
+      content: `Are you sure you want to add the membership role <@&${role.id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`?`,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
@@ -109,7 +109,7 @@ export class AddRoleCommand extends Command {
         color: role.color,
       },
       guild: guild.id,
-      youtube: youTubeChannelDoc._id,
+      youtube: youtubeChannelDoc._id,
     });
     const populatedNewMembershipRoleDoc = await MembershipRoleCollection.populate<{
       youtube: YouTubeChannelDoc | null;

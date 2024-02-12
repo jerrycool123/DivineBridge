@@ -1,4 +1,4 @@
-import { Document, Model, Schema, model } from 'mongoose';
+import mongoose, { Document, Model, Schema, model } from 'mongoose';
 
 export interface MembershipRoleAttrs {
   _id: string; // Discord Role ID
@@ -54,8 +54,10 @@ const membershipRoleSchema = new Schema<MembershipRoleDoc>(
   },
 );
 
-export const MembershipRoleCollection = model<MembershipRoleDoc, MembershipRoleModel>(
-  'MembershipRole',
-  membershipRoleSchema,
-  'MembershipRole',
-);
+export const MembershipRoleCollection =
+  (mongoose.models.MembershipRole as unknown as MembershipRoleModel) ??
+  model<MembershipRoleDoc, MembershipRoleModel>(
+    'MembershipRole',
+    membershipRoleSchema,
+    'MembershipRole',
+  );

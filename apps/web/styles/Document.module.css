@@ -1,0 +1,27 @@
+.documentRoot h1 {
+  font-family: 'Poppins', sans-serif;
+  margin: 3rem 0 2rem;
+}
+
+.documentRoot h2 {
+  font-family: 'Poppins', sans-serif;
+  margin: 2.5rem 0 1.5rem;
+}
+
+.documentRoot h3 {
+  font-family: 'Poppins', sans-serif;
+  margin: 2rem 0 1rem;
+}
+
+.documentRoot h4 {
+  font-family: 'Poppins', sans-serif;
+  margin: 2rem 0 1rem;
+}
+
+.documentRoot h5 {
+  font-family: 'Poppins', sans-serif;
+}
+
+.documentRoot h6 {
+  font-family: 'Poppins', sans-serif;
+}

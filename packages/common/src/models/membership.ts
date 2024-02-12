@@ -1,4 +1,4 @@
-import { Document, Model, Schema, Types, model } from 'mongoose';
+import mongoose, { Document, Model, Schema, Types, model } from 'mongoose';
 
 export interface MembershipAttrs {
   user: string; // Ref: User
@@ -54,8 +54,6 @@ const membershipSchema = new Schema<MembershipDoc>(
   },
 );
 
-export const MembershipCollection = model<MembershipDoc, MembershipModel>(
-  'Membership',
-  membershipSchema,
-  'Membership',
-);
+export const MembershipCollection =
+  (mongoose.models.Membership as unknown as MembershipModel) ??
+  model<MembershipDoc, MembershipModel>('Membership', membershipSchema, 'Membership');

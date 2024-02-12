@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+body {
+  background-color: #2f3539 !important;
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.fs-7 {
+  font-size: 0.875rem !important;
+}
+
+.fs-8 {
+  font-size: 0.75rem !important;
+}
+
+/* total width */
+::-webkit-scrollbar {
+  height: 8px !important;
+  width: 5px !important;
+}
+
+/* scrollbar itself */
+::-webkit-scrollbar-thumb {
+  background-color: #94949a !important;
+  border-radius: 16px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ababb0 !important;
+}
+
+/* set button(top and bottom of the scrollbar) */
+::-webkit-scrollbar-button {
+  display: none !important;
+}
+
+.btn-custom:hover {
+  opacity: 0.9 !important;
+}
+
+.btn-custom:active {
+  opacity: 0.8 !important;
+}
+
+.poppins {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.fw-100 {
+  font-weight: 100 !important;
+}
+
+.fw-200 {
+  font-weight: 200 !important;
+}
+
+.fw-300 {
+  font-weight: 300 !important;
+}
+
+.fw-400 {
+  font-weight: 400 !important;
+}
+
+.fw-500 {
+  font-weight: 500 !important;
+}
+
+.fw-600 {
+  font-weight: 600 !important;
+}
+
+.fw-700 {
+  font-weight: 700 !important;
+}
+
+.fw-800 {
+  font-weight: 800 !important;
+}
+
+.fw-900 {
+  font-weight: 900 !important;
+}
+
+.link {
+  color: #5d9df7;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #81c9fc;
+  text-decoration: underline;
+}

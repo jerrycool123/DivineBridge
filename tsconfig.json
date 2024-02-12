@@ -11,5 +11,5 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "exclude": [".next", "build", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }

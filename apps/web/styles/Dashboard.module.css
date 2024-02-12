@@ -1,0 +1,128 @@
+.container {
+  background-color: #3a4149;
+  border-radius: 0.25rem;
+}
+
+.card {
+  background-color: rgb(65, 79, 103);
+  padding: 1rem;
+  border-radius: 0.25rem;
+  color: white;
+}
+
+.cardPlaceholder {
+  background-color: rgb(65, 79, 103);
+  border-radius: 0.25rem;
+  color: white;
+  height: 10rem;
+}
+
+.cardPlaceholder:hover {
+  filter: brightness(1.1);
+}
+
+.cardHeader {
+  min-width: 0;
+  color: rgb(255, 183, 74);
+}
+
+.cardHeader:hover {
+  filter: brightness(1.1);
+}
+
+.membershipRoleCount {
+  color: #dfa3ff;
+}
+
+.membershipRole {
+  background-color: #313338;
+  border-radius: 1rem;
+  height: 12rem;
+  width: 30rem;
+}
+
+.verifiedMembershipRole {
+  background-color: #283057;
+}
+
+.membershipRolePill {
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.channelInfo {
+  min-width: 0;
+  color: #dcdadc;
+}
+
+.checked {
+  color: rgb(47, 255, 47);
+}
+
+.channelTitle {
+  color: #f1f1f1;
+}
+
+.channelTitle:hover {
+  text-decoration: underline;
+}
+
+.verify {
+  background-color: rgb(111, 92, 229);
+  user-select: none;
+  font-size: 16px;
+  padding: 0.25rem 0.75rem;
+  color: white;
+}
+
+.billingDate {
+  color: rgb(255, 188, 130);
+}
+
+.modal :global(.ant-modal-title) {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  background-color: #3a4149 !important;
+  color: #dcdcdc;
+}
+
+.modalChannelTitle {
+  color: rgb(125, 195, 255);
+}
+
+.modalChannelTitle:hover {
+  text-decoration: underline;
+}
+
+.loadingBox {
+  height: 2.5rem;
+}
+
+.youtubeBranding {
+  height: 2rem;
+}
+
+.modal :global(.ant-modal-content) {
+  background-color: #3a4149 !important;
+  color: #dcdcdc;
+}
+
+.modal :global(.ant-modal-close-x) {
+  color: rgb(173, 173, 173);
+}
+
+.channelWrapper {
+  background-color: #313338;
+  width: 20rem;
+}
+
+.modalGuildName {
+  color: rgb(255, 183, 74);
+}
+
+.modalGotoServer {
+  font-size: 16px !important;
+  width: 13rem !important;
+  background-color: #5865f2;
+  height: 40px !important;
+}

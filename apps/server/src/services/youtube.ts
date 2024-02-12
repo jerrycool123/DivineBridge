@@ -1,19 +1,41 @@
 import { container } from '@sapphire/framework';
-import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
+import { z } from 'zod';
 
-import { Env } from '../utils/env.js';
+import { GoogleService } from './google.js';
 
 export namespace YouTubeService {
-  export const oauth2client = new OAuth2Client({
-    clientId: Env.GOOGLE_CLIENT_ID,
-    clientSecret: Env.GOOGLE_CLIENT_SECRET,
+  export const channelSchema = z.object({
+    id: z.string(),
+    snippet: z.object({
+      title: z.string(),
+      description: z.string(),
+      customUrl: z.string(),
+      thumbnails: z.object({
+        high: z.object({
+          url: z.string(),
+        }),
+      }),
+    }),
   });
-  const apiKey = Env.GOOGLE_API_KEY;
+
+  export const getSelfChannel = async (refreshToken: string) => {
+    try {
+      const oauth2Client = GoogleService.createOAuth2Client();
+      oauth2Client.setCredentials({ refresh_token: refreshToken });
+      const youtubeApi = google.youtube({ version: 'v3', auth: oauth2Client });
+      const response = await youtubeApi.channels.list({ part: ['snippet'], mine: true });
+      const channel = response.data.items?.[0] ?? null;
+      return channel;
+    } catch (error) {
+      container.logger.error(error);
+    }
+    return null;
+  };
 
   export const getChannel = async (channelId: string) => {
     try {
-      const youtubeApi = google.youtube({ version: 'v3', auth: apiKey });
+      const youtubeApi = google.youtube({ version: 'v3', auth: GoogleService.apiKey });
       const response = await youtubeApi.channels.list({ part: ['snippet'], id: [channelId] });
       const channel = response.data.items?.[0] ?? null;
       return channel;
@@ -25,7 +47,7 @@ export namespace YouTubeService {
 
   export const getVideo = async (videoId: string) => {
     try {
-      const youtubeApi = google.youtube({ version: 'v3', auth: apiKey });
+      const youtubeApi = google.youtube({ version: 'v3', auth: GoogleService.apiKey });
       const response = await youtubeApi.videos.list({ part: ['snippet'], id: [videoId] });
       const video = response.data.items?.[0] ?? null;
       return video;
@@ -38,7 +60,7 @@ export namespace YouTubeService {
   export const getMemberOnlyPlaylistItems = async (channelId: string) => {
     try {
       const memberOnlyPlaylistId = 'UUMO' + channelId.slice(2);
-      const youtubeApi = google.youtube({ version: 'v3', auth: apiKey });
+      const youtubeApi = google.youtube({ version: 'v3', auth: GoogleService.apiKey });
       const response = await youtubeApi.playlistItems.list({
         part: ['contentDetails'],
         playlistId: memberOnlyPlaylistId,

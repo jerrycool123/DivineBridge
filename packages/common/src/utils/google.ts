@@ -35,9 +35,9 @@ export class GoogleAPI {
     this.oauth2Client.setCredentials({
       refresh_token: refreshToken,
     });
-    const youTubeApi = google.youtube({ version: 'v3', auth: this.oauth2Client });
+    const youtubeApi = google.youtube({ version: 'v3', auth: this.oauth2Client });
     try {
-      await youTubeApi.commentThreads.list({
+      await youtubeApi.commentThreads.list({
         part: ['id'],
         videoId,
         maxResults: 1,

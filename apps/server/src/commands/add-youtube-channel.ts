@@ -1,6 +1,5 @@
 import { YouTubeChannelCollection } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
-import { z } from 'zod';
 
 import { Embeds } from '../components/embeds.js';
 import { YouTubeService } from '../services/youtube.js';
@@ -54,29 +53,16 @@ export class AddYouTubeChannelCommand extends Command {
     }
 
     // Check if the YouTube channel is already in the database
-    const youtubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
-    if (youtubeChannelDoc !== null) {
+    const existingYoutubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
+    if (existingYoutubeChannelDoc !== null) {
       return await interaction.editReply({
-        content: `The YouTube channel \`${youtubeChannelDoc.profile.title}\` is already in the bot's supported list.`,
+        content: `The YouTube channel \`${existingYoutubeChannelDoc.profile.title}\` is already in the bot's supported list.`,
       });
     }
 
     // Get channel info from YouTube API
     const rawChannel = await YouTubeService.getChannel(youtubeChannelId);
-    const channelSchema = z.object({
-      id: z.string(),
-      snippet: z.object({
-        title: z.string(),
-        description: z.string(),
-        customUrl: z.string(),
-        thumbnails: z.object({
-          high: z.object({
-            url: z.string(),
-          }),
-        }),
-      }),
-    });
-    const parsedChannel = channelSchema.safeParse(rawChannel);
+    const parsedChannel = YouTubeService.channelSchema.safeParse(rawChannel);
     if (!parsedChannel.success) {
       return await interaction.editReply({
         content: `Could not find a YouTube channel for the channel ID: \`${youtubeChannelId}\`. Please try again.`,
@@ -91,11 +77,11 @@ export class AddYouTubeChannelCommand extends Command {
     };
 
     // Ask for confirmation
-    const youTubeChannelEmbed = Embeds.youtubeChannel(youtubeChannel);
+    const youtubeChannelEmbed = Embeds.youtubeChannel(youtubeChannel);
     const confirmResult = await Utils.awaitUserConfirm(interaction, 'add-yt-channel', {
       content:
         "Are you sure you want to add the following YouTube channel to the bot's supported list?",
-      embeds: [youTubeChannelEmbed],
+      embeds: [youtubeChannelEmbed],
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
@@ -113,13 +99,13 @@ export class AddYouTubeChannelCommand extends Command {
     }
 
     // Add YouTube channel to database
-    const youTubeChannelDoc = await Database.upsertYouTubeChannel(
+    const youtubeChannelDoc = await Database.upsertYouTubeChannel(
       youtubeChannel,
       memberOnlyVideoIds,
     );
 
     await confirmedInteraction.editReply({
-      content: `Successfully added the YouTube channel \`${youTubeChannelDoc.profile.title}\` to the bot's supported list.`,
+      content: `Successfully added the YouTube channel \`${youtubeChannelDoc.profile.title}\` to the bot's supported list.`,
     });
   }
 }

@@ -1,11 +1,12 @@
-import { Document, Model, Schema, model } from 'mongoose';
+import mongoose, { Document, Model, Schema, model } from 'mongoose';
 
 export interface UserAttrs {
   _id: string; // Discord ID
   profile: {
     username: string;
-    avatar: string;
+    image: string;
   };
+  refreshToken: string | null;
 }
 
 export interface UserDoc extends UserAttrs, Document<string> {
@@ -36,7 +37,7 @@ const userSchema = new Schema<UserDoc>(
         type: String,
         required: true,
       },
-      avatar: {
+      image: {
         type: String,
         required: true,
       },
@@ -47,6 +48,11 @@ const userSchema = new Schema<UserDoc>(
         required: true,
         default: 'eng',
       },
+    },
+    refreshToken: {
+      type: String,
+      required: false,
+      default: null,
     },
     youtube: {
       type: new Schema(
@@ -98,4 +104,6 @@ const userSchema = new Schema<UserDoc>(
   },
 );
 
-export const UserCollection = model<UserDoc, UserModel>('User', userSchema, 'User');
+export const UserCollection =
+  (mongoose.models.User as unknown as UserModel) ??
+  model<UserDoc, UserModel>('User', userSchema, 'User');

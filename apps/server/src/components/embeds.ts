@@ -360,4 +360,31 @@ export namespace Embeds {
 
     return { success: true, embed, userId, beginDate, endDate, endDateIndex, roleId };
   };
+
+  export const authMembership = (
+    user: User,
+    membershipRoleId: string,
+    membershipDoc: MembershipDoc,
+  ): EmbedBuilder => {
+    return baseUserEmbed(user)
+      .setTitle('✅ New OAuth Membership')
+      .addFields([
+        {
+          name: 'Membership Role',
+          value: `<@&${membershipRoleId}>`,
+          inline: true,
+        },
+        {
+          name: 'Begin Date',
+          value: dayjs(membershipDoc.begin).format('YYYY-MM-DD'),
+          inline: true,
+        },
+        {
+          name: 'End Date',
+          value: dayjs(membershipDoc.end).format('YYYY-MM-DD'),
+          inline: true,
+        },
+      ])
+      .setColor(Constants.colors.success);
+  };
 }

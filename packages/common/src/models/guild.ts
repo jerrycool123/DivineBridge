@@ -1,4 +1,4 @@
-import { Document, Model, Schema, model } from 'mongoose';
+import mongoose, { Document, Model, Schema, model } from 'mongoose';
 
 export interface GuildAttrs {
   _id: string; // Discord Guild ID
@@ -75,4 +75,6 @@ const guildSchema = new Schema<GuildDoc>(
   },
 );
 
-export const GuildCollection = model<GuildDoc, GuildModel>('Guild', guildSchema, 'Guild');
+export const GuildCollection =
+  (mongoose.models.Guild as unknown as GuildModel) ??
+  model<GuildDoc, GuildModel>('Guild', guildSchema, 'Guild');

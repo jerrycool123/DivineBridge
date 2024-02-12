@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "next": {
+      "rootDir": "apps/web/"
+    }
+  },
+  "extends": ["@divine-bridge/eslint-config-custom", "next/core-web-vitals"],
+  "ignorePatterns": ["**/*.mjs"]
+}

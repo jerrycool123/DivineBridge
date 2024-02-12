@@ -69,14 +69,16 @@ export namespace Database {
   export const upsertUser = async (user: {
     id: string;
     username: string;
-    avatar: string;
+    image: string;
+    refreshToken?: string;
   }): Promise<UserDoc> => {
     return await UserCollection.findByIdAndUpdate(
       user.id,
       {
         $set: {
           'profile.username': user.username,
-          'profile.avatar': user.avatar,
+          'profile.image': user.image,
+          ...(user.refreshToken !== undefined && { refreshToken: user.refreshToken }),
         },
         $setOnInsert: { _id: user.id },
       },

@@ -128,7 +128,7 @@ export class VerifyCommand extends Command {
       Database.upsertUser({
         id: user.id,
         username: user.username,
-        avatar: user.displayAvatarURL(),
+        image: user.displayAvatarURL(),
       }),
       Validators.isGuildHasLogChannel(guild),
     ]);
@@ -215,7 +215,7 @@ export class VerifyCommand extends Command {
         embeds: [membershipVerificationRequestEmbed],
       });
     } catch (error) {
-      console.error(error);
+      this.container.logger.error(error);
     }
   }
 }

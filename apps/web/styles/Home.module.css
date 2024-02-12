@@ -1,0 +1,50 @@
+.heroSection {
+  height: 20rem;
+  background-color: #1b1b1b;
+}
+
+.heroText {
+  color: #3bb4ff;
+}
+
+.subText {
+  color: rgb(216, 227, 236);
+}
+
+.C2AButton {
+  height: 2.5rem !important;
+  margin: 0 !important;
+  font-size: 16px !important;
+  width: auto !important;
+}
+
+.youtube {
+  color: #ff0000;
+}
+
+.discord {
+  color: #5865f2;
+}
+
+.heroImage {
+  display: none;
+}
+
+.featuresSection {
+  background-color: #3a4149;
+  padding: 5rem 0;
+}
+
+@media (min-width: 992px) {
+  .heroImage {
+    display: flex;
+  }
+}
+
+.introduction {
+  color: #dcdcdc;
+}
+
+.modeIntro {
+  height: 8rem;
+}

@@ -1,4 +1,4 @@
-import { Document, Model, Schema, model } from 'mongoose';
+import mongoose, { Document, Model, Schema, model } from 'mongoose';
 
 export interface YouTubeChannelAttrs {
   _id: string; // YouTube Channel ID
@@ -60,8 +60,10 @@ const youtubeChannelSchema = new Schema<YouTubeChannelDoc>(
   },
 );
 
-export const YouTubeChannelCollection = model<YouTubeChannelDoc, YouTubeChannelModel>(
-  'YouTubeChannel',
-  youtubeChannelSchema,
-  'YouTubeChannel',
-);
+export const YouTubeChannelCollection =
+  (mongoose.models.YouTubeChannel as unknown as YouTubeChannelModel) ??
+  model<YouTubeChannelDoc, YouTubeChannelModel>(
+    'YouTubeChannel',
+    youtubeChannelSchema,
+    'YouTubeChannel',
+  );

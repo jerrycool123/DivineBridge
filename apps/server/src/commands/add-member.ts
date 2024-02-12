@@ -126,7 +126,7 @@ export class AddMemberCommand extends Command {
     await Database.upsertUser({
       id: user.id,
       username: user.username,
-      avatar: user.displayAvatarURL(),
+      image: user.displayAvatarURL(),
     });
 
     // Get guild member
