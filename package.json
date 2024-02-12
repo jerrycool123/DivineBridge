@@ -23,7 +23,7 @@
     "format": "turbo run format",
     "lint": "turbo run lint",
     "preinstall": "npx only-allow pnpm",
-    "prepare": "husky",
+    "prepare": "npx husky",
     "start": "turbo run start"
   },
   "syncpack": {
