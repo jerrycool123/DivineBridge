@@ -3,10 +3,9 @@ import {
   DeleteCurrentUserRequest,
   RevokeCurrentUserYouTubeRefreshTokenRequest,
 } from '@divine-bridge/common';
-import Collapse from 'antd/lib/collapse';
-import message from 'antd/lib/message';
-import Modal from 'antd/lib/modal';
-import Spin from 'antd/lib/spin';
+import Collapse from 'antd/es/collapse';
+import Modal from 'antd/es/modal/Modal';
+import Spin from 'antd/es/spin';
 import axios from 'axios';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
@@ -16,29 +15,78 @@ import styles from './SettingsModal.module.css';
 
 import { MainContext } from '../../contexts/MainContext';
 import useYouTubeAuthorize from '../../hooks/youtube';
+import { errorDataSchema } from '../../libs/common/error';
 import { serverApi } from '../../libs/common/server';
 import GoogleOAuthButton from '../Buttons/GoogleOAuthButton';
 
-const SettingsModal = ({
+export default function SettingsModal({
   isModalOpen,
   setIsModalOpen,
 }: {
   isModalOpen: boolean;
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
-}) => {
-  const { user } = useContext(MainContext);
+}) {
+  const { user, messageApi } = useContext(MainContext);
 
   const [linkingAccount, setLinkingAccount] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [action, setAction] = useState<'revoke' | 'delete' | null>(null);
 
-  const [messageApi, contextHolder] = message.useMessage();
   const authorize = useYouTubeAuthorize({
     setLinkingAccount,
     messageApi,
   });
 
+  const handleRevokeOAuthAuthorization = async () => {
+    try {
+      void messageApi.loading('Revoking your YouTube OAuth Authorization...');
+      await serverApi.post<RevokeCurrentUserYouTubeRefreshTokenRequest>('/users/@me/revoke', {});
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      if (axios.isAxiosError(error) && error.response !== undefined) {
+        const parsedData = errorDataSchema.safeParse(error.response.data);
+        if (parsedData.success) {
+          const { message } = parsedData.data;
+          void messageApi.error(`[${error.response.status}]: ${message}`);
+        } else {
+          void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
+        }
+      } else if (error instanceof Error) {
+        void messageApi.error(`[${error.name}]: ${error.message}`);
+      } else {
+        void messageApi.error('An unknown error has occurred');
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      void messageApi.loading('Deleting your account...');
+      await serverApi.delete<DeleteCurrentUserRequest>('/users/@me', {});
+      messageApi.destroy();
+      await signOut({ redirect: false });
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      if (axios.isAxiosError(error) && error.response !== undefined) {
+        const parsedData = errorDataSchema.safeParse(error.response.data);
+        if (parsedData.success) {
+          const { message } = parsedData.data;
+          void messageApi.error(`[${error.response.status}]: ${message}`);
+        } else {
+          void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
+        }
+      } else if (error instanceof Error) {
+        void messageApi.error(`[${error.name}]: ${error.message}`);
+      } else {
+        void messageApi.error('An unknown error has occurred');
+      }
+    }
+  };
+
   return (
     <>
-      {contextHolder}
       <Modal
         className={styles.modal}
         title={<div className="text-white">Settings</div>}
@@ -124,49 +172,20 @@ const SettingsModal = ({
                 {user !== null && user.youtube !== null && (
                   <>
                     <div className="mb-2">
-                      If you don&apos;t want to use OAuth mode anymore, you can{' '}
+                      If you don&apos;t want to use Auth Mode anymore, you can{' '}
                       <span className="text-danger fw-700">Revoke OAuth Authorization</span> from
                       Divine Bridge. We will remove your{' '}
                       <span className="text-warning fw-500">linked YouTube account</span> and{' '}
-                      <span className="text-warning fw-500">membership roles under OAuth mode</span>{' '}
+                      <span className="text-warning fw-500">membership roles under Auth mode</span>{' '}
                       you acquired.
                     </div>
                     <div className="mt-3 mb-4 d-flex justify-content-center">
                       <div
                         role="button"
                         className="btn btn-danger btn-sm"
-                        onClick={async () => {
-                          try {
-                            void messageApi.loading('Revoking your YouTube OAuth Authorization...');
-                            await serverApi.post<RevokeCurrentUserYouTubeRefreshTokenRequest>(
-                              '/users/@me/revoke',
-                              {},
-                            );
-                            window.location.reload();
-                          } catch (error) {
-                            console.error(error);
-                            if (axios.isAxiosError(error) && error.response !== undefined) {
-                              const data = error.response.data as unknown;
-                              if (
-                                typeof data === 'object' &&
-                                data !== null &&
-                                'message' in data &&
-                                typeof data.message === 'string'
-                              ) {
-                                void messageApi.error(
-                                  `[Error ${error.response.status}]: ${data.message}`,
-                                );
-                              } else {
-                                void messageApi.error(
-                                  `[Error ${error.response.status}]: ${error.response.statusText}}`,
-                                );
-                              }
-                            } else if (error instanceof Error) {
-                              void messageApi.error(`[${error.name}]: ${error.message}`);
-                            } else {
-                              void messageApi.error('An unknown error has occurred');
-                            }
-                          }
+                        onClick={() => {
+                          setIsConfirmModalOpen(true);
+                          setAction('revoke');
                         }}
                       >
                         Revoke OAuth Authorization
@@ -184,37 +203,9 @@ const SettingsModal = ({
                   <div
                     role="button"
                     className="btn btn-danger btn-sm"
-                    onClick={async () => {
-                      try {
-                        void messageApi.loading('Deleting your account...');
-                        await serverApi.delete<DeleteCurrentUserRequest>('/users/@me', {});
-                        messageApi.destroy();
-                        await signOut({ redirect: false });
-                        window.location.reload();
-                      } catch (error) {
-                        console.error(error);
-                        if (axios.isAxiosError(error) && error.response !== undefined) {
-                          const data = error.response.data as unknown;
-                          if (
-                            typeof data === 'object' &&
-                            data !== null &&
-                            'message' in data &&
-                            typeof data.message === 'string'
-                          ) {
-                            void messageApi.error(
-                              `[Error ${error.response.status}]: ${data.message}`,
-                            );
-                          } else {
-                            void messageApi.error(
-                              `[Error ${error.response.status}]: ${error.response.statusText}}`,
-                            );
-                          }
-                        } else if (error instanceof Error) {
-                          void messageApi.error(`[${error.name}]: ${error.message}`);
-                        } else {
-                          void messageApi.error('An unknown error has occurred');
-                        }
-                      }
+                    onClick={() => {
+                      setIsConfirmModalOpen(true);
+                      setAction('delete');
                     }}
                   >
                     Delete Your Account
@@ -225,8 +216,41 @@ const SettingsModal = ({
           </>
         )}
       </Modal>
+      <Modal
+        className={styles.modal}
+        title={<div className="fs-5 text-warning">Warning</div>}
+        open={isConfirmModalOpen}
+        footer={null}
+        centered
+        classNames={{
+          body: 'fw-700 fs-6',
+        }}
+        onCancel={() => setIsConfirmModalOpen(false)}
+      >
+        <div>
+          Are your sure you want to{' '}
+          <span className="text-danger">
+            {action === 'revoke' ? 'Revoke OAuth Authorization' : 'Delete Your Account'}
+          </span>
+          ?
+        </div>
+        <div className="mb-3">This action cannot be undone.</div>
+        <div className="d-flex justify-content-end">
+          <div
+            role="button"
+            className="btn btn-danger btn-sm"
+            onClick={async () => {
+              if (action === 'revoke') {
+                await handleRevokeOAuthAuthorization();
+              } else if (action === 'delete') {
+                await handleDeleteAccount();
+              }
+            }}
+          >
+            Confirm
+          </div>
+        </div>
+      </Modal>
     </>
   );
-};
-
-export default SettingsModal;
+}

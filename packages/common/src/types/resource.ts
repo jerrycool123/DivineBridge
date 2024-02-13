@@ -18,6 +18,9 @@ export const membershipRoleResourceSchema = z.object({
     name: z.string(),
     color: z.number(),
   }),
+  config: z.object({
+    aliasCommandName: z.string(),
+  }),
   guild: z.string(),
   youtube: z.string(),
   createdAt: z.string(),

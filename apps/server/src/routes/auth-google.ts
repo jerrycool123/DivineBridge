@@ -20,25 +20,25 @@ export class AuthGoogleRoute extends Route {
     const requestSchema = googleAuthRequestSchema.extend({ res: z.unknown() });
     const parsedRequest = requestSchema.safeParse(request);
     if (!parsedRequest.success) {
-      return response.badRequest(parsedRequest.error);
+      return response.status(400).json({ message: parsedRequest.error });
     }
     const { body } = parsedRequest.data;
     const { code } = body;
     const { session } = request;
     if (session === undefined) {
-      return response.unauthorized();
+      return response.status(401).json({ message: 'Unauthorized' });
     }
 
     const userDoc = await UserCollection.findById(session.id);
     if (userDoc === null) {
-      return response.badRequest('User not found');
+      return response.status(400).json({ message: 'User not found' });
     }
 
     // Get refresh token from authorization code
     const oauth2Client = GoogleService.createOAuth2Client();
     const result = await GoogleService.requestAccessToken(oauth2Client, code, 'postmessage');
     if (!result.success) {
-      return response.badRequest(result.error);
+      return response.status(400).json({ message: result.error });
     }
     const { refreshToken } = result;
 
@@ -46,7 +46,9 @@ export class AuthGoogleRoute extends Route {
     const rawChannel = await YouTubeService.getSelfChannel(refreshToken);
     const parsedChannel = YouTubeService.channelSchema.safeParse(rawChannel);
     if (!parsedChannel.success) {
-      return response.badRequest('Could not retrieve your YouTube channel information');
+      return response.status(400).json({
+        message: 'Could not retrieve your YouTube channel information',
+      });
     }
     const {
       id: youtubeChannelId,
@@ -61,16 +63,18 @@ export class AuthGoogleRoute extends Route {
 
     // Check channel in database
     if (userDoc.youtube !== null && userDoc.youtube.id !== youtubeChannelId) {
-      return response.badRequest('You have already connected to a different YouTube channel');
+      return response.status(400).json({
+        message: 'You have already connected to a different YouTube channel',
+      });
     } else {
       const otherUser = await UserCollection.findOne({
         '_id': { $ne: userDoc._id },
         'youtube.id': youtubeChannelId,
       });
       if (otherUser !== null) {
-        return response.badRequest(
-          'This YouTube channel has already been connected to another Discord account',
-        );
+        return response.status(400).json({
+          message: 'This YouTube channel has already been connected to another Discord account',
+        });
       }
     }
 
@@ -78,7 +82,7 @@ export class AuthGoogleRoute extends Route {
     const encryptedRefreshToken = symmetricEncrypt(refreshToken, Env.DATA_ENCRYPTION_KEY);
     if (encryptedRefreshToken === null) {
       // throw new InternalServerError('Could not encrypt refresh token');
-      return response.status(500).end('Internal Server Error');
+      return response.status(500).json({ message: 'Internal Server Error' });
     }
     userDoc.youtube = {
       id: youtubeChannelId,
@@ -95,6 +99,6 @@ export class AuthGoogleRoute extends Route {
       customUrl: userDoc.youtube.customUrl,
       thumbnail: userDoc.youtube.thumbnail,
     };
-    return response.created(resBody);
+    return response.status(201).json(resBody);
   }
 }

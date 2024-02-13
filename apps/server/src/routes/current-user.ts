@@ -24,12 +24,12 @@ export class CurrentUserRoute extends Route {
   public async [methods.GET](request: ApiRequest, response: ApiResponse) {
     const { session } = request;
     if (session === undefined) {
-      return response.unauthorized();
+      return response.status(401).json({ message: 'Unauthorized' });
     }
 
     const user = await UserCollection.findById(session.id);
     if (user === null) {
-      return response.badRequest('User not found');
+      return response.status(400).json({ message: 'User not found' });
     }
 
     const resBody: ReadCurrentUserRequest['res'] = {
@@ -50,18 +50,18 @@ export class CurrentUserRoute extends Route {
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     };
-    return response.json(resBody);
+    return response.status(200).json(resBody);
   }
 
   public async [methods.DELETE](request: ApiRequest, response: ApiResponse) {
     const { session } = request;
     if (session === undefined) {
-      return response.unauthorized();
+      return response.status(401).json({ message: 'Unauthorized' });
     }
 
     const user = await UserCollection.findById(session.id);
     if (user === null) {
-      return response.badRequest('User not found');
+      return response.status(400).json({ message: 'User not found' });
     }
     if (user.youtube !== null) {
       const refreshToken = symmetricDecrypt(user.youtube.refreshToken, Env.DATA_ENCRYPTION_KEY);
@@ -177,6 +177,6 @@ export class CurrentUserRoute extends Route {
     // Remove user from DB
     await user.deleteOne();
 
-    return response.noContent();
+    return response.status(204).end();
   }
 }

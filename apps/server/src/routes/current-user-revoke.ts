@@ -16,14 +16,14 @@ export class CurrentUserRevokeRoute extends Route {
   public async [methods.POST](request: ApiRequest, response: ApiResponse) {
     const { session } = request;
     if (session === undefined) {
-      return response.unauthorized();
+      return response.status(401).json({ message: 'Unauthorized' });
     }
 
     const user = await UserCollection.findById(session.id);
     if (user === null) {
-      return response.badRequest('User not found');
+      return response.status(400).json({ message: 'User not found' });
     } else if (user.youtube === null) {
-      return response.badRequest('You have not connected your YouTube account');
+      return response.status(400).json({ message: 'You have not connected your YouTube account' });
     }
     const refreshToken = symmetricDecrypt(user.youtube.refreshToken, Env.DATA_ENCRYPTION_KEY);
     if (refreshToken === null) {
@@ -45,6 +45,6 @@ export class CurrentUserRevokeRoute extends Route {
       message: 'success',
     };
 
-    return response.json(resBody);
+    return response.status(200).json(resBody);
   }
 }

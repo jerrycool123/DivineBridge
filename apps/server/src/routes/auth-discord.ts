@@ -20,33 +20,33 @@ export class AuthDiscordRoute extends Route {
     const requestSchema = discordAuthRequestSchema.extend({ res: z.unknown() });
     const parsedRequest = requestSchema.safeParse(request);
     if (!parsedRequest.success) {
-      return response.badRequest(parsedRequest.error);
+      return response.status(400).json({ message: parsedRequest.error });
     }
     const { body } = parsedRequest.data;
 
     // Decrypt Discord refresh token
     const refreshToken = symmetricDecrypt(body.token, Env.AUTH_SECRET);
     if (refreshToken === null) {
-      return response.unauthorized('Invalid token.');
+      return response.status(401).json({ message: 'Invalid token.' });
     }
 
     // Refresh access token
     const result = await DiscordService.getAccessToken(refreshToken);
     if (!result.success) {
-      return response.unauthorized(result.error);
+      return response.status(401).json({ message: result.error });
     }
     const { accessToken, newRefreshToken } = result;
 
     // Get user info
     const currentUser = await DiscordService.getCurrentUser(accessToken);
     if (currentUser === null) {
-      return response.unauthorized('Failed to get user info.');
+      return response.status(401).json({ message: 'Failed to get user info.' });
     }
 
     // Encrypt Discord refresh token
     const encryptedRefreshToken = symmetricEncrypt(newRefreshToken, Env.DATA_ENCRYPTION_KEY);
     if (encryptedRefreshToken === null) {
-      return response.status(500).text('Internal server error.');
+      return response.status(500).json({ message: 'Internal server error.' });
     }
 
     // Upsert user info
@@ -60,6 +60,6 @@ export class AuthDiscordRoute extends Route {
     const resBody: DiscordAuthRequest['res'] = {
       id: userDoc._id,
     };
-    return response.created(resBody);
+    return response.status(201).json(resBody);
   }
 }

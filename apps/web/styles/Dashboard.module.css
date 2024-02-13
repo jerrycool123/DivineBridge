@@ -55,8 +55,13 @@
   color: #dcdadc;
 }
 
+.fieldName {
+  color: #dcdcdc;
+  margin-right: 0.5rem;
+}
+
 .checked {
-  color: rgb(47, 255, 47);
+  color: rgb(47, 255, 47) !important;
 }
 
 .channelTitle {
@@ -75,54 +80,6 @@
   color: white;
 }
 
-.billingDate {
+.date {
   color: rgb(255, 188, 130);
-}
-
-.modal :global(.ant-modal-title) {
-  font-family: 'Poppins', sans-serif;
-  font-size: 20px;
-  background-color: #3a4149 !important;
-  color: #dcdcdc;
-}
-
-.modalChannelTitle {
-  color: rgb(125, 195, 255);
-}
-
-.modalChannelTitle:hover {
-  text-decoration: underline;
-}
-
-.loadingBox {
-  height: 2.5rem;
-}
-
-.youtubeBranding {
-  height: 2rem;
-}
-
-.modal :global(.ant-modal-content) {
-  background-color: #3a4149 !important;
-  color: #dcdcdc;
-}
-
-.modal :global(.ant-modal-close-x) {
-  color: rgb(173, 173, 173);
-}
-
-.channelWrapper {
-  background-color: #313338;
-  width: 20rem;
-}
-
-.modalGuildName {
-  color: rgb(255, 183, 74);
-}
-
-.modalGotoServer {
-  font-size: 16px !important;
-  width: 13rem !important;
-  background-color: #5865f2;
-  height: 40px !important;
 }

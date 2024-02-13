@@ -387,7 +387,7 @@ export default function Privacy() {
                 See, edit, and permanently delete your YouTube videos, ratings, comments and
                 captions
               </strong>
-              : We will request you for this scope when you choose to use &apos;OAuth mode&apos; to
+              : We will request you for this scope when you choose to use &apos;Auth mode&apos; to
               verify your YouTube channel membership on Divine Bridge. We will only use this scope
               to try to read comments from members-only videos on your behalf, in order to verify
               whether you are a member of that channel. WE DO NOT EDIT OR DELETE YOUR VIDEOS,

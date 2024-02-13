@@ -367,7 +367,7 @@ export namespace Embeds {
     membershipDoc: MembershipDoc,
   ): EmbedBuilder => {
     return baseUserEmbed(user)
-      .setTitle('✅ New OAuth Membership')
+      .setTitle('✅ New Auth Membership')
       .addFields([
         {
           name: 'Membership Role',

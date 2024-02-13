@@ -1,8 +1,10 @@
 'use client';
 
 import CaretDownOutlined from '@ant-design/icons/CaretDownOutlined';
+import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
+import Dropdown from 'antd/es/dropdown';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
-import Dropdown from 'antd/lib/dropdown';
+import Spin from 'antd/es/spin';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -62,7 +64,7 @@ export default function Navbar() {
           </div>
 
           {status === 'loading' ? (
-            <></>
+            <Spin indicator={<LoadingOutlined className="text-white" />} />
           ) : status === 'authenticated' ? (
             <Dropdown menu={{ items }}>
               <div

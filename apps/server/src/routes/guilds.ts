@@ -21,7 +21,7 @@ export class GuildsRoute extends Route {
   public async [methods.GET](request: ApiRequest, response: ApiResponse) {
     const { session } = request;
     if (session === undefined) {
-      return response.unauthorized();
+      return response.status(401).json({ message: 'Unauthorized' });
     }
 
     // Check if user has authorized with Discord
@@ -29,28 +29,28 @@ export class GuildsRoute extends Route {
       memberships: MembershipDoc[];
     }>('memberships');
     if (userDoc === null) {
-      return response.badRequest('User not found');
+      return response.status(400).json({ message: 'User not found' });
     } else if (userDoc.refreshToken === null) {
-      return response.unauthorized('You have not authorized with Discord');
+      return response.status(401).json({ message: 'You have not authorized with Discord' });
     }
     const refreshToken = symmetricDecrypt(userDoc.refreshToken, Env.DATA_ENCRYPTION_KEY);
     if (refreshToken === null) {
-      return response
-        .status(500)
-        .text('An error occurred while retrieving your data. Please sign in again.');
+      return response.status(500).json({
+        message: 'An error occurred while retrieving your data. Please sign in again.',
+      });
     }
     const result = await DiscordService.getAccessToken(refreshToken);
     if (!result.success) {
-      return response
-        .status(500)
-        .text('An error occurred while retrieving your data. Please sign in again.');
+      return response.status(500).json({
+        message: 'An error occurred while retrieving your data. Please sign in again.',
+      });
     }
     const { accessToken, newRefreshToken } = result;
     const newEncryptedRefreshToken = symmetricEncrypt(newRefreshToken, Env.DATA_ENCRYPTION_KEY);
     if (newEncryptedRefreshToken === null) {
-      return response
-        .status(500)
-        .text('An error occurred while retrieving your data. Please sign in again.');
+      return response.status(500).json({
+        message: 'An error occurred while retrieving your data. Please sign in again.',
+      });
     }
     userDoc.refreshToken = newEncryptedRefreshToken;
     await userDoc.save();
@@ -102,6 +102,9 @@ export class GuildsRoute extends Route {
                 name: membershipRoleDoc.profile.name,
                 color: membershipRoleDoc.profile.color,
               },
+              config: {
+                aliasCommandName: membershipRoleDoc.config.aliasCommandName,
+              },
               guild: membershipRoleDoc.guild,
               youtube: {
                 id: membershipRoleDoc.youtube._id,
@@ -135,6 +138,6 @@ export class GuildsRoute extends Route {
         updatedAt: guildDoc.updatedAt.toISOString(),
       };
     });
-    return response.json(resBody);
+    return response.status(200).json(resBody);
   }
 }

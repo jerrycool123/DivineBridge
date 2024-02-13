@@ -50,50 +50,63 @@ export default function Home() {
           <div className="row d-flex justify-content-center mb-5">
             <div className={`col-lg-8 ${styles.introduction}`}>
               <p className="mb-2 fs-5">
-                A Discord bot verifying YouTube channel memberships & linking them with Discord
-                server roles.
-              </p>
-              <p className="fs-5">
-                Divine Bridge provides two methods to verify your membership:{' '}
-                <span className="text-white fs-500">OAuth Mode</span> and{' '}
-                <span className="text-white fs-500">OCR Mode</span>.
+                Divine Bridge is a Discord bot verifying YouTube channel memberships and link them
+                with Discord server roles. It currently supports{' '}
+                <span className="text-white fw-500">Screenshot Mode</span> and{' '}
+                <span className="text-white fw-500">Auth Mode</span>.
               </p>
             </div>
           </div>
           <div className="row mb-5 d-flex justify-content-center">
             <div className="col-lg-5 d-flex flex-column align-items-center">
-              <h2 className="poppins mb-4">OAuth Mode</h2>
+              <h2 className="poppins mb-4">Screenshot Mode</h2>
               <div className={styles.modeIntro}>
                 <p className={`mb-2 ${styles.introduction}`}>
-                  Divine Bridge will automatically check your membership periodically.
+                  You need to verify your membership every month.
                 </p>
                 <p className={styles.introduction}>
-                  Sign in with your YouTube account and use API to verify your membership.
+                  Provide a screenshot of your{' '}
+                  <Link
+                    className="link fw-500"
+                    href="https://www.youtube.com/paid_memberships"
+                    target="_blank"
+                  >
+                    Memberships
+                  </Link>{' '}
+                  page on YouTube. Divine Bridge use OCR(
+                  <Link
+                    className="link fw-500"
+                    href="https://wikipedia.org/wiki/Optical_character_recognition"
+                    target="_blank"
+                  >
+                    Optical Character Recognition
+                  </Link>
+                  ) to recognize the next billing date, and send your screenshot with the recognized
+                  date to the server moderators to manually approve it.
                 </p>
               </div>
               <Image
                 className="object-fit-contain"
-                src="/oauth.png"
+                src="/ocr.png"
                 width={240}
                 height={240}
                 alt=""
               />
             </div>
             <div className="col-lg-5 d-flex flex-column align-items-center">
-              <h2 className="poppins mb-4">OCR Mode</h2>
+              <h2 className="poppins mb-4">Auth Mode</h2>
               <div className={styles.modeIntro}>
                 <p className={`mb-2 ${styles.introduction}`}>
-                  You need to verify your membership every month.
+                  You need to sign in with YouTube and verify your membership once.
                 </p>
                 <p className={styles.introduction}>
-                  Provide a screenshot of your purchases page on YouTube. Divine Bridge use
-                  OCR(Optical Character Recognition) to recognize the next billing date, and send
-                  your image to the server moderators to manually approve it.
+                  Divine Bridge will securely store your authorized OAuth credentials, and
+                  automatically check your membership via YouTube API periodically.
                 </p>
               </div>
               <Image
                 className="object-fit-contain"
-                src="/ocr.png"
+                src="/oauth.png"
                 width={240}
                 height={240}
                 alt=""
@@ -108,18 +121,7 @@ export default function Home() {
           <div className="row d-flex justify-content-center">
             <div className={`col-lg-8 ${styles.introduction}`}>
               <p>
-                The idea of OAuth mode comes from{' '}
-                <Link
-                  className="link fw-500"
-                  href="https://github.com/member-gentei/member-gentei"
-                  target="_blank"
-                >
-                  member-gentei/member-gentei
-                </Link>
-                .
-              </p>
-              <p>
-                The idea of OCR mode comes from{' '}
+                The idea of the <span className="text-white fw-500">Screenshot Mode</span> came from{' '}
                 <Link
                   className="link fw-500"
                   href="https://github.com/nonJerry/VeraBot"
@@ -130,10 +132,27 @@ export default function Home() {
                 .
               </p>
               <p>
-                Both verification methods have problems. The OCR one is not automated, and you need
-                to provide your proof every month. Besides, the server moderators need to verify
-                everyone&apos;s request, which could still be a heavy burden in long-term point of
-                view. The OAuth one is automated, but it requires you to authorize the App to{' '}
+                The idea of the <span className="text-white fw-500">Auth Mode</span> came from{' '}
+                <Link
+                  className="link fw-500"
+                  href="https://github.com/member-gentei/member-gentei"
+                  target="_blank"
+                >
+                  member-gentei/member-gentei
+                </Link>
+                .
+              </p>
+              <p>Both verification methods have pros and cons.</p>
+              <p>
+                The <span className="text-white fw-500">Screenshot</span> one is not automated, and
+                you need to provide your proof every month. The screenshot might contains sensitive
+                information, like your personal information or your payment details. Besides, the
+                server moderators need to verify everyone&apos;s request, which could still be a
+                heavy burden in long-term point of view.
+              </p>
+              <p>
+                The <span className="text-white fw-500">Auth</span> one is automated, but it
+                requires you to authorize the App to{' '}
                 <span className="text-danger fw-500">
                   See, edit, and permanently delete your YouTube videos, ratings, comments and
                   captions
@@ -145,12 +164,29 @@ export default function Home() {
                 reluctant to use this method.
               </p>
               <p>
-                Considering the problems above, Divine Bridge implements both methods. You can
-                choose the one you prefer. If you choose to use the OAuth method, we will store your
-                OAuth credentials in our database with proper encryption, and we will never use them
-                for any other purpose. You can also revoke the authorization at any time on our
-                dashboard or your Google Account Settings page. Also, we do not save your
-                screenshots you sent to the bot when you use OCR method.
+                Considering the issues above, Divine Bridge implements both modes. You can choose
+                the one you prefer.
+              </p>
+              <p>
+                When you use <span className="text-white fw-500">Screenshot Mode</span>, we do not
+                store or backup your screenshots you sent to the bot. We only sent them to the log
+                channel in your server, and we will delete them after the server moderators approve
+                or reject them.
+              </p>
+              <p>
+                If you choose to use the <span className="text-white fw-500">Auth Mode</span>, we
+                will store your OAuth credentials in our database with proper encryption, and we
+                will never use them for any other purpose. You can also{' '}
+                <span className="text-warning fw-500">revoke your authorization</span> at any time
+                on our dashboard or your{' '}
+                <Link
+                  className="link fw-500"
+                  href="https://support.google.com/accounts/answer/13533235"
+                  target="_blank"
+                >
+                  Google Account Settings page
+                </Link>
+                .
               </p>
               <p>
                 Divine Bridge is open-sourced and has MIT License. We also host a public Discord bot{' '}
