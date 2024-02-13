@@ -6,6 +6,9 @@ export interface MembershipRoleAttrs {
     name: string;
     color: number;
   };
+  config: {
+    aliasCommandId: string;
+  };
   guild: string; // Ref: Guild
   youtube: string; // Ref: YouTubeChannel
 }
@@ -30,6 +33,12 @@ const membershipRoleSchema = new Schema<MembershipRoleDoc>(
       },
       color: {
         type: Number,
+        required: true,
+      },
+    },
+    config: {
+      aliasCommandId: {
+        type: String,
         required: true,
       },
     },

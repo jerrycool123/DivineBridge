@@ -6,8 +6,10 @@ import {
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
+import { DiscordService } from '../services/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
+import { VerifyCommand } from './verify.js';
 
 export class AddRoleCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -31,6 +33,12 @@ export class AddRoleCommand extends Command {
             .setDescription("The YouTube channel's ID (UCXXXX...), name or custom URL (@xxx...)")
             .setRequired(true)
             .setAutocomplete(true),
+        )
+        .addStringOption((option) =>
+          option
+            .setName('alias')
+            .setDescription('The alias of the `/verify` command for this membership role')
+            .setRequired(true),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
         .setDMPermission(false),
@@ -81,6 +89,15 @@ export class AddRoleCommand extends Command {
       });
     }
 
+    // Check if the alias is available
+    const alias = options.getString('alias', true);
+    const aliasResult = await Validators.isAliasAvailable(guild, alias);
+    if (!aliasResult.success) {
+      return await interaction.editReply({
+        content: aliasResult.error,
+      });
+    }
+
     // Check if the role is already assigned to the channel
     const oldMembershipRoleDoc = await MembershipRoleCollection.findOne({
       $or: [{ _id: role.id }, { youtube: youtubeChannelDoc._id }],
@@ -95,11 +112,23 @@ export class AddRoleCommand extends Command {
 
     // Ask for confirmation
     const confirmResult = await Utils.awaitUserConfirm(interaction, 'add-role', {
-      content: `Are you sure you want to add the membership role <@&${role.id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`?`,
+      content:
+        `Are you sure you want to add the membership role <@&${role.id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`?\n` +
+        `Members in this server can use \`/verify\` or \`/${alias}\` to verify their YouTube membership.`,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
+
+    // Create command alias in this guild
+    const aliasCommand = VerifyCommand.createAliasCommand(alias, youtubeChannelDoc.profile.title);
+    const createResult = await DiscordService.createGuildApplicationCommand(guild.id, aliasCommand);
+    if (createResult === null) {
+      return await confirmedInteraction.editReply({
+        content: `Failed to create the command alias \`/${alias}\` in this server. Please try again later.`,
+      });
+    }
+    const aliasCommandId = createResult.id;
 
     // Link the role to YouTube membership and save to DB
     const newMembershipRoleDoc = await MembershipRoleCollection.build({
@@ -108,20 +137,14 @@ export class AddRoleCommand extends Command {
         name: role.name,
         color: role.color,
       },
+      config: {
+        aliasCommandId,
+      },
       guild: guild.id,
       youtube: youtubeChannelDoc._id,
     });
-    const populatedNewMembershipRoleDoc = await MembershipRoleCollection.populate<{
-      youtube: YouTubeChannelDoc | null;
-    }>(newMembershipRoleDoc, 'youtube');
-    if (populatedNewMembershipRoleDoc.youtube === null) {
-      await populatedNewMembershipRoleDoc.deleteOne();
-      return await confirmedInteraction.editReply({
-        content: `YouTube channel not found. You can use the \`/add-youtube-channel\` command to add a new channel to the bot's supported list.`,
-      });
-    }
     await confirmedInteraction.editReply({
-      content: `Successfully added the membership role <@&${populatedNewMembershipRoleDoc._id}> for the YouTube channel \`${populatedNewMembershipRoleDoc.youtube.profile.title}\`.`,
+      content: `Successfully added the membership role <@&${newMembershipRoleDoc._id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`.`,
     });
   }
 }

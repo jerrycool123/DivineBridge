@@ -1,3 +1,4 @@
+import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   MembershipCollection,
   MembershipRoleCollection,
@@ -5,7 +6,7 @@ import {
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
-import { PermissionFlagsBits, RepliableInteraction } from 'discord.js';
+import { Attachment, Guild, RepliableInteraction } from 'discord.js';
 
 import { ActionRows } from '../components/action-rows.js';
 import { Embeds } from '../components/embeds.js';
@@ -18,6 +19,32 @@ import { Validators } from '../utils/validators.js';
 export class VerifyCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
     super(context, { ...options, preconditions: ['GuildOnly'] });
+  }
+
+  public static createAliasCommand(alias: string, youtubeChannelTitle: string) {
+    return new SlashCommandBuilder()
+      .setName(alias)
+      .setDescription(
+        `Provide a screenshot and verify your ${youtubeChannelTitle} membership in this server.`,
+      )
+      .addAttachmentOption((option) =>
+        option
+          .setName('screenshot')
+          .setDescription('Your YouTube membership proof screenshot')
+          .setRequired(true),
+      )
+      .addStringOption((option) =>
+        option
+          .setName('language')
+          .setDescription('The language of the text in your picture')
+          .addChoices(
+            ...OCRConstants.supportedLanguages.map(({ name, code }) => ({
+              name,
+              value: code,
+            })),
+          )
+          .setRequired(false),
+      );
   }
 
   public override registerApplicationCommands(registry: Command.Registry) {
@@ -50,7 +77,6 @@ export class VerifyCommand extends Command {
             )
             .setRequired(false),
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
         .setDMPermission(false),
     );
   }
@@ -97,13 +123,45 @@ export class VerifyCommand extends Command {
   }
 
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, user, options } = interaction;
+    const { guild, options } = interaction;
     if (guild === null) return;
+
+    const picture = options.getAttachment('screenshot', true);
+    const membershipRoleId = options.getString('membership_role', true);
+    const langCode = options.getString('language');
+
+    await this._chatInputRun(interaction, { guild, picture, membershipRoleId, langCode });
+  }
+
+  public async chatInputRunAlias(
+    interaction: Command.ChatInputCommandInteraction,
+    args: { membershipRoleId: string },
+  ) {
+    const { guild, options } = interaction;
+    const { membershipRoleId } = args;
+    if (guild === null) return;
+
+    const picture = options.getAttachment('screenshot', true);
+    const langCode = options.getString('language');
+
+    await this._chatInputRun(interaction, { guild, picture, membershipRoleId, langCode });
+  }
+
+  private async _chatInputRun(
+    interaction: Command.ChatInputCommandInteraction,
+    args: {
+      guild: Guild;
+      picture: Attachment;
+      membershipRoleId: string;
+      langCode: string | null;
+    },
+  ) {
+    const { user } = interaction;
+    const { guild, picture, membershipRoleId, langCode } = args;
 
     await interaction.deferReply({ ephemeral: true });
 
     // Get user attachment
-    const picture = options.getAttachment('screenshot', true);
     if (!(picture.contentType?.startsWith('image/') ?? false)) {
       return await interaction.editReply({
         content: 'Please provide an image file.',
@@ -111,7 +169,6 @@ export class VerifyCommand extends Command {
     }
 
     // Get membership role
-    const membershipRoleId = options.getString('membership_role', true);
     const membershipRoleResult = await Validators.isGuildHasMembershipRole(
       guild.id,
       membershipRoleId,
@@ -140,7 +197,6 @@ export class VerifyCommand extends Command {
     const logChannel = logChannelResult.data;
 
     // Get language
-    const langCode = options.getString('language');
     let selectedLanguage: (typeof OCRConstants.supportedLanguages)[number];
     if (langCode === null) {
       selectedLanguage = OCRConstants.supportedLanguages.find(

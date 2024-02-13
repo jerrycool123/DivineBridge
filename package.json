@@ -16,7 +16,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@8.15.1",
+  "packageManager": "pnpm@8.15.2",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

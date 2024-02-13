@@ -1,4 +1,11 @@
-import { OAuth2API, RESTAPIPartialCurrentUserGuild, UsersAPI } from '@discordjs/core';
+import { SlashCommandBuilder } from '@discordjs/builders';
+import {
+  OAuth2API,
+  RESTAPIPartialCurrentUserGuild,
+  RESTPostAPIApplicationGuildCommandsResult,
+  Routes,
+  UsersAPI,
+} from '@discordjs/core';
 import { REST } from '@discordjs/rest';
 import { container } from '@sapphire/framework';
 
@@ -81,6 +88,40 @@ export namespace DiscordService {
     } catch (error) {
       container.logger.error(error);
       return [];
+    }
+  };
+
+  export const createGuildApplicationCommand = async (
+    guildId: string,
+    command: Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>,
+  ): Promise<RESTPostAPIApplicationGuildCommandsResult | null> => {
+    try {
+      const discordRestApi = new REST({ version: '10' }).setToken(Env.DISCORD_BOT_TOKEN);
+      return (await discordRestApi.post(
+        Routes.applicationGuildCommands(Env.DISCORD_CLIENT_ID, guildId),
+        {
+          body: command.toJSON(),
+        },
+      )) as RESTPostAPIApplicationGuildCommandsResult;
+    } catch (error) {
+      container.logger.error(error);
+      return null;
+    }
+  };
+
+  export const deleteGuildApplicationCommand = async (
+    guildId: string,
+    commandId: string,
+  ): Promise<boolean> => {
+    try {
+      const discordRestApi = new REST({ version: '10' }).setToken(Env.DISCORD_BOT_TOKEN);
+      await discordRestApi.delete(
+        Routes.applicationGuildCommand(Env.DISCORD_CLIENT_ID, guildId, commandId),
+      );
+      return true;
+    } catch (error) {
+      container.logger.error(error);
+      return false;
     }
   };
 }

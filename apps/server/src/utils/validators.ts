@@ -4,7 +4,7 @@ import {
   MembershipRoleDoc,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
-import { container } from '@sapphire/framework';
+import { ApplicationCommandRegistries, container } from '@sapphire/framework';
 import dayjs from 'dayjs';
 import { Guild, GuildTextBasedChannel, PermissionFlagsBits } from 'discord.js';
 
@@ -207,6 +207,52 @@ export namespace Validators {
           )}\`) must not be more than ${limitDays} days after the base date (\`${baseDate.format(
             'YYYY-MM-DD',
           )}\`).`,
+      };
+    }
+    return { success: true };
+  };
+
+  export const isAliasAvailable = async (
+    guild: Guild,
+    alias: string,
+  ): Promise<
+    | {
+        success: true;
+      }
+    | {
+        success: false;
+        error: string;
+      }
+  > => {
+    // Check if the alias is a legal command name
+    // ? Ref: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+    if (/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u.test(alias) === false) {
+      return {
+        success: false,
+        error:
+          `The alias \`${alias}\` is not a valid command name.\n` +
+          `Please check the naming rules [here](https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming).`,
+      };
+    }
+
+    // Check if the alias is conflicting with the built-in commands
+    const builtInCommandNames = Array.from(ApplicationCommandRegistries.registries.keys());
+    if (builtInCommandNames.includes(alias)) {
+      return {
+        success: false,
+        error: `The alias \`${alias}\` is already used for a built-in command.`,
+      };
+    }
+
+    // Check if the alias is already used in this guild
+    const membershipRoleDoc = await MembershipRoleCollection.findOne({
+      'guild': guild.id,
+      'config.alias': alias,
+    });
+    if (membershipRoleDoc !== null) {
+      return {
+        success: false,
+        error: `The alias \`${alias}\` is already used for the role <@&${membershipRoleDoc._id}> in this server.`,
       };
     }
     return { success: true };

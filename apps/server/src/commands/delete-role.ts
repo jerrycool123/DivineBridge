@@ -2,6 +2,7 @@ import { MembershipCollection } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
+import { DiscordService } from '../services/discord.js';
 import { MembershipService } from '../services/membership.js';
 import { Database } from '../utils/database.js';
 import { Fetchers } from '../utils/fetchers.js';
@@ -92,6 +93,12 @@ export class DeleteRoleCommand extends Command {
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
+
+    // Remove command alias in this guild
+    await DiscordService.deleteGuildApplicationCommand(
+      guild.id,
+      membershipRoleDoc.config.aliasCommandId,
+    );
 
     // Notify admin about the removal
     const removeReason = `the membership role has been deleted by a moderator in the server \`${guild.name}\``;
