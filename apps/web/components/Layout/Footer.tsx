@@ -16,10 +16,16 @@ export default function Footer() {
           Privacy Policy
         </Link>
       </div>
-      <div className="mb-4 d-flex align-items-center">
+      <div className="mb-2 d-flex align-items-center">
         <GithubOutlined className="me-2" />
         <Link className="link fs-7" href="https://github.com/jerrycool123/DivineBridge">
           jerrycool123/DivineBridge
+        </Link>
+      </div>
+      <div className={`mb-4 fs-7 ${styles.source}`}>
+        The website used some images provided by{' '}
+        <Link className="link fs-7" href="https://www.irasutoya.com/" target="_blank">
+          いらすとや
         </Link>
       </div>
     </div>
