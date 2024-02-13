@@ -10,3 +10,4 @@ node_modules/
 .env.*.local
 .serverless/
 .aws.env
+.DS_Store
