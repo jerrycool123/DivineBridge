@@ -92,7 +92,7 @@ export const checkScreenshotMembership = async (
             await DiscordAPI.createDMMessage(userId, {
               content:
                 `Your membership role **@${membershipRoleName}** will expire tomorrow.\n` +
-                `Please use \`/verify\` command to renew your membership in the server \`${guildName}\`.`,
+                `Please use \`/${membershipRoleDoc.config.aliasCommandName}\` command to renew your membership in the server \`${guildName}\`.`,
             });
           }
         } catch (error) {
@@ -108,7 +108,7 @@ export const checkScreenshotMembership = async (
           membershipDoc,
           removeReason:
             `it has expired.\n` +
-            `Please use \`/verify\` command to renew your membership in the server \`${guildName}\``,
+            `Please use \`/${membershipRoleDoc.config.aliasCommandName}\` command to renew your membership in the server \`${guildName}\``,
         });
         if (roleRemoved === false) {
           failedRoleRemovalUserIds.push(userId);
