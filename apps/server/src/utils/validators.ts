@@ -50,11 +50,12 @@ export namespace Validators {
         error: `The bot doesn't have enough permission to view the log channel.`,
       };
     } else if (
-      !(logChannel.permissionsFor(botUser)?.has(PermissionFlagsBits.SendMessages) ?? false)
+      !(logChannel.permissionsFor(botUser)?.has(PermissionFlagsBits.SendMessages) ?? false) ||
+      !(logChannel.permissionsFor(botUser)?.has(PermissionFlagsBits.EmbedLinks) ?? false)
     ) {
       return {
         success: false,
-        error: `The bot doesn't have enough permission to send messages in the log channel.`,
+        error: `The bot doesn't have enough permission to send embed messages in the log channel.`,
       };
     }
 

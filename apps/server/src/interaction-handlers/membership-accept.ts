@@ -137,7 +137,6 @@ export class MembershipAcceptButtonHandler extends InteractionHandler {
               inline: true,
             },
           ])
-          .setImage(null)
           .setColor(Constants.colors.success),
       ],
       components: [acceptedActionRow],

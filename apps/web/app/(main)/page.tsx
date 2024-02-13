@@ -170,8 +170,7 @@ export default function Home() {
               <p>
                 When you use <span className="text-white fw-500">Screenshot Mode</span>, we do not
                 store or backup your screenshots you sent to the bot. We only sent them to the log
-                channel in your server, and we will delete them after the server moderators approve
-                or reject them.
+                channel in your server.
               </p>
               <p>
                 If you choose to use the <span className="text-white fw-500">Auth Mode</span>, we

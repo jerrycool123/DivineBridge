@@ -119,7 +119,6 @@ export class MembershipRejectButtonHandler extends InteractionHandler {
               value: reason.length > 0 ? reason : 'None',
             },
           ])
-          .setImage(null)
           .setColor(Constants.colors.error),
       ],
       components: [rejectedActionRow],
