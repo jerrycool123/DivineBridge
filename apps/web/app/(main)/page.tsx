@@ -192,7 +192,7 @@ export default function Home() {
                 Divine Bridge is open-sourced and has MIT License. We also host a public Discord bot{' '}
                 <Link
                   className="link fw-500"
-                  href="https://discord.com/api/oauth2/authorize?client_id=1091609534310645810&permissions=268435456&scope=bot"
+                  href="https://discord.com/api/oauth2/authorize?client_id=1203668745663287337&permissions=268435456&scope=bot"
                 >
                   Divine Bridge
                 </Link>
