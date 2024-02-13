@@ -14,7 +14,16 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['cdn.discordapp.com', 'yt3.ggpht.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.discordapp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'yt3.ggpht.com',
+      },
+    ],
   },
   async rewrites() {
     return [

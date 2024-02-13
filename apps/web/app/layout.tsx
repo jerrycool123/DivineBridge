@@ -11,6 +11,7 @@ import '../styles/globals.css';
 import { publicEnv } from '../libs/common/public-env';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(publicEnv.NEXT_PUBLIC_WEB_URL),
   title: 'Divine Bridge',
   description:
     'Divine Bridge is a Discord bot verifying YouTube channel memberships and link them with Discord server roles. It currently supports Screenshot Mode and Auth Mode.',
