@@ -100,6 +100,7 @@ export class AddRoleCommand extends Command {
 
     // Check if the role is already assigned to the channel
     const oldMembershipRoleDoc = await MembershipRoleCollection.findOne({
+      guild: guild.id,
       $or: [{ _id: role.id }, { youtube: youtubeChannelDoc._id }],
     }).populate<{
       youtube: YouTubeChannelDoc | null;
