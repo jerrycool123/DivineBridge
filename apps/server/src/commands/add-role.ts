@@ -139,6 +139,7 @@ export class AddRoleCommand extends Command {
       },
       config: {
         aliasCommandId,
+        aliasCommandName: alias,
       },
       guild: guild.id,
       youtube: youtubeChannelDoc._id,

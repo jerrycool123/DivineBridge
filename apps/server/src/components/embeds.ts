@@ -61,7 +61,7 @@ export namespace Embeds {
               ? membershipRoleDocs
                   .map(
                     ({ _id: membershipRoleId, config, youtube }) =>
-                      `\`/${config.aliasCommandId}\` - <@&${membershipRoleId}> - ${
+                      `\`/${config.aliasCommandName}\` - <@&${membershipRoleId}> - ${
                         youtube !== null
                           ? `[${youtube.profile.title}](https://www.youtube.com/channel/${youtube._id}) ([${youtube.profile.customUrl}](https://www.youtube.com/${youtube.profile.customUrl}))`
                           : '[Unknown Channel]'
