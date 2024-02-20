@@ -1,10 +1,5 @@
-import { DiscordAuthRequest, symmetricEncrypt } from '@divine-bridge/common';
-import { isAxiosError } from 'axios';
 import NextAuth from 'next-auth';
 import Discord from 'next-auth/providers/discord';
-
-import { serverApi } from './libs/common/server';
-import { privateEnv } from './libs/server/private-env';
 
 export const {
   handlers: { GET, POST },
@@ -17,58 +12,31 @@ export const {
     }),
   ],
   callbacks: {
-    async signIn({ account }) {
-      if (account === null || account.refresh_token === undefined) return false;
-      else if (account.provider === 'discord') {
-        try {
-          const encryptedToken = symmetricEncrypt(account.refresh_token, privateEnv.AUTH_SECRET);
-          if (encryptedToken === null) {
-            throw new Error('Failed to encrypt refresh token.');
-          }
-          await serverApi.post<DiscordAuthRequest>('/auth/discord', {
-            token: encryptedToken,
-          });
-        } catch (error) {
-          if (isAxiosError(error) && error.response !== undefined) {
-            console.error(error.response.data);
-          } else {
-            console.error(error);
-          }
-          return false;
-        }
-
-        return true;
-      }
-      return false;
-    },
-    jwt({ token, profile }) {
-      if (profile !== undefined) {
-        token.user = {
-          id: profile.id,
-          username: profile.username,
-          image: profile.image_url,
-        };
+    jwt({ token, account = null }) {
+      if (account !== null && account.expires_at !== undefined) {
+        const { access_token, expires_at } = account;
+        return { ...token, access_token, expires_at };
+      } else if (Date.now() > token.expires_at * 1000) {
+        return null;
       }
       return token;
     },
-    session: (args) => {
-      const { session } = args;
-      if (session.user !== undefined && 'token' in args && args.token.sub !== undefined) {
-        session.user = {
-          id: args.token.user.id,
-          username: args.token.user.username,
-          image: args.token.user.image,
-        };
+    session: ({ session, ...args }) => {
+      if ('token' in args) {
+        const { sub, name, picture } = args.token;
+        session.user = { id: sub, name, image: picture };
       }
       return session;
     },
-    async authorized({ request, auth }) {
-      console.log({ request, auth });
-      return true;
+    authorized: async ({ auth }) => {
+      return auth !== null;
     },
   },
   pages: {
     signIn: '/',
     error: '/',
+  },
+  jwt: {
+    maxAge: 7 * 24 * 60 * 60, // 7 days, align with Discord token expiration
   },
 });

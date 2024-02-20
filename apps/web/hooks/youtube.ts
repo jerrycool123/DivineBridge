@@ -1,12 +1,12 @@
-import { GoogleAuthRequest } from '@divine-bridge/common';
 import { useGoogleLogin } from '@react-oauth/google';
 import { MessageInstance } from 'antd/es/message/interface';
-import axios from 'axios';
+import 'client-only';
 import { Dispatch, SetStateAction, useContext } from 'react';
 
 import { MainContext } from '../contexts/MainContext';
-import { errorDataSchema } from '../libs/common/error';
-import { serverApi } from '../libs/common/server';
+import { requiredAction } from '../libs/common/action';
+import { connectYouTubeAction } from '../libs/server/actions/connect-youtube';
+import { useErrorHandler } from './error-handler';
 
 const useYouTubeAuthorize = ({
   setLinkingAccount,
@@ -17,11 +17,15 @@ const useYouTubeAuthorize = ({
 }) => {
   const { setUser } = useContext(MainContext);
 
+  const errorHandler = useErrorHandler();
+
   return useGoogleLogin({
     onSuccess: async ({ code }) => {
       setLinkingAccount(true);
       try {
-        const { data } = await serverApi.post<GoogleAuthRequest>('/auth/google', { code });
+        const data = await connectYouTubeAction({ code })
+          .then(requiredAction)
+          .then(({ data }) => data);
         setUser((oldUser) =>
           oldUser !== null
             ? {
@@ -32,20 +36,7 @@ const useYouTubeAuthorize = ({
         );
         void messageApi.success('Successfully linked your YouTube channel');
       } catch (error) {
-        console.error(error);
-        if (axios.isAxiosError(error) && error.response !== undefined) {
-          const parsedData = errorDataSchema.safeParse(error.response.data);
-          if (parsedData.success) {
-            const { message } = parsedData.data;
-            void messageApi.error(`[${error.response.status}]: ${message}`);
-          } else {
-            void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
-          }
-        } else if (error instanceof Error) {
-          void messageApi.error(`[${error.name}]: ${error.message}`);
-        } else {
-          void messageApi.error('An unknown error has occurred');
-        }
+        errorHandler(error);
       } finally {
         setLinkingAccount(false);
       }

@@ -1,12 +1,10 @@
+import { ActionRows, AppEventLogService, MembershipService, Modals } from '@divine-bridge/common';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ButtonInteraction, EmbedBuilder, ModalSubmitInteraction } from 'discord.js';
 
-import { ActionRows } from '../components/action-rows.js';
-import { Embeds } from '../components/embeds.js';
-import { Modals } from '../components/modals.js';
 import { Constants } from '../constants.js';
-import { MembershipService } from '../services/membership.js';
-import { Fetchers } from '../utils/fetchers.js';
+import { discordBotApi } from '../utils/discord.js';
+import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
 export class MembershipRejectButtonHandler extends InteractionHandler {
@@ -49,7 +47,7 @@ export class MembershipRejectButtonHandler extends InteractionHandler {
         content: 'Failed to parse the request embed.',
       });
     }
-    const parsedResult = await Embeds.parseMembershipVerificationRequestEmbed(interaction);
+    const parsedResult = await Utils.parseMembershipVerificationRequestEmbed(interaction);
     if (!parsedResult.success) {
       return await interaction.followUp({
         content: parsedResult.error,
@@ -67,8 +65,8 @@ export class MembershipRejectButtonHandler extends InteractionHandler {
     const membershipRoleDoc = membershipRoleResult.data;
 
     // Get guild member
-    const member = await Fetchers.fetchGuildMember(guild, userId);
-    if (member === null) {
+    const memberResult = await discordBotApi.fetchGuildMember(guild.id, userId);
+    if (!memberResult.success) {
       return await interaction.followUp({
         content: `The user <@${userId}> is not a member of this server.`,
       });
@@ -91,11 +89,15 @@ export class MembershipRejectButtonHandler extends InteractionHandler {
     }
     const reason = modalSubmitInteraction.fields.getTextInputValue(modalInputCustomId);
 
+    // Initialize log service and membership service
+    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+
     // Reject membership to user
-    const { notified } = await MembershipService.rejectMembership({
-      guild,
+    const { notified } = await membershipService.reject({
+      guildName: guild.name,
       membershipRoleDoc,
-      member,
+      userId,
       reason,
     });
 
@@ -122,6 +124,11 @@ export class MembershipRejectButtonHandler extends InteractionHandler {
           .setColor(Constants.colors.error),
       ],
       components: [rejectedActionRow],
+    });
+
+    await interaction.followUp({
+      content: `The membership verification request of <@${userId}> has been rejected.`,
+      ephemeral: true,
     });
   }
 }

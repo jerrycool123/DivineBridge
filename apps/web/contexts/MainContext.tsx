@@ -1,21 +1,23 @@
 'use client';
 
-import { ReadCurrentUserRequest, ReadGuildRequest } from '@divine-bridge/common';
 import message from 'antd/es/message';
 import { MessageInstance } from 'antd/es/message/interface';
-import { isAxiosError } from 'axios';
 import { useSession } from 'next-auth/react';
 import { Dispatch, ReactNode, SetStateAction, createContext, useEffect, useState } from 'react';
 
-import { errorDataSchema } from '../libs/common/error';
-import { serverApi } from '../libs/common/server';
+import { useErrorHandler } from '../hooks/error-handler';
+import { requiredAction } from '../libs/common/action';
+import { getGuildsAction } from '../libs/server/actions/get-guilds';
+import { getUserAction } from '../libs/server/actions/get-user';
+import type { GetGuildsActionData, GetUserActionData } from '../types/server-actions';
 
 export interface TMainContext {
-  user: ReadCurrentUserRequest['res'] | null;
-  setUser: Dispatch<SetStateAction<ReadCurrentUserRequest['res'] | null>>;
-  guilds: ReadGuildRequest['res'] | null;
-  setGuilds: Dispatch<SetStateAction<ReadGuildRequest['res'] | null>>;
+  user: GetUserActionData | null;
+  setUser: Dispatch<SetStateAction<GetUserActionData | null>>;
+  guilds: GetGuildsActionData | null;
+  setGuilds: Dispatch<SetStateAction<GetGuildsActionData | null>>;
   messageApi: MessageInstance;
+  errorHandler: (error: unknown) => void;
 }
 
 export const MainContext = createContext<TMainContext>({
@@ -24,60 +26,35 @@ export const MainContext = createContext<TMainContext>({
   guilds: null,
   setGuilds: () => undefined,
   messageApi: undefined as unknown as MessageInstance,
+  errorHandler: () => undefined,
 });
 
 export const MainProvider = ({ children }: { children: ReactNode }) => {
   const { status } = useSession();
   const [messageApi, contextHolder] = message.useMessage();
   const [user, setUser] = useState<TMainContext['user']>(null);
-  const [guilds, setGuilds] = useState<ReadGuildRequest['res'] | null>(null);
+  const [guilds, setGuilds] = useState<TMainContext['guilds'] | null>(null);
+
+  const errorHandler = useErrorHandler();
 
   useEffect(() => {
     if (status !== 'authenticated') return;
-    void (async () => {
-      try {
-        const { data } = await serverApi.get<ReadCurrentUserRequest>('/users/@me');
-        setUser(data);
-      } catch (error) {
-        if (isAxiosError(error) && error.response !== undefined) {
-          const parsedData = errorDataSchema.safeParse(error.response.data);
-          if (parsedData.success) {
-            const { message } = parsedData.data;
-            void messageApi.error(`[${error.response.status}]: ${message}`);
-          } else {
-            void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
-          }
-        } else if (error instanceof Error) {
-          void messageApi.error(`[${error.name}]: ${error.message}`);
-        } else {
-          void messageApi.error('An unknown error has occurred');
-        }
-      }
-    })();
-    void (async () => {
-      try {
-        const { data } = await serverApi.get<ReadGuildRequest>('/guilds');
+
+    void getUserAction({})
+      .then(requiredAction)
+      .then(({ data }) => setUser(data))
+      .catch(errorHandler);
+    void getGuildsAction({})
+      .then(requiredAction)
+      .then(({ data }) => {
         setGuilds(data);
-      } catch (error) {
-        if (isAxiosError(error) && error.response !== undefined) {
-          const parsedData = errorDataSchema.safeParse(error.response.data);
-          if (parsedData.success) {
-            const { message } = parsedData.data;
-            void messageApi.error(`[${error.response.status}]: ${message}`);
-          } else {
-            void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
-          }
-        } else if (error instanceof Error) {
-          void messageApi.error(`[${error.name}]: ${error.message}`);
-        } else {
-          void messageApi.error('An unknown error has occurred');
-        }
-      }
-    })();
-  }, [messageApi, status]);
+        console.log(data);
+      })
+      .catch(errorHandler);
+  }, [errorHandler, messageApi, status]);
 
   return (
-    <MainContext.Provider value={{ user, setUser, guilds, setGuilds, messageApi }}>
+    <MainContext.Provider value={{ user, setUser, guilds, setGuilds, messageApi, errorHandler }}>
       {contextHolder}
       {children}
     </MainContext.Provider>

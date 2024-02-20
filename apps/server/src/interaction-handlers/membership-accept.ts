@@ -1,11 +1,15 @@
+import {
+  ActionRows,
+  AppEventLogService,
+  DiscordUtils,
+  MembershipService,
+} from '@divine-bridge/common';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ButtonInteraction, EmbedBuilder } from 'discord.js';
 
-import { ActionRows } from '../components/action-rows.js';
-import { Embeds } from '../components/embeds.js';
 import { Constants } from '../constants.js';
-import { MembershipService } from '../services/membership.js';
-import { Fetchers } from '../utils/fetchers.js';
+import { discordBotApi } from '../utils/discord.js';
+import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
 export class MembershipAcceptButtonHandler extends InteractionHandler {
@@ -44,7 +48,7 @@ export class MembershipAcceptButtonHandler extends InteractionHandler {
         content: 'Failed to parse the request embed.',
       });
     }
-    const parsedResult = await Embeds.parseMembershipVerificationRequestEmbed(interaction);
+    const parsedResult = await Utils.parseMembershipVerificationRequestEmbed(interaction);
     if (!parsedResult.success) {
       return await interaction.followUp({
         content: parsedResult.error,
@@ -86,18 +90,26 @@ export class MembershipAcceptButtonHandler extends InteractionHandler {
     }
 
     // Get guild member
-    const member = await Fetchers.fetchGuildMember(guild, userId);
-    if (member === null) {
-      return await interaction.followUp({
+    const memberResult = await discordBotApi.fetchGuildMember(guild.id, userId);
+    if (!memberResult.success) {
+      return await interaction.editReply({
         content: `The user <@${userId}> is not a member of this server.`,
       });
     }
+    const {
+      member: { user },
+    } = memberResult;
+
+    // Initialize log service and membership service
+    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Add membership to user
-    const addMembershipResult = await MembershipService.addMembership({
-      guild,
+    const addMembershipResult = await membershipService.add({
+      guildId: guild.id,
+      guildName: guild.name,
       membershipRoleDoc,
-      member,
+      userPayload: DiscordUtils.convertAPIUser(user),
       type: 'screenshot',
       begin: beginDate,
       end: endDate,
@@ -140,6 +152,11 @@ export class MembershipAcceptButtonHandler extends InteractionHandler {
           .setColor(Constants.colors.success),
       ],
       components: [acceptedActionRow],
+    });
+
+    await interaction.followUp({
+      content: `The membership verification request of <@${userId}> has been accepted.`,
+      ephemeral: true,
     });
   }
 }

@@ -1,18 +1,30 @@
-import { MembershipRoleDoc, YouTubeChannelDoc } from '@divine-bridge/common';
-import { container } from '@sapphire/framework';
+import {
+  ActionRows,
+  MembershipRoleDoc,
+  UserPayload,
+  YouTubeChannelDoc,
+} from '@divine-bridge/common';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
 import {
   ButtonInteraction,
   ComponentType,
-  GuildMember,
-  GuildTextBasedChannel,
+  Embed,
   InteractionEditReplyOptions,
   MessageCreateOptions,
   RepliableInteraction,
+  User,
 } from 'discord.js';
 
-import { ActionRows } from '../components/action-rows.js';
+dayjs.extend(utc);
 
 export namespace Utils {
+  export const convertUser = (user: User): UserPayload => ({
+    id: user.id,
+    name: user.username,
+    image: user.displayAvatarURL(),
+  });
+
   export const awaitUserConfirm = async (
     originalInteraction: RepliableInteraction,
     uniqueIdentifier: string,
@@ -28,7 +40,7 @@ export namespace Utils {
         reason: 'cancelled' | 'timed-out';
       }
   > => {
-    if (originalInteraction.replied === false && originalInteraction.deferred === false) {
+    if (!originalInteraction.replied && !originalInteraction.deferred) {
       await originalInteraction.deferReply({ ephemeral: true });
     }
 
@@ -84,45 +96,69 @@ export namespace Utils {
     return { confirmed: false, reason: 'cancelled' };
   };
 
-  export const sendEventLog = async ({
-    guildOwner,
-    logChannel,
-    payload,
-  }: {
-    guildOwner: GuildMember | null;
-    logChannel: GuildTextBasedChannel | null;
-    payload: MessageCreateOptions;
-  }): Promise<boolean> => {
-    // Try to send event log to the log channel
-    if (logChannel !== null) {
-      try {
-        await logChannel.send(payload);
-        return true;
-      } catch (error) {
-        // We cannot send log to the log channel
-        container.logger.error(error);
+  export const parseMembershipVerificationRequestEmbed = async (
+    interaction: ButtonInteraction,
+  ): Promise<
+    | {
+        success: true;
+        embed: Embed;
+        userId: string;
+        beginDate: dayjs.Dayjs;
+        endDate: dayjs.Dayjs | null;
+        endDateIndex: number;
+        roleId: string;
       }
+    | {
+        success: false;
+        error: string;
+      }
+  > => {
+    const returnError = async (error: string) => {
+      const invalidActionRow = ActionRows.disabledInvalidButton();
+      await interaction.message.edit({
+        components: [invalidActionRow],
+      });
+      return { success: false, error } as const;
+    };
+
+    if (interaction.message.embeds.length === 0) {
+      return await returnError('The message does not contain an embed.');
+    }
+    const embed = interaction.message.embeds[0];
+
+    const userId = embed.footer?.text.split('User ID: ')[1] ?? null;
+    if (userId === null) {
+      return await returnError(
+        'The embed footer does not contain a user ID in the form of `User ID: {userId}`.',
+      );
     }
 
-    // If the log is failed to send, try to DM the guild owner about the removal
-    if (guildOwner !== null) {
-      try {
-        const content = payload.content !== undefined ? `\n\n${payload.content}` : '';
-        await guildOwner.send({
-          ...payload,
-          content:
-            `> I cannot send event log to the log channel in your server \`${guildOwner.guild.name}\`.\n` +
-            `> Please make sure that the log channel is set with \`/set-log-channel\`, and that I have enough permissions to send messages in it.` +
-            content,
-        });
-        return true;
-      } catch (error) {
-        // We cannot DM the owner
-        container.logger.error(error);
-      }
+    const beginDateString = embed.timestamp;
+    const beginDate = beginDateString !== null ? dayjs.utc(beginDateString).startOf('date') : null;
+    if (beginDate === null || !beginDate.isValid()) {
+      return await returnError(`The embed timestamp does not contain a valid date.`);
     }
 
-    return false;
+    const endDateIndex = embed.fields.findIndex(({ name }) => name === 'Recognized Date');
+    if (endDateIndex === -1) {
+      return await returnError('The embed does not contain a `Recognized Date` field.');
+    }
+    const endDateString = endDateIndex !== -1 ? embed.fields[endDateIndex].value : null;
+    const rawEndDate =
+      endDateString !== null ? dayjs.utc(endDateString, 'YYYY-MM-DD', true).startOf('date') : null;
+    const endDate = rawEndDate?.isValid() ?? false ? rawEndDate : null;
+
+    const roleRegex = /<@&(\d+)>/;
+    const roleId =
+      embed.fields.find(({ name }) => name === 'Membership Role')?.value?.match(roleRegex)?.[1] ??
+      null;
+    if (roleId === null) {
+      return await returnError(
+        'The embed does not contain a valid role ID in the `Membership Role` field.',
+      );
+    }
+
+    return { success: true, embed, userId, beginDate, endDate, endDateIndex, roleId };
   };
 
   export const getRoleRemoveErrorPayload = (

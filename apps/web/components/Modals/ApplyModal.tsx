@@ -1,5 +1,4 @@
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
-import { ReadGuildRequest, VerifyMembershipRequest } from '@divine-bridge/common';
 import Modal from 'antd/es/modal/Modal';
 import Spin from 'antd/es/spin';
 import axios from 'axios';
@@ -11,8 +10,10 @@ import styles from './ApplyModal.module.css';
 
 import { MainContext } from '../../contexts/MainContext';
 import useYouTubeAuthorize from '../../hooks/youtube';
+import { requiredAction } from '../../libs/common/action';
 import { errorDataSchema } from '../../libs/common/error';
-import { serverApi } from '../../libs/common/server';
+import { verifyAuthMembershipAction } from '../../libs/server/actions/verify-auth-membership';
+import { GetGuildsActionData } from '../../types/server-actions';
 import GoogleOAuthButton from '../Buttons/GoogleOAuthButton';
 
 export default function ApplyModal({
@@ -23,9 +24,9 @@ export default function ApplyModal({
 }: {
   isModalOpen: boolean;
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
-  selectedMembershipRole: ReadGuildRequest['res'][number]['membershipRoles'][number] | null;
+  selectedMembershipRole: GetGuildsActionData[number]['membershipRoles'][number] | null;
   setSelectedMembershipRole: Dispatch<
-    SetStateAction<ReadGuildRequest['res'][number]['membershipRoles'][number] | null>
+    SetStateAction<GetGuildsActionData[number]['membershipRoles'][number] | null>
   >;
 }) {
   const { user, guilds, setGuilds, messageApi } = useContext(MainContext);
@@ -136,10 +137,11 @@ export default function ApplyModal({
                           duration: 10,
                         });
                         try {
-                          const { data } = await serverApi.post<VerifyMembershipRequest>(
-                            `/memberships/${selectedMembershipRole.id}`,
-                            {},
-                          );
+                          const data = await verifyAuthMembershipAction({
+                            membershipRoleId: selectedMembershipRole.id,
+                          })
+                            .then(requiredAction)
+                            .then(({ data }) => data);
                           setGuilds((oldGuilds) =>
                             oldGuilds !== null
                               ? oldGuilds.map((guild) =>

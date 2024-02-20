@@ -6,7 +6,7 @@ import {
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
-import { DiscordService } from '../services/discord.js';
+import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 import { VerifyCommand } from './verify.js';
@@ -55,7 +55,7 @@ export class AddRoleCommand extends Command {
           { 'profile.title': { $regex: keyword, $options: 'i' } },
           { 'profile.customUrl': { $regex: keyword, $options: 'i' } },
         ],
-      });
+      }).limit(25);
       await interaction.respond(
         youtubeChannelDocs.map((channel) => ({
           name: `${channel.profile.title} (${channel.profile.customUrl})`,
@@ -66,7 +66,7 @@ export class AddRoleCommand extends Command {
   }
 
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options } = interaction;
+    const { guild, options, client } = interaction;
     if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });
@@ -123,13 +123,17 @@ export class AddRoleCommand extends Command {
 
     // Create command alias in this guild
     const aliasCommand = VerifyCommand.createAliasCommand(alias, youtubeChannelDoc.profile.title);
-    const createResult = await DiscordService.createGuildApplicationCommand(guild.id, aliasCommand);
-    if (createResult === null) {
+    const createResult = await discordBotApi.createGuildApplicationCommand(
+      client.user.id,
+      guild.id,
+      aliasCommand.toJSON(),
+    );
+    if (!createResult.success) {
       return await confirmedInteraction.editReply({
         content: `Failed to create the command alias \`/${alias}\` in this server. Please try again later.`,
       });
     }
-    const aliasCommandId = createResult.id;
+    const aliasCommandId = createResult.command.id;
 
     // Link the role to YouTube membership and save to DB
     const newMembershipRoleDoc = await MembershipRoleCollection.build({

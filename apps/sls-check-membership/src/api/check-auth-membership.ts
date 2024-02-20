@@ -1,25 +1,30 @@
 import {
-  GoogleAPI,
+  AppEventLogService,
+  GoogleOAuth,
   GuildCollection,
   MembershipCollection,
   MembershipDoc,
   MembershipRoleCollection,
+  MembershipService,
   UserCollection,
   UserDoc,
   YouTubeChannelCollection,
-  symmetricDecrypt,
+  YouTubeOAuthAPI,
 } from '@divine-bridge/common';
+import { CryptoUtils } from '@divine-bridge/common';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 
 import { checkAuth } from '../utils/auth.js';
+import { discordBotApi } from '../utils/discord.js';
 import { Env } from '../utils/env.js';
 import { Logger } from '../utils/logger.js';
-import { removeMembership } from '../utils/membership.js';
 import { dbConnect } from '../utils/mongoose.js';
 
 dayjs.extend(utc);
+
+const cryptoUtils = new CryptoUtils(Env.DATA_ENCRYPTION_KEY);
 
 export const checkAuthMembership = async (
   event: APIGatewayProxyEventV2,
@@ -76,8 +81,6 @@ export const checkAuthMembership = async (
     // Get guild from DB
     const guildId = membershipRoleDoc.guild;
     const guildDoc = await GuildCollection.findById(guildId);
-
-    // Remove membership role and records if guild does not exist in DB
     if (guildDoc === null) {
       await Logger.sysLog(
         `Failed to find the server ${guildId} which the role <@&${membershipRoleId}> belongs to in the database.`,
@@ -97,6 +100,10 @@ export const checkAuthMembership = async (
       continue;
     }
 
+    // Initialize log service and membership service
+    const appEventLogService = await new AppEventLogService(discordBotApi, guildId).init();
+    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+
     // Check membership
     const failedRoleRemovalUserIds: string[] = [];
     for (const membershipDoc of membershipDocGroup) {
@@ -106,23 +113,28 @@ export const checkAuthMembership = async (
       // Verify the user's membership via Google API
       const refreshToken =
         userDoc !== null && userDoc.youtube !== null
-          ? symmetricDecrypt(userDoc.youtube.refreshToken, Env.DATA_ENCRYPTION_KEY)
+          ? cryptoUtils.decrypt(userDoc.youtube.refreshToken)
           : null;
 
       let verifySuccess = false;
       if (refreshToken !== null) {
         let retry: number;
-        for (retry = 0; retry < 3 && verifySuccess === false; retry++) {
+        for (retry = 0; retry < 3 && !verifySuccess; retry++) {
           const randomVideoId =
             youtubeChannelDoc.memberOnlyVideoIds[
               Math.floor(Math.random() * youtubeChannelDoc.memberOnlyVideoIds.length)
             ];
-          const googleApi = new GoogleAPI(Env.GOOGLE_CLIENT_ID, Env.GOOGLE_CLIENT_SECRET);
-          const result = await googleApi.verifyYouTubeMembership(refreshToken, randomVideoId);
+          const googleOAuth = new GoogleOAuth(Env.GOOGLE_CLIENT_ID, Env.GOOGLE_CLIENT_SECRET);
+          const youtubeOAuthApi = new YouTubeOAuthAPI(googleOAuth, refreshToken);
+          const result = await youtubeOAuthApi.verifyMembership(randomVideoId);
           console.log(randomVideoId, result.success ? 'success' : result.error);
-          if (result.success === true) {
+          if (result.success) {
             verifySuccess = true;
-          } else if (result.error === 'forbidden' || result.error === 'token_expired_or_revoked') {
+          } else if (
+            result.error === 'forbidden' ||
+            result.error === 'invalid_grant' ||
+            result.error === 'token_expired_or_revoked'
+          ) {
             verifySuccess = false;
             break;
           } else if (result.error === 'video_not_found' || result.error === 'comment_disabled') {
@@ -157,13 +169,16 @@ export const checkAuthMembership = async (
       // If not, and the end date is before today, remove the user's membership
       const endDate = dayjs.utc(membershipDoc.end).startOf('day');
       if (endDate.isBefore(currentDate, 'date')) {
-        const roleRemoved = await removeMembership({
+        const removeMembershipResult = await membershipService.remove({
           guildId,
           membershipDoc,
           membershipRoleDoc,
-          removeReason: 'we cannot verify your membership from YouTube API',
+          removeReason:
+            'we cannot verify your membership from YouTube API.\n' +
+            'Please go to our [website](https://divine-bridge.jerrycool123.com) to verify your membership again.',
+          manual: false,
         });
-        if (roleRemoved === false) {
+        if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
           failedRoleRemovalUserIds.push(userId);
           removalFailCount += 1;
         }
@@ -173,7 +188,7 @@ export const checkAuthMembership = async (
 
     // Send log to the log channel if there are failed role removals
     if (failedRoleRemovalUserIds.length > 0) {
-      await Logger.guildLog(guildDoc, {
+      await appEventLogService.log({
         content:
           `[Auth membership check]\n` +
           `Following are the users whose membership has expired, ` +

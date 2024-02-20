@@ -1,14 +1,12 @@
-import { MembershipCollection } from '@divine-bridge/common';
+import { AppEventLogService, Database, Embeds, MembershipCollection } from '@divine-bridge/common';
+import { MembershipService } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import utc from 'dayjs/plugin/utc.js';
 import { PermissionFlagsBits, RepliableInteraction } from 'discord.js';
 
-import { Embeds } from '../components/embeds.js';
-import { MembershipService } from '../services/membership.js';
-import { Database } from '../utils/database.js';
-import { Fetchers } from '../utils/fetchers.js';
+import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
@@ -59,34 +57,18 @@ export class AddMemberCommand extends Command {
 
     await interaction.deferReply({ ephemeral: true });
 
-    // Get guild owner and log channel
-    const [guildOwner, logChannelResult] = await Promise.all([
-      Fetchers.fetchGuildOwner(guild),
+    // Get log channel and membership role, and check if the role is manageable
+    const role = options.getRole('role', true);
+    const [logChannelResult, membershipRoleResult, manageableResult] = await Promise.all([
       Validators.isGuildHasLogChannel(guild),
+      Validators.isGuildHasMembershipRole(guild.id, role.id),
+      Validators.isManageableRole(guild, role.id),
     ]);
-    if (guildOwner === null) {
-      return await interaction.editReply({
-        content: 'Failed to fetch the guild owner.',
-      });
-    } else if (!logChannelResult.success) {
+    if (!logChannelResult.success) {
       return await interaction.editReply({
         content: logChannelResult.error,
       });
-    }
-    const logChannel = logChannelResult.data;
-
-    // Check if the guild has the membership role and the role is manageable
-    const role = options.getRole('role', true);
-    const [membershipRoleResult, manageableResult] = await Promise.all([
-      Validators.isGuildHasMembershipRole(guild.id, role.id),
-      Validators.isManageableRole(guild, role.id),
-      Database.updateMembershipRole({
-        id: role.id,
-        name: role.name,
-        color: role.color,
-      }),
-    ]);
-    if (!membershipRoleResult.success) {
+    } else if (!membershipRoleResult.success) {
       return await interaction.editReply({
         content: membershipRoleResult.error,
       });
@@ -121,21 +103,21 @@ export class AddMemberCommand extends Command {
       });
     }
 
-    // Upsert user
+    // Get guild member
     const user = options.getUser('member', true);
+    const memberResult = await discordBotApi.fetchGuildMember(guild.id, user.id);
+    if (!memberResult.success) {
+      return await interaction.editReply({
+        content: `The user <@${user.id}> is not a member of this server.`,
+      });
+    }
+
+    // Upsert user
     await Database.upsertUser({
       id: user.id,
       username: user.username,
       image: user.displayAvatarURL(),
     });
-
-    // Get guild member
-    const member = await Fetchers.fetchGuildMember(guild, user.id);
-    if (member === null) {
-      return await interaction.editReply({
-        content: `The user <@${user.id}> is not a member of this server.`,
-      });
-    }
 
     // Check if the user already has membership
     const oldMembershipDoc = await MembershipCollection.findOne({
@@ -149,7 +131,7 @@ export class AddMemberCommand extends Command {
         'add-member-existing-membership',
         {
           content: `The user <@${user.id}> already has an existing membership. Do you want to overwrite it?`,
-          embeds: [Embeds.membership(user, oldMembershipDoc)],
+          embeds: [Embeds.membership(Utils.convertUser(user), oldMembershipDoc)],
         },
       );
       if (!confirmResult.confirmed) return;
@@ -160,51 +142,37 @@ export class AddMemberCommand extends Command {
     // Ask for confirmation
     const confirmResult = await Utils.awaitUserConfirm(activeInteraction, 'add-member', {
       content:
-        `Are you sure you want to assign the membership role <@&${role.id}> to <@${member.id}>?\n` +
+        `Are you sure you want to assign the membership role <@&${role.id}> to <@${user.id}>?\n` +
         `Their membership will expire on \`${endDate.format('YYYY-MM-DD')}\`.`,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
 
+    // Initialize log service and membership service
+    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+
     // Add membership to user
-    const addMembershipResult = await MembershipService.addMembership({
-      guild,
+    const addMembershipResult = await membershipService.add({
+      guildId: guild.id,
+      guildName: guild.name,
       membershipRoleDoc,
-      member,
+      userPayload: Utils.convertUser(user),
       type: 'manual',
       begin: currentDate,
       end: endDate,
+      moderatorId: moderator.id,
     });
     if (!addMembershipResult.success) {
       return await confirmedInteraction.editReply({
         content: addMembershipResult.error,
       });
     }
-    const { notified, updatedMembershipDoc } = addMembershipResult;
-
-    // Send added log
-    const manualMembershipAssignmentEmbed = Embeds.manualMembershipAssignment(
-      member.user,
-      updatedMembershipDoc.begin,
-      updatedMembershipDoc.end,
-      updatedMembershipDoc.membershipRole,
-      moderator.id,
-    );
-    await Utils.sendEventLog({
-      guildOwner,
-      logChannel,
-      payload: {
-        content: notified
-          ? ''
-          : "**[NOTE]** Due to the user's __Privacy Settings__ of this server, **I cannot send DM to notify them.**\nYou might need to notify them yourself.",
-        embeds: [manualMembershipAssignmentEmbed],
-      },
-    });
 
     await confirmedInteraction.editReply({
       content: `Successfully assigned the membership role <@&${role.id}> to <@${
-        member.id
+        user.id
       }>.\nTheir membership will expire on \`${endDate.format('YYYY-MM-DD')}\`.`,
     });
   }

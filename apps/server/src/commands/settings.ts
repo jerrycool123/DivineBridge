@@ -1,9 +1,13 @@
-import { MembershipRoleCollection, YouTubeChannelDoc } from '@divine-bridge/common';
+import {
+  Database,
+  Embeds,
+  MembershipRoleCollection,
+  YouTubeChannelDoc,
+} from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
-import { Embeds } from '../components/embeds.js';
-import { Database } from '../utils/database.js';
+import { Utils } from '../utils/index.js';
 
 export class SettingsCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -39,7 +43,11 @@ export class SettingsCommand extends Command {
     ]);
 
     // Send settings
-    const guildSettingsEmbed = Embeds.guildSettings(user, guildDoc, membershipRoleDocs);
+    const guildSettingsEmbed = Embeds.guildSettings(
+      Utils.convertUser(user),
+      guildDoc,
+      membershipRoleDocs,
+    );
     await interaction.editReply({
       embeds: [guildSettingsEmbed],
     });

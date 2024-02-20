@@ -2,43 +2,32 @@
 
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
-import { ReadGuildRequest } from '@divine-bridge/common';
 import Spin from 'antd/es/spin';
 import Switch from 'antd/es/switch';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { PermissionFlagsBits } from 'discord-api-types/v10';
-import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 
 import styles from '../../../styles/Dashboard.module.css';
 
 import ApplyModal from '../../../components/Modals/ApplyModal';
 import { MainContext } from '../../../contexts/MainContext';
-import { publicEnv } from '../../../libs/common/public-env';
+import { getDiscordBotInviteLink } from '../../../libs/common/discord';
+import { GetGuildsActionData } from '../../../types/server-actions';
 
 dayjs.extend(utc);
 
 export default function Dashboard() {
-  const router = useRouter();
   const { guilds } = useContext(MainContext);
-  const { status } = useSession();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMembershipRole, setSelectedMembershipRole] = useState<
-    ReadGuildRequest['res'][number]['membershipRoles'][number] | null
+    GetGuildsActionData[number]['membershipRoles'][number] | null
   >(null);
 
   const [hoveredRoleId, setHoveredRoleId] = useState<string | null>(null);
   const [viewAcquiredMembershipsOnly, setViewAcquiredMembershipsOnly] = useState(false);
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/');
-    }
-  }, [status, router]);
 
   if (guilds === null) {
     return (
@@ -88,23 +77,28 @@ export default function Dashboard() {
                     <div className={styles.card}>
                       <div className="mb-4 mx-2 d-flex justify-content-between align-items-center">
                         <div
-                          role="button"
                           className={`flex-grow-1 d-flex align-items-center ${styles.cardHeader}`}
-                          onClick={() =>
-                            window.open(`https://discord.com/channels/${guild.id}`, '_blank')
-                          }
                         >
-                          {guild.profile.icon !== null && (
-                            <Image
-                              className="flex-shrink-0 rounded-circle"
-                              src={guild.profile.icon}
-                              alt={`${guild.profile.name}'s icon`}
-                              width={40}
-                              height={40}
-                            />
-                          )}
-                          <div className="flex-grow-1 text-truncate fw-700 fs-4 mx-3">
-                            {guild.profile.name}
+                          <div
+                            role="button"
+                            className={`d-flex align-items-center ${styles.guildButton}`}
+                            style={{ minWidth: 0 }}
+                            onClick={() =>
+                              window.open(`https://discord.com/channels/${guild.id}`, '_blank')
+                            }
+                          >
+                            {guild.profile.icon !== null && (
+                              <Image
+                                className="flex-shrink-0 rounded-circle"
+                                src={guild.profile.icon}
+                                alt={`${guild.profile.name}'s icon`}
+                                width={40}
+                                height={40}
+                              />
+                            )}
+                            <div className="flex-grow-1 text-truncate fw-700 fs-4 mx-3">
+                              {guild.profile.name}
+                            </div>
                           </div>
                         </div>
                         <div
@@ -241,11 +235,17 @@ export default function Dashboard() {
                 role="button"
                 className={`d-flex justify-content-center align-items-center ${styles.cardPlaceholder}`}
                 onClick={() => {
-                  const url = new URL('https://discord.com/api/oauth2/authorize');
-                  url.searchParams.set('client_id', publicEnv.NEXT_PUBLIC_DISCORD_CLIENT_ID);
-                  url.searchParams.set('permissions', PermissionFlagsBits.ManageRoles.toString());
-                  url.searchParams.set('scope', 'applications.commands bot');
-                  window.location.href = url.toString();
+                  const popupWinWidth = 980,
+                    popupWinHeight = 700;
+                  const left = (screen.width - popupWinWidth) / 2;
+                  const top = (screen.height - popupWinHeight) / 4;
+                  setTimeout(() => {
+                    window.open(
+                      getDiscordBotInviteLink(),
+                      '_blank',
+                      `resizable=yes, width= ${popupWinWidth}, height=${popupWinHeight}, top=${top}, left=${left}`,
+                    );
+                  });
                 }}
               >
                 <div className="poppins fs-5 user-select-none">

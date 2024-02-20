@@ -1,11 +1,8 @@
-import { MembershipCollection } from '@divine-bridge/common';
+import { AppEventLogService, MembershipCollection, MembershipService } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
-import { DiscordService } from '../services/discord.js';
-import { MembershipService } from '../services/membership.js';
-import { Database } from '../utils/database.js';
-import { Fetchers } from '../utils/fetchers.js';
+import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
@@ -35,39 +32,23 @@ export class DeleteRoleCommand extends Command {
   }
 
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options } = interaction;
+    const { guild, options, client } = interaction;
     if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });
 
-    // Get guild owner and log channel
-    const [guildOwner, logChannelResult] = await Promise.all([
-      Fetchers.fetchGuildOwner(guild),
+    // Get log channel and membership role, and check if the role is manageable
+    const role = options.getRole('role', true);
+    const [logChannelResult, membershipRoleResult, manageableResult] = await Promise.all([
       Validators.isGuildHasLogChannel(guild),
+      Validators.isGuildHasMembershipRole(guild.id, role.id),
+      Validators.isManageableRole(guild, role.id),
     ]);
-    if (guildOwner === null) {
-      return await interaction.editReply({
-        content: 'Failed to fetch the guild owner.',
-      });
-    } else if (!logChannelResult.success) {
+    if (!logChannelResult.success) {
       return await interaction.editReply({
         content: logChannelResult.error,
       });
-    }
-    const logChannel = logChannelResult.data;
-
-    // Check if the guild has the membership role and the role is manageable
-    const role = options.getRole('role', true);
-    const [membershipRoleResult, manageableResult] = await Promise.all([
-      Validators.isGuildHasMembershipRole(guild.id, role.id),
-      Validators.isManageableRole(guild, role.id),
-      Database.updateMembershipRole({
-        id: role.id,
-        name: role.name,
-        color: role.color,
-      }),
-    ]);
-    if (!membershipRoleResult.success) {
+    } else if (!membershipRoleResult.success) {
       return await interaction.editReply({
         content: membershipRoleResult.error,
       });
@@ -95,27 +76,23 @@ export class DeleteRoleCommand extends Command {
     await confirmedInteraction.deferReply({ ephemeral: true });
 
     // Remove command alias in this guild
-    await DiscordService.deleteGuildApplicationCommand(
+    const deleteResult = await discordBotApi.deleteGuildApplicationCommand(
+      client.user.id,
       guild.id,
       membershipRoleDoc.config.aliasCommandId,
     );
+    if (!deleteResult.success) {
+      // ? We do not want to stop the process if the command alias deletion failed
+      this.container.logger.error(deleteResult.error);
+    }
 
-    // Notify admin about the removal
-    const removeReason = `the membership role has been deleted by a moderator in the server \`${guild.name}\``;
-    await Utils.sendEventLog({
-      payload: {
-        content:
-          `The membership role <@&${membershipRoleDoc._id}> has been removed, since ${removeReason}.\n` +
-          'I will try to remove the role from the members, but if I failed to do so, please remove the role manually.\n' +
-          'If you believe this is an error, please contact the bot owner to resolve this issue.',
-      },
-      guildOwner,
-      logChannel,
-    });
+    // Initialize log service and membership service
+    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Remove membership role from DB
-    await MembershipService.purgeMembershipRole({
-      guild,
+    await membershipService.purgeRole({
+      guildId: guild.id,
       membershipDocs,
       membershipRoleDoc,
       removeReason: `the membership role has been deleted by a moderator in the server \`${guild.name}\``,

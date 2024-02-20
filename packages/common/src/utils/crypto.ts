@@ -1,36 +1,44 @@
 import crypto from 'node:crypto';
 
-export const SYMMETRIC_ENCRYPTION_ALGORITHM = 'aes-256-cbc';
+export class CryptoUtils {
+  private readonly key: Buffer;
 
-export const symmetricEncrypt = (plain: string, b64key: string): string | null => {
-  try {
-    const key = Buffer.from(b64key, 'base64');
-    const iv = crypto.randomBytes(16); // 128-bit IV
-    const cipher = crypto.createCipheriv(SYMMETRIC_ENCRYPTION_ALGORITHM, key, iv);
-    let encrypted = cipher.update(plain, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
-    return Buffer.concat([iv, Buffer.from(encrypted, 'base64')]).toString('base64');
-  } catch (error) {
-    // Failed to encrypt
-    console.error(error);
+  constructor(
+    b64key: string,
+    public readonly algorithm = 'aes-256-cbc',
+    public readonly keyBytes = 16,
+  ) {
+    this.key = Buffer.from(b64key, 'base64');
   }
-  return null;
-};
 
-export const symmetricDecrypt = (b64cipher: string, b64key: string): string | null => {
-  try {
-    const cipher = Buffer.from(b64cipher, 'base64');
-    const key = Buffer.from(b64key, 'base64');
-    const iv = cipher.subarray(0, 16);
-    const encrypted = cipher.subarray(16).toString('base64');
-    const decipher = crypto.createDecipheriv(SYMMETRIC_ENCRYPTION_ALGORITHM, key, iv);
-    let decrypted = decipher.update(encrypted, 'base64', 'utf8');
-    decrypted += decipher.final('utf8');
-
-    return decrypted;
-  } catch (error) {
-    // Failed to decrypt
-    console.error(error);
+  public encrypt(plain: string): string | null {
+    try {
+      const iv = crypto.randomBytes(this.keyBytes); // (this.keyBytes * 8)-bit IV
+      const cipher = crypto.createCipheriv(this.algorithm, this.key, iv);
+      let encrypted = cipher.update(plain, 'utf8', 'base64');
+      encrypted += cipher.final('base64');
+      return Buffer.concat([iv, Buffer.from(encrypted, 'base64')]).toString('base64');
+    } catch (error) {
+      // Failed to encrypt
+      console.error(error);
+    }
+    return null;
   }
-  return null;
-};
+
+  public decrypt(b64cipher: string): string | null {
+    try {
+      const cipher = Buffer.from(b64cipher, 'base64');
+      const iv = cipher.subarray(0, this.keyBytes);
+      const encrypted = cipher.subarray(this.keyBytes).toString('base64');
+      const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv);
+      let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+      decrypted += decipher.final('utf8');
+
+      return decrypted;
+    } catch (error) {
+      // Failed to decrypt
+      console.error(error);
+    }
+    return null;
+  }
+}

@@ -1,7 +1,6 @@
+import { Database } from '@divine-bridge/common';
 import { Events, Listener } from '@sapphire/framework';
 import { Role } from 'discord.js';
-
-import { Database } from '../utils/database.js';
 
 export class RoleUpdateListener extends Listener<typeof Events.GuildRoleUpdate> {
   public constructor(context: Listener.LoaderContext, options: Listener.Options) {

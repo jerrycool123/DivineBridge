@@ -6,7 +6,6 @@ export interface UserAttrs {
     username: string;
     image: string;
   };
-  refreshToken: string | null;
 }
 
 export interface UserDoc extends UserAttrs, Document<string> {
@@ -48,11 +47,6 @@ const userSchema = new Schema<UserDoc>(
         required: true,
         default: 'eng',
       },
-    },
-    refreshToken: {
-      type: String,
-      required: false,
-      default: null,
     },
     youtube: {
       type: new Schema(

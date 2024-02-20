@@ -6,9 +6,13 @@ import {
 } from '@divine-bridge/common';
 import { ApplicationCommandRegistries, container } from '@sapphire/framework';
 import dayjs from 'dayjs';
-import { Guild, GuildTextBasedChannel, PermissionFlagsBits } from 'discord.js';
-
-import { Fetchers } from './fetchers.js';
+import {
+  Guild,
+  GuildBasedChannel,
+  GuildMember,
+  GuildTextBasedChannel,
+  PermissionFlagsBits,
+} from 'discord.js';
 
 export namespace Validators {
   export const isValidLogChannel = async (
@@ -26,7 +30,12 @@ export namespace Validators {
   > => {
     const { user: botUser } = container.client;
 
-    const logChannel = await Fetchers.fetchGuildChannel(guild, logChannelId);
+    let logChannel: GuildBasedChannel | null = null;
+    try {
+      logChannel = await guild.channels.fetch(logChannelId);
+    } catch (error) {
+      // The bot can't find the log channel, ignore the error
+    }
     if (botUser === null) {
       return {
         success: false,
@@ -150,7 +159,12 @@ export namespace Validators {
         error: string;
       }
   > => {
-    const botMember = await Fetchers.fetchBotGuildMember(guild);
+    let botMember: GuildMember | null = null;
+    try {
+      botMember = await guild.members.fetchMe();
+    } catch (error) {
+      // ignore the error
+    }
     if (botMember === null) {
       return {
         success: false,
@@ -226,8 +240,12 @@ export namespace Validators {
       }
   > => {
     // Check if the alias is a legal command name
-    // ? Ref: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
-    if (/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u.test(alias) === false) {
+    if (
+      // ? Ref: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+      !/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u.test(alias) ||
+      // ? Ref: https://github.com/discordjs/discord.js/blob/main/packages/builders/src/interactions/slashCommands/Assertions.ts
+      !/^[\p{Ll}\p{Lm}\p{Lo}\p{N}\p{sc=Devanagari}\p{sc=Thai}_-]+$/u.test(alias)
+    ) {
       return {
         success: false,
         error:

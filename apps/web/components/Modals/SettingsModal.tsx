@@ -1,12 +1,7 @@
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
-import {
-  DeleteCurrentUserRequest,
-  RevokeCurrentUserYouTubeRefreshTokenRequest,
-} from '@divine-bridge/common';
 import Collapse from 'antd/es/collapse';
 import Modal from 'antd/es/modal/Modal';
 import Spin from 'antd/es/spin';
-import axios from 'axios';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
@@ -14,9 +9,11 @@ import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import styles from './SettingsModal.module.css';
 
 import { MainContext } from '../../contexts/MainContext';
+import { useErrorHandler } from '../../hooks/error-handler';
 import useYouTubeAuthorize from '../../hooks/youtube';
-import { errorDataSchema } from '../../libs/common/error';
-import { serverApi } from '../../libs/common/server';
+import { requiredAction } from '../../libs/common/action';
+import { deleteAccountAction } from '../../libs/server/actions/delete-account';
+import { revokeYouTubeAction } from '../../libs/server/actions/revoke-youtube';
 import GoogleOAuthButton from '../Buttons/GoogleOAuthButton';
 
 export default function SettingsModal({
@@ -32,6 +29,8 @@ export default function SettingsModal({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [action, setAction] = useState<'revoke' | 'delete' | null>(null);
 
+  const errorHandler = useErrorHandler();
+
   const authorize = useYouTubeAuthorize({
     setLinkingAccount,
     messageApi,
@@ -40,48 +39,27 @@ export default function SettingsModal({
   const handleRevokeOAuthAuthorization = async () => {
     try {
       void messageApi.loading('Revoking your YouTube OAuth Authorization...');
-      await serverApi.post<RevokeCurrentUserYouTubeRefreshTokenRequest>('/users/@me/revoke', {});
+      await revokeYouTubeAction({}).then(requiredAction);
       window.location.reload();
     } catch (error) {
-      console.error(error);
-      if (axios.isAxiosError(error) && error.response !== undefined) {
-        const parsedData = errorDataSchema.safeParse(error.response.data);
-        if (parsedData.success) {
-          const { message } = parsedData.data;
-          void messageApi.error(`[${error.response.status}]: ${message}`);
-        } else {
-          void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
-        }
-      } else if (error instanceof Error) {
-        void messageApi.error(`[${error.name}]: ${error.message}`);
-      } else {
-        void messageApi.error('An unknown error has occurred');
-      }
+      errorHandler(error);
     }
   };
 
   const handleDeleteAccount = async () => {
     try {
-      void messageApi.loading('Deleting your account...');
-      await serverApi.delete<DeleteCurrentUserRequest>('/users/@me', {});
-      messageApi.destroy();
-      await signOut({ redirect: false });
-      window.location.reload();
+      void messageApi.open({
+        key: 'delete-account',
+        type: 'loading',
+        content: 'Deleting your account...',
+        duration: 60,
+      });
+      await deleteAccountAction({}).then(requiredAction);
+      messageApi.destroy('delete-account');
+      await signOut({ callbackUrl: '/' });
     } catch (error) {
-      console.error(error);
-      if (axios.isAxiosError(error) && error.response !== undefined) {
-        const parsedData = errorDataSchema.safeParse(error.response.data);
-        if (parsedData.success) {
-          const { message } = parsedData.data;
-          void messageApi.error(`[${error.response.status}]: ${message}`);
-        } else {
-          void messageApi.error(`[${error.response.status}]: ${error.response.statusText}}`);
-        }
-      } else if (error instanceof Error) {
-        void messageApi.error(`[${error.name}]: ${error.message}`);
-      } else {
-        void messageApi.error('An unknown error has occurred');
-      }
+      messageApi.destroy('delete-account');
+      errorHandler(error);
     }
   };
 
@@ -184,8 +162,8 @@ export default function SettingsModal({
                         role="button"
                         className="btn btn-danger btn-sm"
                         onClick={() => {
-                          setIsConfirmModalOpen(true);
                           setAction('revoke');
+                          setIsConfirmModalOpen(true);
                         }}
                       >
                         Revoke OAuth Authorization
@@ -204,8 +182,8 @@ export default function SettingsModal({
                     role="button"
                     className="btn btn-danger btn-sm"
                     onClick={() => {
-                      setIsConfirmModalOpen(true);
                       setAction('delete');
+                      setIsConfirmModalOpen(true);
                     }}
                   >
                     Delete Your Account

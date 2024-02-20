@@ -1,8 +1,13 @@
-import { MembershipCollection, MembershipDoc, MembershipRoleDoc } from '@divine-bridge/common';
+import {
+  Embeds,
+  MembershipCollection,
+  MembershipDoc,
+  MembershipRoleDoc,
+} from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
-import { Embeds } from '../components/embeds.js';
+import { Utils } from '../utils/index.js';
 
 export class CheckMemberCommand extends Command {
   public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -58,7 +63,7 @@ export class CheckMemberCommand extends Command {
     }
 
     // Organize membership status to embed and display
-    const membershipStatusEmbed = Embeds.membershipStatus(user, memberships);
+    const membershipStatusEmbed = Embeds.membershipStatus(Utils.convertUser(user), memberships);
     await interaction.editReply({
       embeds: [membershipStatusEmbed],
     });

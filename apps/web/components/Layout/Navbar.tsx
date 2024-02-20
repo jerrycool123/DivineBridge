@@ -74,7 +74,7 @@ export default function Navbar() {
                 <div className={`${styles.avatar} position-relative me-2`}>
                   <Image className="rounded-circle" src={session.user.image} alt="avatar" fill />
                 </div>
-                <div className={`fs-7 me-2 ${styles.username}`}>{session.user.username}</div>
+                <div className={`fs-7 me-2 ${styles.username}`}>{session.user.name}</div>
                 <CaretDownOutlined />
               </div>
             </Dropdown>

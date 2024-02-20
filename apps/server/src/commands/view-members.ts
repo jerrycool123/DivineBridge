@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import { AttachmentBuilder, PermissionFlagsBits } from 'discord.js';
 
-import { Database } from '../utils/database.js';
 import { Validators } from '../utils/validators.js';
 
 dayjs.extend(utc);
@@ -41,11 +40,6 @@ export class ViewMembersCommand extends Command {
     const role = options.getRole('role', true);
     const [membershipRoleResult] = await Promise.all([
       Validators.isGuildHasMembershipRole(guild.id, role.id),
-      Database.updateMembershipRole({
-        id: role.id,
-        name: role.name,
-        color: role.color,
-      }),
     ]);
     if (!membershipRoleResult.success) {
       return await interaction.editReply({

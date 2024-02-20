@@ -1,7 +1,6 @@
+import { Database } from '@divine-bridge/common';
 import { Events, Listener } from '@sapphire/framework';
 import { Guild } from 'discord.js';
-
-import { Database } from '../utils/database.js';
 
 export class GuildCreateListener extends Listener<typeof Events.GuildCreate> {
   public constructor(context: Listener.LoaderContext, options: Listener.Options) {

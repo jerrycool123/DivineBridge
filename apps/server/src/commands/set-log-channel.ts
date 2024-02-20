@@ -1,7 +1,7 @@
+import { Database } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import { PermissionFlagsBits } from 'discord.js';
 
-import { Database } from '../utils/database.js';
 import { Validators } from '../utils/validators.js';
 
 export class SetLogChannelCommand extends Command {
@@ -36,7 +36,7 @@ export class SetLogChannelCommand extends Command {
     // Get log channel
     const channel = options.getChannel('channel', true);
     const logChannelResult = await Validators.isValidLogChannel(guild, channel.id);
-    if (logChannelResult.success === false) {
+    if (!logChannelResult.success) {
       return await interaction.editReply({
         content: logChannelResult.error,
       });

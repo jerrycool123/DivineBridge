@@ -20,7 +20,6 @@
     "googleapis": "^132.0.0",
     "jose": "^5.2.2",
     "mongoose": "^8.1.1",
-    "p-queue": "^8.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {

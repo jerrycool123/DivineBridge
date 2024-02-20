@@ -16,10 +16,11 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@8.15.2",
+  "packageManager": "pnpm@8.15.3",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter web --filter @divine-bridge/common",
     "format": "turbo run format",
     "lint": "turbo run lint",
     "preinstall": "npx only-allow pnpm",

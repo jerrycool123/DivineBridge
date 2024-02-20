@@ -2,12 +2,15 @@
   "name": "@divine-bridge/common",
   "version": "0.0.1",
   "dependencies": {
-    "@types/express": "^4.17.21",
-    "express": "^4.18.2",
+    "@discordjs/builders": "^1.7.0",
+    "@discordjs/rest": "^2.2.0",
+    "dayjs": "^1.11.10",
+    "discord-api-types": "^0.37.69",
     "gaxios": "^6.2.0",
     "google-auth-library": "^9.6.3",
     "googleapis": "^132.0.0",
     "mongoose": "^8.1.1",
+    "p-queue": "^8.0.1",
     "tsup": "^8.0.1",
     "zod": "^3.22.4"
   },

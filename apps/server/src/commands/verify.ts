@@ -1,5 +1,8 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import {
+  ActionRows,
+  Database,
+  Embeds,
   MembershipCollection,
   MembershipRoleCollection,
   MembershipRoleDoc,
@@ -8,11 +11,8 @@ import {
 import { Command } from '@sapphire/framework';
 import { Attachment, Guild, RepliableInteraction } from 'discord.js';
 
-import { ActionRows } from '../components/action-rows.js';
-import { Embeds } from '../components/embeds.js';
 import { OCRConstants } from '../services/ocr/constants.js';
 import { OCRService } from '../services/ocr/index.js';
-import { Database } from '../utils/database.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
@@ -87,9 +87,11 @@ export class VerifyCommand extends Command {
     const focusedOption = interaction.options.getFocused(true);
     if (focusedOption.name === 'membership_role') {
       const keyword = focusedOption.value.toLocaleLowerCase();
-      const membershipRoleDocs = await MembershipRoleCollection.find({ guild: guild.id }).populate<{
-        youtube: YouTubeChannelDoc | null;
-      }>('youtube');
+      const membershipRoleDocs = await MembershipRoleCollection.find({ guild: guild.id })
+        .limit(25)
+        .populate<{
+          youtube: YouTubeChannelDoc | null;
+        }>('youtube');
       const filteredMembershipRoleDocs = membershipRoleDocs.filter(
         (
           membershipRoleDoc,
@@ -239,7 +241,7 @@ export class VerifyCommand extends Command {
 
     // Send response to user
     const screenshotSubmission = Embeds.screenshotSubmission(
-      user,
+      Utils.convertUser(user),
       membershipRoleDoc,
       selectedLanguage.name,
       guild.name,
@@ -259,7 +261,7 @@ export class VerifyCommand extends Command {
 
       const adminActionRow = ActionRows.adminVerificationButton();
       const membershipVerificationRequestEmbed = Embeds.membershipVerificationRequest(
-        user,
+        Utils.convertUser(user),
         recognizedDate,
         membershipRoleDoc._id,
         selectedLanguage.name,

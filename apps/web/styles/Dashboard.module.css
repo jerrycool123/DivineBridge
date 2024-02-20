@@ -23,10 +23,14 @@
 
 .cardHeader {
   min-width: 0;
+}
+
+.guildButton {
+  min-width: 0;
   color: rgb(255, 183, 74);
 }
 
-.cardHeader:hover {
+.guildButton:hover {
   filter: brightness(1.1);
 }
 

@@ -1,14 +1,11 @@
-import { MembershipCollection } from '@divine-bridge/common';
+import { AppEventLogService, MembershipCollection, MembershipService } from '@divine-bridge/common';
 import { Command } from '@sapphire/framework';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import utc from 'dayjs/plugin/utc.js';
 import { PermissionFlagsBits } from 'discord.js';
 
-import { Embeds } from '../components/embeds.js';
-import { MembershipService } from '../services/membership.js';
-import { Database } from '../utils/database.js';
-import { Fetchers } from '../utils/fetchers.js';
+import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
@@ -52,42 +49,30 @@ export class DeleteMemberCommand extends Command {
 
     await interaction.deferReply({ ephemeral: true });
 
-    // Get guild owner and log channel
-    const [guildOwner, logChannelResult] = await Promise.all([
-      Fetchers.fetchGuildOwner(guild),
+    // Get log channel and membership role, and check if the role is manageable
+    const role = options.getRole('role', true);
+    const [logChannelResult, membershipRoleResult, manageableResult] = await Promise.all([
       Validators.isGuildHasLogChannel(guild),
+      Validators.isGuildHasMembershipRole(guild.id, role.id),
+      Validators.isManageableRole(guild, role.id),
     ]);
-    if (guildOwner === null) {
-      return await interaction.editReply({
-        content: 'Failed to fetch the guild owner.',
-      });
-    } else if (!logChannelResult.success) {
+    if (!logChannelResult.success) {
       return await interaction.editReply({
         content: logChannelResult.error,
       });
-    }
-    const logChannel = logChannelResult.data;
-
-    // Get membership role
-    const role = options.getRole('role', true);
-    const [membershipRoleResult] = await Promise.all([
-      Validators.isGuildHasMembershipRole(guild.id, role.id),
-      Database.updateMembershipRole({
-        id: role.id,
-        name: role.name,
-        color: role.color,
-      }),
-    ]);
-    if (!membershipRoleResult.success) {
+    } else if (!membershipRoleResult.success) {
       return await interaction.editReply({
         content: membershipRoleResult.error,
+      });
+    } else if (!manageableResult.success) {
+      return await interaction.editReply({
+        content: manageableResult.error,
       });
     }
     const membershipRoleDoc = membershipRoleResult.data;
 
-    const user = options.getUser('member', true);
-
     // Get the membership
+    const user = options.getUser('member', true);
     const membershipDoc = await MembershipCollection.findOne({
       user: user.id,
       membershipRole: role.id,
@@ -108,21 +93,26 @@ export class DeleteMemberCommand extends Command {
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
 
-    // Initialize membership service
+    // Initialize log service and membership service
+    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Remove membership from user
-    const removeMembershipResult = await MembershipService.removeMembership({
-      guild,
+    const removeMembershipResult = await membershipService.remove({
+      guildId: guild.id,
       membershipRoleDoc,
       membershipDoc,
       removeReason: 'it has been manually removed from the server by a moderator',
+      manual: true,
+      userPayload: Utils.convertUser(user),
+      moderatorId: moderator.id,
     });
     if (!removeMembershipResult.success) {
       return await confirmedInteraction.editReply({
         content: removeMembershipResult.error,
       });
     }
-    const { notified, roleRemoved } = removeMembershipResult;
+    const { roleRemoved } = removeMembershipResult;
 
     // Check if the role is successfully removed
     if (!roleRemoved) {
@@ -130,23 +120,6 @@ export class DeleteMemberCommand extends Command {
         Utils.getRoleRemoveErrorPayload(membershipRoleDoc, user.id),
       );
     }
-
-    // Send removal log
-    const manualMembershipRemovalEmbed = Embeds.manualMembershipRemoval(
-      user,
-      role.id,
-      moderator.id,
-    );
-    await Utils.sendEventLog({
-      guildOwner,
-      logChannel,
-      payload: {
-        content: notified
-          ? ''
-          : "**[NOTE]** Due to the user's __Privacy Settings__ of this server, **I cannot send DM to notify them.**\nYou might need to notify them yourself.",
-        embeds: [manualMembershipRemovalEmbed],
-      },
-    });
 
     await confirmedInteraction.editReply({
       content: `Successfully removed the membership role <@&${role.id}> from <@${user.id}>.`,

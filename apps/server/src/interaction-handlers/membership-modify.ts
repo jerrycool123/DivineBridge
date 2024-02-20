@@ -1,3 +1,4 @@
+import { Modals } from '@divine-bridge/common';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -8,9 +9,8 @@ import {
   ModalSubmitInteraction,
 } from 'discord.js';
 
-import { Embeds } from '../components/embeds.js';
-import { Modals } from '../components/modals.js';
 import { Constants } from '../constants.js';
+import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
 dayjs.extend(utc);
@@ -50,7 +50,7 @@ export class MembershipModifyButtonHandler extends InteractionHandler {
         content: 'Failed to parse the request embed.',
       });
     }
-    const parsedResult = await Embeds.parseMembershipVerificationRequestEmbed(interaction);
+    const parsedResult = await Utils.parseMembershipVerificationRequestEmbed(interaction);
     if (!parsedResult.success) {
       return await interaction.followUp({
         content: parsedResult.error,
@@ -123,6 +123,11 @@ export class MembershipModifyButtonHandler extends InteractionHandler {
     // Modify the embed
     await interaction.message.edit({
       embeds: [EmbedBuilder.from(embed.data).setFields(fields).setColor('#FEE75C')],
+    });
+
+    await modalSubmitInteraction.followUp({
+      content: `The recognized date has been modified to \`${newEndDate.format('YYYY-MM-DD')}\`.`,
+      ephemeral: true,
     });
   }
 }
