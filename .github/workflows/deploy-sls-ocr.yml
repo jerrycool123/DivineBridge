@@ -1,10 +1,9 @@
 name: Deploy sls-ocr to AWS Lambda
 
 on:
-  workflow_run:
-    workflows: ['Run tests']
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:

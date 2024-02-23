@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -28,7 +28,7 @@ jobs:
         run: pnpm install
 
       - name: Load test environment variables
-        run: echo "${{ secrets.OCR_SERVICE_TEST_ENV }}" | base64 --decode >> ./packages/ocr-service/.env.test
+        run: echo "${{ secrets.OCR_SERVICE_TEST_ENV }}" | base64 --decode >> ./packages/ocr-service/.env.test.local
 
       - name: Run tests
         run: pnpm run test
