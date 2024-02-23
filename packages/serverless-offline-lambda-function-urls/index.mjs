@@ -1,0 +1,124 @@
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { cwd } from 'node:process';
+
+export default class ServerlessOfflineLambdaFunctionUrls {
+  #http;
+
+  constructor(serverless) {
+    const configuration = serverless.config.serverless.configurationInput;
+    this.serverless = serverless;
+    this.configuration = configuration;
+    this.hooks = {
+      'offline:start:init': () => this.init(),
+      'offline:functionsUpdated:cleanup': () => {
+        this.cleanup();
+        this.init();
+      },
+    };
+  }
+  getLambdas(functions) {
+    return Object.entries(functions).reduce(
+      (lambdas, [functionKey, functionDefinition]) => [
+        ...lambdas,
+        {
+          functionKey,
+          functionDefinition: {
+            ...functionDefinition,
+            handler: this.getTranspiledHandlerFilepath(functionDefinition.handler),
+          },
+        },
+      ],
+      [],
+    );
+  }
+  filterNonUrlEnabledFunctions(configuration) {
+    return Object.entries(configuration.functions).reduce(
+      (functions, [functionKey, functionDefinition]) => {
+        if (!functionDefinition.url) {
+          return functions;
+        }
+        return { ...functions, [functionKey]: functionDefinition };
+      },
+      {},
+    );
+  }
+  getEvents(functions) {
+    const stage = this.getStage();
+    const verbs = this.configuration?.custom?.['serverless-offline']
+      ?.urlLambdaFunctionsHttpVerbs ?? ['GET', 'POST'];
+    return Object.entries(functions).reduce((events, [functionKey, { handler }]) => {
+      const path = `/${stage}/${encodeURIComponent(functionKey)}`;
+      return events.concat(
+        verbs.map((verb) => ({
+          functionKey,
+          handler,
+          http: {
+            routeKey: `${verb} ${path}`,
+            payload: '2.0',
+            isHttpApi: true,
+            path,
+            method: verb,
+          },
+        })),
+      );
+    }, []);
+  }
+  getStage() {
+    return this.serverless.variables.options?.stage ?? this.configuration.provider?.stage;
+  }
+  mergeServerlessOfflineOptions(options) {
+    const stage = this.getStage();
+    const serverlessOfflineOptions = this.configuration?.custom?.['serverless-offline'] ?? {};
+    return {
+      ...serverlessOfflineOptions,
+      stage,
+      host: serverlessOfflineOptions['host'] ?? '127.0.0.1',
+      httpPort: serverlessOfflineOptions['urlLambdaFunctionsHttpPort'] ?? 3003,
+      ...options,
+    };
+  }
+  getTranspiledHandlerFilepath(handler) {
+    const webpackDir = existsSync(this.getFullPath('.webpack'));
+    if (webpackDir) {
+      return join('.webpack', 'service', handler);
+    }
+    const esbuildDir = existsSync(this.getFullPath('.esbuild'));
+    if (esbuildDir) {
+      return join('.esbuild', '.build', handler);
+    }
+
+    return handler;
+  }
+  getFullPath(...args) {
+    return resolve(cwd(), ...args);
+  }
+  async init() {
+    const { default: Lambda } = await import(
+      this.getFullPath('node_modules', 'serverless-offline', 'src', 'lambda', 'Lambda.js')
+    );
+    const { default: Http } = await import(
+      this.getFullPath('node_modules', 'serverless-offline', 'src', 'events', 'http', 'Http.js')
+    );
+    const functions = this.filterNonUrlEnabledFunctions(this.configuration);
+
+    const lambda = new Lambda(
+      this.serverless,
+      this.mergeServerlessOfflineOptions({ noTimeout: true }),
+    );
+    lambda.create(this.getLambdas(functions));
+
+    this.#http = new Http(this.serverless, this.mergeServerlessOfflineOptions(), lambda);
+
+    await this.#http.createServer();
+
+    this.#http.create(this.getEvents(functions));
+    this.#http.createResourceRoutes();
+    this.#http.create404Route();
+
+    await this.#http.start();
+  }
+  cleanup() {
+    this.#http?.stop();
+  }
+}

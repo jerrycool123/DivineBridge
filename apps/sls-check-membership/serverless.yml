@@ -17,6 +17,8 @@ functions:
 plugins:
   - serverless-esbuild
   - serverless-dotenv-plugin
+  - '@divine-bridge/serverless-offline-lambda-function-urls'
+  - serverless-offline
 
 custom:
   esbuild:
@@ -24,3 +26,8 @@ custom:
     minify: false
     format: cjs
     outputFileExtension: .cjs
+  serverless-offline:
+    lambdaPort: 3011
+    urlLambdaFunctionsHttpPort: 5011
+    urlLambdaFunctionsHttpVerbs:
+      - POST

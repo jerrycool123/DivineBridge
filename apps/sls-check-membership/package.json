@@ -4,11 +4,13 @@
   "dependencies": {
     "@discordjs/rest": "^2.2.0",
     "@divine-bridge/common": "workspace:^",
+    "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
     "dayjs": "^1.11.10",
     "discord-api-types": "^0.37.69",
     "discord.js": "^14.14.1",
     "esbuild": "^0.20.0",
     "mongoose": "^8.1.1",
+    "serverless-offline": "^13.3.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -25,9 +27,9 @@
   },
   "main": "index.js",
   "scripts": {
+    "build": "#noop",
     "deploy": "serverless deploy --stage production",
-    "dev:auth": "serverless invoke local --function check-auth-membership --path invoke-local.json",
-    "dev:screenshot": "serverless invoke local --function check-screenshot-membership --path invoke-local.json",
+    "dev": "serverless offline start --verbose",
     "package": "serverless package --stage production"
   },
   "type": "module"

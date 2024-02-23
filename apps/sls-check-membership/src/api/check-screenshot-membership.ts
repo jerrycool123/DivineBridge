@@ -12,21 +12,22 @@ import utc from 'dayjs/plugin/utc.js';
 
 import { checkAuth } from '../utils/auth.js';
 import { discordBotApi } from '../utils/discord.js';
-import { Logger } from '../utils/logger.js';
+import { checkScreenshotMembershipLogger as logger } from '../utils/logger.js';
 import { dbConnect } from '../utils/mongoose.js';
+import { sleep } from '../utils/sleep.js';
 
 dayjs.extend(utc);
 
 export const checkScreenshotMembership = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  Logger.awsEventLog(event);
+  logger.debug(event);
   if (!checkAuth(event)) {
     return { statusCode: 403 };
   }
 
-  await Logger.sysLog(`Start checking screenshot membership.`, 'check-screenshot-membership');
-  await dbConnect();
+  logger.info(`Start checking screenshot membership.`);
+  await dbConnect(logger);
   let removalCount = 0,
     removalFailCount = 0;
 
@@ -50,15 +51,12 @@ export const checkScreenshotMembership = async (
   for (const [membershipRoleId, membershipDocGroup] of Object.entries(membershipDocRecord)) {
     if (membershipDocGroup.length === 0) continue;
 
-    console.log(`Checking membership role <@&${membershipRoleId}>...`);
+    logger.debug(`Checking membership role <@&${membershipRoleId}>...`);
 
     // Get membership role from DB
     const membershipRoleDoc = await MembershipRoleCollection.findById(membershipRoleId);
     if (membershipRoleDoc === null) {
-      await Logger.sysLog(
-        `Failed to find membership role <@&${membershipRoleId}> in the database.`,
-        'check-screenshot-membership',
-      );
+      logger.error(`Failed to find membership role <@&${membershipRoleId}> in the database.`);
       continue;
     }
     const membershipRoleName = membershipRoleDoc.profile.name;
@@ -67,16 +65,15 @@ export const checkScreenshotMembership = async (
     const guildId = membershipRoleDoc.guild;
     const guildDoc = await GuildCollection.findById(guildId);
     if (guildDoc === null) {
-      await Logger.sysLog(
+      logger.error(
         `Failed to find the server ${guildId} which the role <@&${membershipRoleId}> belongs to in the database.`,
-        'check-screenshot-membership',
       );
       continue;
     }
     const guildName = guildDoc.profile.name;
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(discordBotApi, guildId).init();
+    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guildId).init();
     const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Check membership
@@ -97,7 +94,9 @@ export const checkScreenshotMembership = async (
           });
         } catch (error) {
           // We cannot DM the user, so we just ignore it
-          console.error(error);
+          logger.debug(
+            `Failed to send DM to <@${userId}> for membership role <@&${membershipRoleId}>.`,
+          );
         }
       } else if (endDate.isBefore(currentDate, 'date')) {
         // When the end date is before today, we remove the user's membership
@@ -132,11 +131,13 @@ export const checkScreenshotMembership = async (
     }
   }
 
-  await Logger.sysLog(
+  logger.info(
     `Finished checking screenshot membership.\n` +
       `Removed ${removalCount} memberships (${removalFailCount} failed).`,
-    'check-screenshot-membership',
   );
+
+  // ? Wait for 1 second to ensure the log is sent
+  await sleep(1);
   return {
     statusCode: 200,
     body: JSON.stringify({ removalCount, removalFailCount }),

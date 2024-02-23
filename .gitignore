@@ -8,6 +8,10 @@ node_modules/
 .env.production
 .env.bak
 .env.*.local
+.env.test
 .serverless/
 .aws.env
 .DS_Store
+
+# vercel
+.vercel

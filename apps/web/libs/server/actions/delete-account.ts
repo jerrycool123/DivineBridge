@@ -14,6 +14,7 @@ import type { DeleteAccountActionData } from '../../../types/server-actions';
 import { cryptoUtils } from '../crypto';
 import { discordBotApi } from '../discord';
 import { googleOAuth } from '../google';
+import { logger } from '../logger';
 
 const deleteAccountActionInputSchema = z.object({});
 
@@ -23,8 +24,9 @@ export const deleteAccountAction = authAction<
 >(deleteAccountActionInputSchema, async (_input, { userDoc }) => {
   // Revoke YouTube refresh token if user has connected their YouTube account
   if (userDoc.youtube !== null) {
-    const refreshToken = cryptoUtils.decrypt(userDoc.youtube.refreshToken);
-    if (refreshToken !== null) {
+    const decryptResult = cryptoUtils.decrypt(userDoc.youtube.refreshToken);
+    if (decryptResult.success) {
+      const { plain: refreshToken } = decryptResult;
       // Revoke YouTube refresh token
       // ? We don't do error handling here and proceed to remove the membership
       await googleOAuth.revokeRefreshToken(refreshToken);
@@ -86,7 +88,7 @@ export const deleteAccountAction = authAction<
     if (membershipDocGroup.length === 0) continue;
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(discordBotApi, guildId).init();
+    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guildId).init();
     const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Remove membership

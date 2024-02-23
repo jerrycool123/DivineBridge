@@ -1,8 +1,9 @@
-import { OCRTypes } from '../types.js';
+import type { RecognizedDate } from '../definitions.js';
+import { BillingDateParser } from '../definitions.js';
 
-export class DeuBillingDateParser implements OCRTypes.BillingDateParser {
-  constructor(public readonly language: 'deu') {}
-  parse(lines: string[]): OCRTypes.RecognizedDate {
+export class DeuBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'deu') {}
+  parse(lines: string[]): RecognizedDate {
     const regex = /NächstesAbrechnungsdatum:(\d{1,2})\.(\d{1,2})\.(\d{4})/;
     for (const line of lines) {
       const match = line.match(regex);
@@ -11,6 +12,6 @@ export class DeuBillingDateParser implements OCRTypes.BillingDateParser {
         return { year, month, day };
       }
     }
-    return OCRTypes.BillingDateParser.emptyDate;
+    return BillingDateParser.emptyDate;
   }
 }

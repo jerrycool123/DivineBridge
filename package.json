@@ -5,7 +5,7 @@
     "husky": "^9.0.10",
     "lint-staged": "^15.2.1",
     "syncpack": "^12.3.0",
-    "turbo": "^1.12.3"
+    "turbo": "^1.12.4"
   },
   "license": "MIT",
   "lint-staged": {
@@ -19,13 +19,17 @@
   "packageManager": "pnpm@8.15.3",
   "scripts": {
     "build": "turbo run build",
+    "deploy": "vercel --prod deploy",
+    "deploy:sls-check-membership": "turbo run deploy --filter sls-check-membership",
+    "deploy:sls-ocr": "turbo run deploy --filter sls-ocr",
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter web --filter @divine-bridge/common",
     "format": "turbo run format",
     "lint": "turbo run lint",
     "preinstall": "npx only-allow pnpm",
     "prepare": "npx husky",
-    "start": "turbo run start"
+    "start": "turbo run start",
+    "test": "turbo run test"
   },
   "syncpack": {
     "dependencyTypes": [

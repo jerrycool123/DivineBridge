@@ -6,10 +6,9 @@ provider:
 
 functions:
   ocr:
-    handler: src/index.handler
+    handler: src/index.ocr
     timeout: 900
-    events:
-      - httpApi: '*'
+    url: true
 
 package:
   include:
@@ -28,17 +27,19 @@ package:
     - node_modules/webidl-conversions/**
 
 plugins:
-  - serverless-esbuild
   - serverless-dotenv-plugin
+  - serverless-esbuild
+  - '@divine-bridge/serverless-offline-lambda-function-urls'
   - serverless-offline
 
 custom:
-  serverless-offline:
-    host: 0.0.0.0
-    lambdaPort: 3010
-    httpPort: 5010
   esbuild:
     bundle: true
     minify: false
     format: cjs
     outputFileExtension: .cjs
+  serverless-offline:
+    lambdaPort: 3010
+    urlLambdaFunctionsHttpPort: 5010
+    urlLambdaFunctionsHttpVerbs:
+      - POST

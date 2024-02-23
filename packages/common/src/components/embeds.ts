@@ -1,4 +1,5 @@
 import { EmbedBuilder } from '@discordjs/builders';
+import type { RecognizedDate } from '@divine-bridge/ocr-service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 
@@ -7,7 +8,6 @@ import { MembershipRoleDoc } from '../models/membership-role.js';
 import { MembershipDoc } from '../models/membership.js';
 import { YouTubeChannelDoc } from '../models/youtube-channel.js';
 import { UserPayload } from '../types/common.js';
-import { RecognizedDate } from '../types/common.js';
 import { CommonUtils } from '../utils/common.js';
 import { DiscordUtils } from '../utils/discord.js';
 

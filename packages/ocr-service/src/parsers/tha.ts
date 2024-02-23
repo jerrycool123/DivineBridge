@@ -1,8 +1,9 @@
-import { OCRTypes } from '../types.js';
+import type { RecognizedDate } from '../definitions.js';
+import { BillingDateParser } from '../definitions.js';
 
-export class ThaBillingDateParser implements OCRTypes.BillingDateParser {
-  constructor(public readonly language: 'tha') {}
-  parse(lines: string[]): OCRTypes.RecognizedDate {
+export class ThaBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'tha') {}
+  parse(lines: string[]): RecognizedDate {
     const regex =
       /เรียกเก็บเงินครั้งถัดไปในวันที่(\d{1,2})(ม.ค.|ก.พ.|มี.ค.|เม.ย.|พ.ค.|มิ.ย.|ก.ค.|ส.ค.|ก.ย.|ต.ค.|พ.ย.|ธ.ค.)(\d{4})/;
     for (const line of lines) {
@@ -28,6 +29,6 @@ export class ThaBillingDateParser implements OCRTypes.BillingDateParser {
         return { year, month, day };
       }
     }
-    return OCRTypes.BillingDateParser.emptyDate;
+    return BillingDateParser.emptyDate;
   }
 }

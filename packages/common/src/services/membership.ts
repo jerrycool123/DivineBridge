@@ -160,17 +160,11 @@ export class MembershipService {
     );
 
     // If the role is not removed, we stop when it's a manual removal
-    if (!roleRemoved) {
-      if (manual) {
-        return {
-          success: false,
-          error: 'Failed to remove the role from the member.',
-        };
-      } else {
-        console.error(
-          `Failed to remove role <@&${membershipRoleId}> from user <@${userId}> in guild ${guildId}.`,
-        );
-      }
+    if (!roleRemoved && manual) {
+      return {
+        success: false,
+        error: 'Failed to remove the role from the member.',
+      };
     }
 
     // Remove membership record in DB

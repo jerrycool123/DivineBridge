@@ -13,5 +13,6 @@ export const Env = z
     OCR_API_ENDPOINT: z.string(),
     OCR_API_KEY: z.string(),
     DATA_ENCRYPTION_KEY: z.string(),
+    LOGGER_URI: z.string(),
   })
   .parse(process.env);

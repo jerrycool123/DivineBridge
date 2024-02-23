@@ -2,7 +2,10 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "dev": {
-      "dependsOn": ["@divine-bridge/common#build"],
+      "dependsOn": [
+        "@divine-bridge/ocr-service#build",
+        "@divine-bridge/common#build"
+      ],
       "dotEnv": [".env.development.local", ".env"],
       "cache": false
     },
@@ -11,10 +14,18 @@
       "outputs": [".next/**", "build/**", "dist/**"],
       "dotEnv": [".env.production.local", ".env"]
     },
+    "deploy": {
+      "dependsOn": ["^build"],
+      "dotEnv": [".env.production.local", ".env"]
+    },
     "start": {
       "dependsOn": ["^build"]
     },
     "lint": {},
-    "format": {}
+    "format": {},
+    "test": {
+      "dependsOn": ["^build"],
+      "dotEnv": [".env.test"]
+    }
   }
 }

@@ -1,7 +1,6 @@
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
 import Modal from 'antd/es/modal/Modal';
 import Spin from 'antd/es/spin';
-import axios from 'axios';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { DiscordLoginButton } from 'react-social-login-buttons';
@@ -9,9 +8,9 @@ import { DiscordLoginButton } from 'react-social-login-buttons';
 import styles from './ApplyModal.module.css';
 
 import { MainContext } from '../../contexts/MainContext';
+import { useErrorHandler } from '../../hooks/error-handler';
 import useYouTubeAuthorize from '../../hooks/youtube';
 import { requiredAction } from '../../libs/common/action';
-import { errorDataSchema } from '../../libs/common/error';
 import { verifyAuthMembershipAction } from '../../libs/server/actions/verify-auth-membership';
 import { GetGuildsActionData } from '../../types/server-actions';
 import GoogleOAuthButton from '../Buttons/GoogleOAuthButton';
@@ -33,6 +32,8 @@ export default function ApplyModal({
 
   const [linkingAccount, setLinkingAccount] = useState(false);
   const [verifyingMembership, setVerifyingMembership] = useState(false);
+
+  const errorHandler = useErrorHandler();
 
   const authorize = useYouTubeAuthorize({
     setLinkingAccount,
@@ -166,43 +167,13 @@ export default function ApplyModal({
                             key: 'verify-membership',
                             type: 'success',
                             content: 'Successfully verified your membership',
+                            duration: 3,
                           });
                           setIsModalOpen(false);
                         } catch (error) {
-                          console.error(error);
-                          if (axios.isAxiosError(error) && error.response !== undefined) {
-                            const parsedData = errorDataSchema.safeParse(error.response.data);
-                            if (parsedData.success) {
-                              const { message } = parsedData.data;
-                              void messageApi.open({
-                                key: 'verify-membership',
-                                type: 'error',
-                                content: `[${error.response.status}]: ${message}`,
-                              });
-                            } else {
-                              void messageApi.open({
-                                key: 'verify-membership',
-                                type: 'error',
-                                content: `[${error.response.status}]: ${error.response.statusText}}`,
-                              });
-                            }
-                          } else if (error instanceof Error) {
-                            void messageApi.open({
-                              key: 'verify-membership',
-                              type: 'error',
-                              content: `[${error.name}]: ${error.message}`,
-                            });
-                          } else {
-                            void messageApi.open({
-                              key: 'verify-membership',
-                              type: 'error',
-                              content: 'An unknown error has occurred',
-                            });
-                          }
+                          messageApi.destroy('verify-membership');
+                          errorHandler(error);
                         } finally {
-                          setTimeout(() => {
-                            messageApi.destroy('verify-membership');
-                          }, 3000);
                           setVerifyingMembership(false);
                         }
                       }}

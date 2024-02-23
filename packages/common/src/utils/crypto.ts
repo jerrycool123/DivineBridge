@@ -11,21 +11,27 @@ export class CryptoUtils {
     this.key = Buffer.from(b64key, 'base64');
   }
 
-  public encrypt(plain: string): string | null {
+  public encrypt(
+    plain: string,
+  ): { success: true; cipher: string } | { success: false; error: unknown } {
     try {
       const iv = crypto.randomBytes(this.keyBytes); // (this.keyBytes * 8)-bit IV
       const cipher = crypto.createCipheriv(this.algorithm, this.key, iv);
       let encrypted = cipher.update(plain, 'utf8', 'base64');
       encrypted += cipher.final('base64');
-      return Buffer.concat([iv, Buffer.from(encrypted, 'base64')]).toString('base64');
+      return {
+        success: true,
+        cipher: Buffer.concat([iv, Buffer.from(encrypted, 'base64')]).toString('base64'),
+      };
     } catch (error) {
       // Failed to encrypt
-      console.error(error);
+      return { success: false, error };
     }
-    return null;
   }
 
-  public decrypt(b64cipher: string): string | null {
+  public decrypt(
+    b64cipher: string,
+  ): { success: true; plain: string } | { success: false; error: unknown } {
     try {
       const cipher = Buffer.from(b64cipher, 'base64');
       const iv = cipher.subarray(0, this.keyBytes);
@@ -34,11 +40,10 @@ export class CryptoUtils {
       let decrypted = decipher.update(encrypted, 'base64', 'utf8');
       decrypted += decipher.final('utf8');
 
-      return decrypted;
+      return { success: true, plain: decrypted };
     } catch (error) {
       // Failed to decrypt
-      console.error(error);
+      return { success: false, error };
     }
-    return null;
   }
 }

@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-const envSchema = z.object({
-  NODE_ENV: z.string(),
-  API_TOKEN: z.string(),
-});
-
-export const Env = envSchema.parse(process.env);
+export const Env = z
+  .object({
+    NODE_ENV: z.string(),
+    API_TOKEN: z.string(),
+    LOGGER_URI: z.string(),
+  })
+  .parse(process.env);

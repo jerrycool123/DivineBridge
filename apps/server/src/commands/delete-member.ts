@@ -7,6 +7,7 @@ import { PermissionFlagsBits } from 'discord.js';
 
 import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
+import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
 
 dayjs.extend(utc);
@@ -94,7 +95,7 @@ export class DeleteMemberCommand extends Command {
     await confirmedInteraction.deferReply({ ephemeral: true });
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guild.id).init();
     const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Remove membership from user

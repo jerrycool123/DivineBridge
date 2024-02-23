@@ -2,13 +2,15 @@ import { RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v10';
 
 import { GuildCollection } from '../models/guild.js';
 import { DiscordBotAPI } from './discord-bot-api.js';
+import type { Logger } from './system-log.js';
 
 export class AppEventLogService {
-  private guildName: string;
   public guildOwnerId: string | null = null;
   public logChannelId: string | null = null;
+  private guildName: string;
 
   constructor(
+    private readonly logger: Logger,
     private readonly discordBotApi: DiscordBotAPI,
     private readonly guildId: string,
   ) {
@@ -60,7 +62,7 @@ export class AppEventLogService {
       }
     }
 
-    console.error(
+    this.logger.error(
       `Failed to send event log to the log channel or DM the guild owner in guild ${this.guildId}.`,
     );
     return false;

@@ -1,8 +1,9 @@
-import { OCRTypes } from '../types.js';
+import type { RecognizedDate } from '../definitions.js';
+import { BillingDateParser } from '../definitions.js';
 
-export class FilBillingDateParser implements OCRTypes.BillingDateParser {
-  constructor(public readonly language: 'fil') {}
-  parse(lines: string[]): OCRTypes.RecognizedDate {
+export class FilBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'fil') {}
+  parse(lines: string[]): RecognizedDate {
     const regex =
       /Susunodnapetsangpagsingil:(Ene|Peb|Mar|Abr|Mayo|Hun|Hul|Ago|Set|Okt|Nob|Dis)(\d{1,2}),(\d{4})/;
     for (const line of lines) {
@@ -28,6 +29,6 @@ export class FilBillingDateParser implements OCRTypes.BillingDateParser {
         return { year, month, day };
       }
     }
-    return OCRTypes.BillingDateParser.emptyDate;
+    return BillingDateParser.emptyDate;
   }
 }

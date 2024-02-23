@@ -20,6 +20,7 @@ import { getAccessTokenFromCookie } from '../authjs';
 import { cryptoUtils } from '../crypto';
 import { discordBotApi } from '../discord';
 import { googleOAuth } from '../google';
+import { logger } from '../logger';
 
 dayjs.extend(utc);
 
@@ -41,14 +42,19 @@ export const verifyAuthMembershipAction = authAction<
     .populate<{ guild: GuildDoc | null }>('guild')
     .populate<{ youtube: YouTubeChannelDoc | null }>('youtube');
   if (membershipRoleDoc === null) {
-    // return response.status(404).json({ message: 'Membership role not found' });
     throw new Error('Membership role not found');
   } else if (membershipRoleDoc.guild === null) {
+    logger.error(
+      `Cannot retrieve the server that owns the membership role <@&${membershipRoleDoc._id}? from the database.`,
+    );
     throw new Error(
       'Cannot retrieve the server that owns the membership role from the database.\n' +
         'Please contact the bot owner to fix this issue.',
     );
   } else if (membershipRoleDoc.youtube === null) {
+    logger.error(
+      `Cannot retrieve the corresponding YouTube channel of the membership role <@&${membershipRoleDoc._id}> from the database.`,
+    );
     throw new Error(
       'Cannot retrieve the corresponding YouTube channel of the membership role from the database.\n' +
         'Please contact the bot owner to fix this issue.',
@@ -87,16 +93,17 @@ export const verifyAuthMembershipAction = authAction<
   }
 
   // Auth membership check
-  const refreshToken = cryptoUtils.decrypt(userDoc.youtube.refreshToken);
-  if (refreshToken === null) {
-    console.error(`Failed to decrypt YouTube refresh token for user <@${userDoc._id}>`);
+  const decryptResult = cryptoUtils.decrypt(userDoc.youtube.refreshToken);
+  if (!decryptResult.success) {
+    logger.error(`Failed to decrypt YouTube refresh token for user <@${userDoc._id}>`);
     throw new Error('Internal server error. Please contact the bot owner to fix this issue.');
   }
+  const { plain: refreshToken } = decryptResult;
   const randomVideoId =
     membershipRoleDoc.youtube.memberOnlyVideoIds[
       Math.floor(Math.random() * membershipRoleDoc.youtube.memberOnlyVideoIds.length)
     ];
-  const youtubeOAuthApi = new YouTubeOAuthAPI(googleOAuth, refreshToken);
+  const youtubeOAuthApi = new YouTubeOAuthAPI(logger, googleOAuth, refreshToken);
   const verifyResult = await youtubeOAuthApi.verifyMembership(randomVideoId);
   if (!verifyResult.success) {
     if (
@@ -110,11 +117,21 @@ export const verifyAuthMembershipAction = authAction<
       verifyResult.error === 'comment_disabled' ||
       verifyResult.error === 'video_not_found'
     ) {
+      logger.error(
+        `Failed to retrieve the members-only video of the YouTube channel <@&${membershipRoleDoc._id}>.\n` +
+          `Error: ${verifyResult.error}\n` +
+          `Random video ID: ${randomVideoId}`,
+      );
       throw new Error(
         'Failed to retrieve the members-only video of the YouTube channel.\n' +
           'Please try again. If the problem persists, please contact the bot owner.',
       );
     } else if (verifyResult.error === 'unknown_error') {
+      logger.error(
+        `An unknown error occurred when trying to verify the YouTube membership of user <@${userDoc._id}>\n` +
+          `YouTube channel ID: ${membershipRoleDoc.youtube.id}\n` +
+          `Random video ID: ${randomVideoId}`,
+      );
       throw new Error(
         'An unknown error occurred when trying to verify your YouTube membership.\n' +
           'Please try again. If the problem persists, please contact the bot owner.',
@@ -123,7 +140,11 @@ export const verifyAuthMembershipAction = authAction<
   }
 
   // Initialize log service and membership service
-  const appEventLogService = await new AppEventLogService(discordBotApi, guildDoc._id).init();
+  const appEventLogService = await new AppEventLogService(
+    logger,
+    discordBotApi,
+    guildDoc._id,
+  ).init();
   const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
   // Add membership to user

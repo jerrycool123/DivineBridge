@@ -19,8 +19,9 @@ import utc from 'dayjs/plugin/utc.js';
 import { checkAuth } from '../utils/auth.js';
 import { discordBotApi } from '../utils/discord.js';
 import { Env } from '../utils/env.js';
-import { Logger } from '../utils/logger.js';
+import { checkAuthMembershipLogger as logger } from '../utils/logger.js';
 import { dbConnect } from '../utils/mongoose.js';
+import { sleep } from '../utils/sleep.js';
 
 dayjs.extend(utc);
 
@@ -29,13 +30,13 @@ const cryptoUtils = new CryptoUtils(Env.DATA_ENCRYPTION_KEY);
 export const checkAuthMembership = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  Logger.awsEventLog(event);
+  logger.debug(event);
   if (!checkAuth(event)) {
     return { statusCode: 403 };
   }
 
-  await Logger.sysLog(`Start checking auth membership.`, 'check-auth-membership');
-  await dbConnect();
+  logger.info(`Start checking auth membership.`);
+  await dbConnect(logger);
   let removalCount = 0,
     removalFailCount = 0;
 
@@ -66,15 +67,12 @@ export const checkAuthMembership = async (
   for (const [membershipRoleId, membershipDocGroup] of Object.entries(membershipDocRecord)) {
     if (membershipDocGroup.length === 0) continue;
 
-    console.log(`Checking membership role <@&${membershipRoleId}>...`);
+    logger.debug(`Checking membership role <@&${membershipRoleId}>...`);
 
     // Get membership role from DB
     const membershipRoleDoc = await MembershipRoleCollection.findById(membershipRoleId);
     if (membershipRoleDoc === null) {
-      await Logger.sysLog(
-        `Failed to find membership role <@&${membershipRoleId}> in the database.`,
-        'check-auth-membership',
-      );
+      logger.error(`Failed to find membership role <@&${membershipRoleId}> in the database.`);
       continue;
     }
 
@@ -82,9 +80,8 @@ export const checkAuthMembership = async (
     const guildId = membershipRoleDoc.guild;
     const guildDoc = await GuildCollection.findById(guildId);
     if (guildDoc === null) {
-      await Logger.sysLog(
+      logger.error(
         `Failed to find the server ${guildId} which the role <@&${membershipRoleId}> belongs to in the database.`,
-        'check-auth-membership',
       );
       continue;
     }
@@ -93,15 +90,14 @@ export const checkAuthMembership = async (
     const youtubeChannelId = membershipRoleDoc.youtube;
     const youtubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
     if (youtubeChannelDoc === null) {
-      await Logger.sysLog(
+      logger.error(
         `Failed to find the YouTube channel \`${youtubeChannelId}\` which the role <@&${membershipRoleId}> belongs to in the database.`,
-        'check-auth-membership',
       );
       continue;
     }
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(discordBotApi, guildId).init();
+    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guildId).init();
     const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Check membership
@@ -111,13 +107,14 @@ export const checkAuthMembership = async (
       const userDoc = userId in userDocRecord ? userDocRecord[userId] : null;
 
       // Verify the user's membership via Google API
-      const refreshToken =
+      const decryptResult =
         userDoc !== null && userDoc.youtube !== null
           ? cryptoUtils.decrypt(userDoc.youtube.refreshToken)
           : null;
 
       let verifySuccess = false;
-      if (refreshToken !== null) {
+      if (decryptResult !== null && decryptResult.success === true) {
+        const { plain: refreshToken } = decryptResult;
         let retry: number;
         for (retry = 0; retry < 3 && !verifySuccess; retry++) {
           const randomVideoId =
@@ -125,9 +122,9 @@ export const checkAuthMembership = async (
               Math.floor(Math.random() * youtubeChannelDoc.memberOnlyVideoIds.length)
             ];
           const googleOAuth = new GoogleOAuth(Env.GOOGLE_CLIENT_ID, Env.GOOGLE_CLIENT_SECRET);
-          const youtubeOAuthApi = new YouTubeOAuthAPI(googleOAuth, refreshToken);
+          const youtubeOAuthApi = new YouTubeOAuthAPI(logger, googleOAuth, refreshToken);
           const result = await youtubeOAuthApi.verifyMembership(randomVideoId);
-          console.log(randomVideoId, result.success ? 'success' : result.error);
+          logger.debug(randomVideoId, result.success ? 'success' : result.error);
           if (result.success) {
             verifySuccess = true;
           } else if (
@@ -142,17 +139,15 @@ export const checkAuthMembership = async (
           } else {
             // ! Unknown error, currently we let it pass
             verifySuccess = true;
-            await Logger.sysLog(
+            logger.error(
               `An unknown error occurred while verifying the user's membership for the YouTube channel \`${youtubeChannelDoc.profile.title}\` via Google API.`,
-              'check-auth-membership',
             );
           }
         }
         if (retry === 3) {
           // ! Failed more than 3 times, currently we let it pass
-          await Logger.sysLog(
+          logger.error(
             `Failed to verify the user's membership for the YouTube channel \`${youtubeChannelDoc.profile.title}\` via Google API after retry 3 times.`,
-            'check-auth-membership',
           );
           continue;
         }
@@ -199,11 +194,13 @@ export const checkAuthMembership = async (
     }
   }
 
-  await Logger.sysLog(
+  logger.info(
     `Finished checking auth membership.\n` +
       `Removed ${removalCount} memberships (${removalFailCount} failed).`,
-    'check-auth-membership',
   );
+
+  // ? Wait for 1 second to ensure the log is sent
+  await sleep(1);
   return {
     statusCode: 200,
     body: JSON.stringify({ removalCount, removalFailCount }),

@@ -7,6 +7,7 @@ import { authAction } from '.';
 import type { ConnectYouTubeActionData } from '../../../types/server-actions';
 import { cryptoUtils } from '../crypto';
 import { googleOAuth } from '../google';
+import { logger } from '../logger';
 
 const connectYouTubeActionInputSchema = z.object({
   code: z.string(),
@@ -24,7 +25,7 @@ export const connectYouTubeAction = authAction<
   const { refreshToken } = result;
 
   // Get channel info from YouTube API
-  const youtubeOAuthApi = new YouTubeOAuthAPI(googleOAuth, refreshToken);
+  const youtubeOAuthApi = new YouTubeOAuthAPI(logger, googleOAuth, refreshToken);
   const channelResult = await youtubeOAuthApi.getSelfChannel();
   if (!channelResult.success) {
     throw new Error(channelResult.error);
@@ -54,10 +55,12 @@ export const connectYouTubeAction = authAction<
   }
 
   // Update user YouTube channel info
-  const encryptedRefreshToken = cryptoUtils.encrypt(refreshToken);
-  if (encryptedRefreshToken === null) {
-    throw new Error('Internal Server Error');
+  const encryptResult = cryptoUtils.encrypt(refreshToken);
+  if (!encryptResult.success) {
+    logger.error(`Failed to encrypt YouTube refresh token for user <@${userDoc._id}>`);
+    throw new Error('Internal Server Error. Please contact the bot owner to fix this issue');
   }
+  const { cipher: encryptedRefreshToken } = encryptResult;
   userDoc.youtube = {
     id: youtubeChannelId,
     title,

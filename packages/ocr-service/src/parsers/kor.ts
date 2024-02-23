@@ -1,8 +1,9 @@
-import { OCRTypes } from '../types.js';
+import type { RecognizedDate } from '../definitions.js';
+import { BillingDateParser } from '../definitions.js';
 
-export class KorBillingDateParser implements OCRTypes.BillingDateParser {
-  constructor(public readonly language: 'kor') {}
-  parse(lines: string[]): OCRTypes.RecognizedDate {
+export class KorBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'kor') {}
+  parse(lines: string[]): RecognizedDate {
     const regex = /다음결제일:(\d{4})\.(\d{1,2})\.(\d{1,2})\./;
     for (const line of lines) {
       const match = line.match(regex);
@@ -11,6 +12,6 @@ export class KorBillingDateParser implements OCRTypes.BillingDateParser {
         return { year, month, day };
       }
     }
-    return OCRTypes.BillingDateParser.emptyDate;
+    return BillingDateParser.emptyDate;
   }
 }

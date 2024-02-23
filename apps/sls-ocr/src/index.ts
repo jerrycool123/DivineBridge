@@ -1,24 +1,19 @@
-import express from 'express';
-import serverless from 'serverless-http';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { createWorker } from 'tesseract.js';
 
-import { authMiddleware } from './middleware.js';
+import { checkAuth } from './utils/auth.js';
+import { logger } from './utils/logger.js';
 import { ocrBodySchema } from './utils/schemas.js';
 
-const app = express();
-app.use(express.json());
+export const ocr = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+  logger.debug(JSON.stringify(event, null, 2));
+  if (!checkAuth(event)) {
+    return { statusCode: 403 };
+  }
 
-app.use((req, _res, next) => {
-  console.log(req.method, req.url);
-  next();
-});
-
-app.use(authMiddleware);
-
-app.post('/api/ocr', async (req, res) => {
-  const parsedBody = ocrBodySchema.safeParse(req.body);
+  const parsedBody = ocrBodySchema.safeParse(JSON.parse(event.body ?? ''));
   if (!parsedBody.success) {
-    return res.status(400).json({ message: parsedBody.error });
+    return { statusCode: 400, body: JSON.stringify({ message: parsedBody.error }) };
   }
   const { image, language } = parsedBody.data;
 
@@ -29,11 +24,5 @@ app.post('/api/ocr', async (req, res) => {
   const ret = await worker.recognize(image);
   await worker.terminate();
 
-  res.status(200).json({ message: ret.data.text });
-});
-
-app.all('*', (_req, res) => {
-  res.status(404).end();
-});
-
-export const handler = serverless(app);
+  return { statusCode: 200, body: JSON.stringify({ message: ret.data.text }) };
+};

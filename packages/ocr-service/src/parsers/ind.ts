@@ -1,10 +1,11 @@
-import { OCRTypes } from '../types.js';
+import type { RecognizedDate } from '../definitions.js';
+import { BillingDateParser } from '../definitions.js';
 
-export class MsaBillingDateParser implements OCRTypes.BillingDateParser {
-  constructor(public readonly language: 'msa') {}
-  parse(lines: string[]): OCRTypes.RecognizedDate {
+export class IndBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'ind') {}
+  parse(lines: string[]): RecognizedDate {
     const regex =
-      /Tarikhpengebilanseterusnya:(\d{1,2})(Jan|Feb|Mac|Apr|Mei|Jun|Jul|Ogos|Sep|Okt|Nov|Dis)(\d{4})/;
+      /Tanggalpenagihanberikutnya:(\d{1,2})(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)(\d{4})/;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {
@@ -12,22 +13,22 @@ export class MsaBillingDateParser implements OCRTypes.BillingDateParser {
         const monthMap: Record<string, number> = {
           Jan: 1,
           Feb: 2,
-          Mac: 3,
+          Mar: 3,
           Apr: 4,
           Mei: 5,
           Jun: 6,
           Jul: 7,
-          Ogos: 8,
+          Agu: 8,
           Sep: 9,
           Okt: 10,
           Nov: 11,
-          Dis: 12,
+          Des: 12,
         };
         const month = monthMap[abbreviatedMonth];
         const [day, , year] = match.slice(1, 4).map((s) => parseInt(s, 10));
         return { year, month, day };
       }
     }
-    return OCRTypes.BillingDateParser.emptyDate;
+    return BillingDateParser.emptyDate;
   }
 }

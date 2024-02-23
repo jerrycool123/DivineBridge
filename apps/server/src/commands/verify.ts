@@ -8,11 +8,11 @@ import {
   MembershipRoleDoc,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
+import { OCRService, supportedOCRLanguages } from '@divine-bridge/ocr-service';
 import { Command } from '@sapphire/framework';
 import { Attachment, Guild, RepliableInteraction } from 'discord.js';
 
-import { OCRConstants } from '../services/ocr/constants.js';
-import { OCRService } from '../services/ocr/index.js';
+import { Env } from '../utils/env.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
@@ -38,8 +38,8 @@ export class VerifyCommand extends Command {
           .setName('language')
           .setDescription('The language of the text in your picture')
           .addChoices(
-            ...OCRConstants.supportedLanguages.map(({ name, code }) => ({
-              name,
+            ...supportedOCRLanguages.map(({ language, code }) => ({
+              name: language,
               value: code,
             })),
           )
@@ -70,8 +70,8 @@ export class VerifyCommand extends Command {
             .setName('language')
             .setDescription('The language of the text in your picture')
             .addChoices(
-              ...OCRConstants.supportedLanguages.map(({ name, code }) => ({
-                name,
+              ...supportedOCRLanguages.map(({ language, code }) => ({
+                name: language,
                 value: code,
               })),
             )
@@ -199,14 +199,14 @@ export class VerifyCommand extends Command {
     const logChannel = logChannelResult.data;
 
     // Get language
-    let selectedLanguage: (typeof OCRConstants.supportedLanguages)[number];
+    let selectedLanguage: (typeof supportedOCRLanguages)[number];
     if (langCode === null) {
-      selectedLanguage = OCRConstants.supportedLanguages.find(
+      selectedLanguage = supportedOCRLanguages.find(
         ({ code }) => code === userDoc.preference.language,
-      ) ?? { name: 'English', code: 'eng' };
+      ) ?? { language: 'English', code: 'eng' };
     } else {
-      selectedLanguage = OCRConstants.supportedLanguages.find(({ code }) => code === langCode) ?? {
-        name: 'English',
+      selectedLanguage = supportedOCRLanguages.find(({ code }) => code === langCode) ?? {
+        language: 'English',
         code: 'eng',
       };
     }
@@ -243,7 +243,7 @@ export class VerifyCommand extends Command {
     const screenshotSubmission = Embeds.screenshotSubmission(
       Utils.convertUser(user),
       membershipRoleDoc,
-      selectedLanguage.name,
+      selectedLanguage.language,
       guild.name,
       picture.url,
     );
@@ -254,17 +254,24 @@ export class VerifyCommand extends Command {
     // Send picture to membership service for OCR
     // ? Do not send error to user if OCR failed due to errors that are not related to the user
     try {
-      const recognizedDate = await OCRService.recognizeBillingDate(
+      const ocrService = new OCRService(Env.OCR_API_ENDPOINT, Env.OCR_API_KEY);
+      const recognizedResult = await ocrService.recognizeBillingDate(
         picture.url,
         selectedLanguage.code,
       );
+      if (!recognizedResult.success) {
+        this.container.logger.error(recognizedResult.error);
+      }
+      const recognizedDate = recognizedResult.success
+        ? recognizedResult.date
+        : { year: null, month: null, day: null };
 
       const adminActionRow = ActionRows.adminVerificationButton();
       const membershipVerificationRequestEmbed = Embeds.membershipVerificationRequest(
         Utils.convertUser(user),
         recognizedDate,
         membershipRoleDoc._id,
-        selectedLanguage.name,
+        selectedLanguage.language,
         picture.url,
       );
 

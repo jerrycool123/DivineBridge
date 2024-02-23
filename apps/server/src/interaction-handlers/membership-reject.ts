@@ -5,6 +5,7 @@ import { type ButtonInteraction, EmbedBuilder, ModalSubmitInteraction } from 'di
 import { Constants } from '../constants.js';
 import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
+import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
 
 export class MembershipRejectButtonHandler extends InteractionHandler {
@@ -90,7 +91,7 @@ export class MembershipRejectButtonHandler extends InteractionHandler {
     const reason = modalSubmitInteraction.fields.getTextInputValue(modalInputCustomId);
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(discordBotApi, guild.id).init();
+    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guild.id).init();
     const membershipService = new MembershipService(discordBotApi, appEventLogService);
 
     // Reject membership to user

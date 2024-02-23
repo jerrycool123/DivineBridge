@@ -46,10 +46,7 @@ export const MainProvider = ({ children }: { children: ReactNode }) => {
       .catch(errorHandler);
     void getGuildsAction({})
       .then(requiredAction)
-      .then(({ data }) => {
-        setGuilds(data);
-        console.log(data);
-      })
+      .then(({ data }) => setGuilds(data))
       .catch(errorHandler);
   }, [errorHandler, messageApi, status]);
 

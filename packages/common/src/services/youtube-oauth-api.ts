@@ -1,13 +1,18 @@
 import { google } from 'googleapis';
 
-import { YouTubeUtils } from '../index.js';
+import { Logger } from '../services/system-log.js';
 import { GoogleUtils } from '../utils/google.js';
+import { YouTubeUtils } from '../utils/youtube.js';
 import { GoogleOAuth } from './google-oauth.js';
 
 export class YouTubeOAuthAPI {
   private readonly googleOAuth: GoogleOAuth;
 
-  constructor(googleOAuth: GoogleOAuth, refreshToken: string) {
+  constructor(
+    private readonly logger: Logger,
+    googleOAuth: GoogleOAuth,
+    refreshToken: string,
+  ) {
     // ? Prevent polluting the original GoogleOAuth instance
     this.googleOAuth = googleOAuth.clone();
     this.googleOAuth.oauth2Client.setCredentials({ refresh_token: refreshToken });
@@ -36,7 +41,6 @@ export class YouTubeOAuthAPI {
       }
       return { success: true, channel: parsedChannel.data };
     } catch (error) {
-      console.error(error);
       const { message } = GoogleUtils.parseError(error);
       return { success: false, error: message };
     }
@@ -77,13 +81,13 @@ export class YouTubeOAuthAPI {
             error: 'forbidden',
           };
         } else if (reason === 'commentsDisabled') {
-          console.error(error);
+          this.logger.debug(error);
           return {
             success: false,
             error: 'comment_disabled',
           };
         } else if (reason === 'videoNotFound') {
-          console.error(error);
+          this.logger.debug(error);
           return {
             success: false,
             error: 'video_not_found',
@@ -107,7 +111,7 @@ export class YouTubeOAuthAPI {
         }
       }
 
-      console.error(error);
+      this.logger.error(error);
       return {
         success: false,
         error: 'unknown_error',

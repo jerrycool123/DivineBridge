@@ -19,23 +19,17 @@ export class Queue {
       }
     | {
         success: false;
+        error: unknown;
       }
   > {
     return await this.queue.add(
       async () => {
         try {
           const value = await cb();
-          return {
-            success: true,
-            value,
-          };
+          return { success: true, value };
         } catch (error) {
-          console.error(`An error occurred while executing a ${this.name} job:`);
-          console.error(error);
+          return { success: false, error };
         }
-        return {
-          success: false,
-        };
       },
       {
         throwOnTimeout: true,

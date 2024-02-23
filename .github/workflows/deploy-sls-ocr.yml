@@ -1,13 +1,17 @@
 name: Deploy sls-ocr to AWS Lambda
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['Run tests']
+    types:
+      - completed
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,4 +36,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
-        run: pnpm -F sls-ocr run deploy
+        run: pnpm run deploy:sls-ocr
