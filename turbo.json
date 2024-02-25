@@ -12,7 +12,8 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "build/**", "dist/**"],
-      "dotEnv": [".env.production.local", ".env"]
+      "dotEnv": [".env.production.local", ".env"],
+      "cache": false
     },
     "deploy": {
       "dependsOn": ["^build"],

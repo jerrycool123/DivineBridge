@@ -13,10 +13,6 @@ functions:
 package:
   include:
     - mongodump
-    - node_modules/pino-abstract-transport/**
-    - node_modules/split2/**
-    - node_modules/readable-stream/**
-    - node_modules/process/**
 
 plugins:
   - serverless-dotenv-plugin
