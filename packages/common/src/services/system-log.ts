@@ -1,8 +1,10 @@
 import { type Logger as L, type LevelWithSilentOrString, pino } from 'pino';
 import build from 'pino-abstract-transport';
+import { build as pretty } from 'pino-pretty';
 import { z } from 'zod';
 
 export type Logger = L;
+export type LogLevel = LevelWithSilentOrString;
 
 /**
  * Log messages to the OpenObserve platform.
@@ -56,7 +58,7 @@ export class SystemLogService {
 
     this.instance = pino(
       { level: defaultLogLevel },
-      pino.multistream([{ stream: process.stdout, level: defaultLogLevel }, this.openObserve()]),
+      pino.multistream([{ stream: pretty({}), level: defaultLogLevel }, this.openObserve()]),
     );
   }
 

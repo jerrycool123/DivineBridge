@@ -1,40 +1,24 @@
 import { ActionRows, AppEventLogService, MembershipService, Modals } from '@divine-bridge/common';
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import { type ButtonInteraction, EmbedBuilder, ModalSubmitInteraction } from 'discord.js';
 
 import { Constants } from '../constants.js';
+import { Button } from '../structures/button.js';
 import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
 
-export class MembershipRejectButtonHandler extends InteractionHandler {
-  public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
-    super(ctx, {
-      ...options,
-      interactionHandlerType: InteractionHandlerTypes.Button,
-    });
+export class MembershipRejectButton extends Button {
+  public readonly customId = Constants.membership.reject;
+  public readonly sameClientOnly = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: Button.Context) {
+    super(context);
   }
 
-  public override parse(interaction: ButtonInteraction) {
-    const { guild } = interaction;
-    if (
-      guild === null ||
-      interaction.message.author.id !== this.container.client.id ||
-      interaction.customId !== Constants.membership.reject
-    ) {
-      return this.none();
-    }
-
-    return this.some({ guild });
-  }
-
-  public async run(
-    interaction: ButtonInteraction,
-    parsedData: InteractionHandler.ParseResult<this>,
-  ) {
+  public async execute(interaction: ButtonInteraction, { guild }: Button.ExecuteContext) {
     const { user: moderator } = interaction;
-    const { guild } = parsedData;
 
     // Create reject modal
     const modalCustomId = `${Constants.membership.reject}-modal-${interaction.id}`;

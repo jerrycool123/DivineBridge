@@ -16,7 +16,8 @@
     },
     "deploy": {
       "dependsOn": ["^build"],
-      "dotEnv": [".env.production.local", ".env"]
+      "dotEnv": [".env.production.local", ".env"],
+      "inputs": ["$TURBO_DEFAULT$", "mongodump"]
     },
     "start": {
       "dependsOn": ["^build"]

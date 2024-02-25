@@ -11,6 +11,8 @@ let ocrService: OCRService;
 
 const TIMEOUT = 30 * 1000;
 
+export interface A {}
+
 beforeAll(() => {
   if (process.env.OCR_API_ENDPOINT === undefined || process.env.OCR_API_KEY === undefined) {
     throw new Error('Please provide OCR_API_ENDPOINT and OCR_API_KEY in .env.test');

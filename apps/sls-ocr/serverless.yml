@@ -25,6 +25,10 @@ package:
     - node_modules/whatwg-url/**
     - node_modules/tr46/**
     - node_modules/webidl-conversions/**
+    - node_modules/pino-abstract-transport/**
+    - node_modules/split2/**
+    - node_modules/readable-stream/**
+    - node_modules/process/**
 
 plugins:
   - serverless-dotenv-plugin
@@ -34,10 +38,7 @@ plugins:
 
 custom:
   esbuild:
-    bundle: true
-    minify: false
-    format: cjs
-    outputFileExtension: .cjs
+    config: esbuild.config.cjs
   serverless-offline:
     lambdaPort: 3010
     urlLambdaFunctionsHttpPort: 5010

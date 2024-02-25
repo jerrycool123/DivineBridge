@@ -23,39 +23,15 @@ importers:
 
   apps/server:
     dependencies:
-      '@discordjs/builders':
-        specifier: ^1.7.0
-        version: 1.7.0
-      '@discordjs/core':
-        specifier: ^1.1.1
-        version: 1.1.1
-      '@discordjs/rest':
-        specifier: ^2.2.0
-        version: 2.2.0
       '@divine-bridge/common':
         specifier: workspace:^
         version: link:../../packages/common
       '@divine-bridge/ocr-service':
         specifier: workspace:^
         version: link:../../packages/ocr-service
-      '@panva/hkdf':
-        specifier: ^1.1.1
-        version: 1.1.1
-      '@sapphire/framework':
-        specifier: ^5.0.7
-        version: 5.0.7
-      '@sapphire/plugin-api':
-        specifier: ^6.1.1
-        version: 6.1.1
-      '@sapphire/plugin-logger':
-        specifier: ^4.0.2
-        version: 4.0.2
       axios:
         specifier: ^1.6.7
         version: 1.6.7
-      cookie:
-        specifier: ^0.6.0
-        version: 0.6.0
       csv-writer:
         specifier: ^1.6.0
         version: 1.6.0
@@ -68,15 +44,6 @@ importers:
       dotenv:
         specifier: ^16.4.1
         version: 16.4.1
-      google-auth-library:
-        specifier: ^9.6.3
-        version: 9.6.3
-      googleapis:
-        specifier: ^132.0.0
-        version: 132.0.0
-      jose:
-        specifier: ^5.2.2
-        version: 5.2.2
       mongoose:
         specifier: ^8.1.1
         version: 8.1.1
@@ -90,9 +57,6 @@ importers:
       '@divine-bridge/prettier-config-custom':
         specifier: workspace:^
         version: link:../../packages/prettier-config-custom
-      '@types/cookie':
-        specifier: ^0.6.0
-        version: 0.6.0
       eslint:
         specifier: ^8.56.0
         version: 8.56.0
@@ -105,6 +69,94 @@ importers:
       tsup:
         specifier: ^8.0.1
         version: 8.0.1(typescript@5.3.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
+  apps/sls-backup:
+    dependencies:
+      '@divine-bridge/common':
+        specifier: workspace:^
+        version: link:../../packages/common
+      '@divine-bridge/ocr-service':
+        specifier: workspace:^
+        version: link:../../packages/ocr-service
+      '@divine-bridge/serverless-offline-lambda-function-urls':
+        specifier: workspace:^
+        version: link:../../packages/serverless-offline-lambda-function-urls
+      adm-zip:
+        specifier: ^0.5.10
+        version: 0.5.10
+      discord.js:
+        specifier: ^14.14.1
+        version: 14.14.1
+      esbuild:
+        specifier: ^0.20.0
+        version: 0.20.0
+      pino-abstract-transport:
+        specifier: ^1.1.0
+        version: 1.1.0
+      process:
+        specifier: ^0.11.10
+        version: 0.11.10
+      readable-stream:
+        specifier: ^4.5.2
+        version: 4.5.2
+      serverless-offline:
+        specifier: ^13.3.3
+        version: 13.3.3(serverless@3.38.0)
+      split2:
+        specifier: ^4.2.0
+        version: 4.2.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@divine-bridge/eslint-config-custom':
+        specifier: workspace:^
+        version: link:../../packages/eslint-config-custom
+      '@divine-bridge/prettier-config-custom':
+        specifier: workspace:^
+        version: link:../../packages/prettier-config-custom
+      '@types/adm-zip':
+        specifier: ^0.5.5
+        version: 0.5.5
+      '@types/aws-lambda':
+        specifier: ^8.10.133
+        version: 8.10.133
+      '@types/node':
+        specifier: ^20.11.16
+        version: 20.11.16
+      '@types/tar':
+        specifier: ^6.1.11
+        version: 6.1.11
+      dotenv:
+        specifier: ^16.4.1
+        version: 16.4.1
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
+      eslint-plugin-import-esm:
+        specifier: ^1.2.1
+        version: 1.2.1(eslint@8.56.0)
+      prettier:
+        specifier: ^3.2.5
+        version: 3.2.5
+      serverless:
+        specifier: ^3.38.0
+        version: 3.38.0(@aws-sdk/credential-provider-node@3.515.0)
+      serverless-dotenv-plugin:
+        specifier: ^6.0.0
+        version: 6.0.0(serverless@3.38.0)
+      serverless-esbuild:
+        specifier: ^1.51.0
+        version: 1.51.0(esbuild@0.20.0)
+      tar:
+        specifier: ^6.2.0
+        version: 6.2.0
+      tsx:
+        specifier: ^4.7.1
+        version: 4.7.1
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -135,9 +187,21 @@ importers:
       mongoose:
         specifier: ^8.1.1
         version: 8.1.1
+      pino-abstract-transport:
+        specifier: ^1.1.0
+        version: 1.1.0
+      process:
+        specifier: ^0.11.10
+        version: 0.11.10
+      readable-stream:
+        specifier: ^4.5.2
+        version: 4.5.2
       serverless-offline:
         specifier: ^13.3.3
         version: 13.3.3(serverless@3.38.0)
+      split2:
+        specifier: ^4.2.0
+        version: 4.2.0
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -202,15 +266,24 @@ importers:
       node-fetch:
         specifier: ^2.6.9
         version: 2.7.0
+      pino-abstract-transport:
+        specifier: ^1.1.0
+        version: 1.1.0
+      process:
+        specifier: ^0.11.10
+        version: 0.11.10
+      readable-stream:
+        specifier: ^4.5.2
+        version: 4.5.2
       regenerator-runtime:
         specifier: ^0.13.3
         version: 0.13.11
       serverless-offline:
         specifier: ^13.3.3
         version: 13.3.3(serverless@3.38.0)
-      serverless-offline-lambda-function-urls:
-        specifier: ^1.0.3
-        version: 1.0.3(serverless-offline@13.3.3)(serverless@3.38.0)
+      split2:
+        specifier: ^4.2.0
+        version: 4.2.0
       tesseract.js:
         specifier: ^5.0.4
         version: 5.0.4
@@ -420,12 +493,18 @@ importers:
       '@divine-bridge/prettier-config-custom':
         specifier: workspace:^
         version: link:../prettier-config-custom
+      '@types/node':
+        specifier: ^20.11.16
+        version: 20.11.16
       eslint:
         specifier: ^8.56.0
         version: 8.56.0
       eslint-plugin-import-esm:
         specifier: ^1.2.1
         version: 1.2.1(eslint@8.56.0)
+      pino-pretty:
+        specifier: ^10.3.1
+        version: 10.3.1
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -989,55 +1068,6 @@ packages:
       '@aws-crypto/sha256-js': 3.0.0
       '@aws-sdk/core': 3.511.0
       '@aws-sdk/credential-provider-node': 3.511.0
-      '@aws-sdk/middleware-host-header': 3.511.0
-      '@aws-sdk/middleware-logger': 3.511.0
-      '@aws-sdk/middleware-recursion-detection': 3.511.0
-      '@aws-sdk/middleware-user-agent': 3.511.0
-      '@aws-sdk/region-config-resolver': 3.511.0
-      '@aws-sdk/types': 3.511.0
-      '@aws-sdk/util-endpoints': 3.511.0
-      '@aws-sdk/util-user-agent-browser': 3.511.0
-      '@aws-sdk/util-user-agent-node': 3.511.0
-      '@smithy/config-resolver': 2.1.1
-      '@smithy/core': 1.3.2
-      '@smithy/fetch-http-handler': 2.4.1
-      '@smithy/hash-node': 2.1.1
-      '@smithy/invalid-dependency': 2.1.1
-      '@smithy/middleware-content-length': 2.1.1
-      '@smithy/middleware-endpoint': 2.4.1
-      '@smithy/middleware-retry': 2.1.1
-      '@smithy/middleware-serde': 2.1.1
-      '@smithy/middleware-stack': 2.1.1
-      '@smithy/node-config-provider': 2.2.1
-      '@smithy/node-http-handler': 2.3.1
-      '@smithy/protocol-http': 3.1.1
-      '@smithy/smithy-client': 2.3.1
-      '@smithy/types': 2.9.1
-      '@smithy/url-parser': 2.1.1
-      '@smithy/util-base64': 2.1.1
-      '@smithy/util-body-length-browser': 2.1.1
-      '@smithy/util-body-length-node': 2.2.1
-      '@smithy/util-defaults-mode-browser': 2.1.1
-      '@smithy/util-defaults-mode-node': 2.2.0
-      '@smithy/util-endpoints': 1.1.1
-      '@smithy/util-middleware': 2.1.1
-      '@smithy/util-retry': 2.1.1
-      '@smithy/util-utf8': 2.1.1
-      fast-xml-parser: 4.2.5
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - aws-crt
-
-  /@aws-sdk/client-sts@3.511.0(@aws-sdk/credential-provider-node@3.515.0):
-    resolution: {integrity: sha512-lwVEEXK+1auEwmBuTv35m2GvbxPthi8SjNUpU4pRetZPVbGhnhCN6H7JqeMDP6GLf81Io2eySXRsmLMt7l/fjg==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@aws-sdk/credential-provider-node': ^3.511.0
-    dependencies:
-      '@aws-crypto/sha256-browser': 3.0.0
-      '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/core': 3.511.0
-      '@aws-sdk/credential-provider-node': 3.515.0
       '@aws-sdk/middleware-host-header': 3.511.0
       '@aws-sdk/middleware-logger': 3.511.0
       '@aws-sdk/middleware-recursion-detection': 3.511.0
@@ -2013,21 +2043,6 @@ packages:
   /@discordjs/collection@2.0.0:
     resolution: {integrity: sha512-YTWIXLrf5FsrLMycpMM9Q6vnZoR/lN2AWX23/Cuo8uOOtS8eHB2dyQaaGnaF8aZPYnttf2bkLMcXn/j6JUOi3w==}
     engines: {node: '>=18'}
-    dev: false
-
-  /@discordjs/core@1.1.1:
-    resolution: {integrity: sha512-3tDqc6KCAtE0CxNl5300uPzFnNsY/GAmJhc6oGutbl/la+4mRv5zVb4N68cmcaeD2Il/ySH4zIc00sq+cyhtUA==}
-    engines: {node: '>=18'}
-    dependencies:
-      '@discordjs/rest': 2.2.0
-      '@discordjs/util': 1.0.2
-      '@discordjs/ws': 1.0.2
-      '@sapphire/snowflake': 3.5.3
-      '@vladfrangu/async_event_emitter': 2.2.4
-      discord-api-types: 0.37.61
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
     dev: false
 
   /@discordjs/formatters@0.3.3:
@@ -3577,87 +3592,6 @@ packages:
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
     dev: false
 
-  /@sapphire/discord-utilities@3.2.2:
-    resolution: {integrity: sha512-lJZMV89wt2Vuq9Sra44rK9gONrLpL6INd9CEI01r+lGdbix+EWceQR7SLESzw1+oD12v6gfMOUQUjgy0mFUk1g==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dependencies:
-      discord-api-types: 0.37.69
-    dev: false
-
-  /@sapphire/discord.js-utilities@7.1.6:
-    resolution: {integrity: sha512-rOSs1xUOSLkqF6MXGtAOFtxYqzCoIIHImMFXftIxIdn38PNsLJNMWjf18bIVRMDMduVXtfROF7PLXxSp/CpLaw==}
-    engines: {node: '>=16.6.0', npm: '>=7.0.0'}
-    dependencies:
-      '@sapphire/discord-utilities': 3.2.2
-      '@sapphire/duration': 1.1.2
-      '@sapphire/utilities': 3.15.3
-      tslib: 2.6.2
-    dev: false
-
-  /@sapphire/duration@1.1.2:
-    resolution: {integrity: sha512-m+DpXedUHdnH3rM6P9Hiyb9dpdXKb8WeTAVIug0QuN8tarQedbymbOor+UFmBfCbKOkoW9HvGK10xDwDvSfKrw==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dev: false
-
-  /@sapphire/framework@5.0.7:
-    resolution: {integrity: sha512-AfCqoW9F5Xu+oAWINfPU25Gm8WVhaz+ETnRXpUCKbfRDSoYT1C8OImbnZeor2HH25DU6KKkKk3A98AfUxzawDA==}
-    engines: {node: '>=v18', npm: '>=7'}
-    dependencies:
-      '@discordjs/builders': 1.7.0
-      '@sapphire/discord-utilities': 3.2.2
-      '@sapphire/discord.js-utilities': 7.1.6
-      '@sapphire/lexure': 1.1.7
-      '@sapphire/pieces': 4.2.2
-      '@sapphire/ratelimits': 2.4.9
-      '@sapphire/result': 2.6.6
-      '@sapphire/stopwatch': 1.5.2
-      '@sapphire/utilities': 3.15.3
-    dev: false
-
-  /@sapphire/lexure@1.1.7:
-    resolution: {integrity: sha512-6PqU2/V+w1k4DHbZ8erIH+iaT/kAmLfReiWNUURt1akfrPTWqlVYWfuxkHXF0JMPk53r4NIkZoitiWwGUtPF+Q==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dependencies:
-      '@sapphire/result': 2.6.6
-    dev: false
-
-  /@sapphire/pieces@4.2.2:
-    resolution: {integrity: sha512-DvAC+zTgm5o41D6iX+jBjMp+rRmoHPKNYnav6v6vQLTxBJb+iFMmup9ZREiuXdrh1ejrmVRZojnnI59xQgezwQ==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dependencies:
-      '@discordjs/collection': 1.5.3
-      '@sapphire/utilities': 3.15.3
-      tslib: 2.6.2
-    dev: false
-
-  /@sapphire/plugin-api@6.1.1:
-    resolution: {integrity: sha512-/Znz+AvNvnOwdKw+iehb2ZDDqQk0p9/Ls7WaXxeIsv3alPn/70/Q4i+WjoXFeG6T9KGCv110quJRPc4kS4QPWg==}
-    engines: {node: '>=v18', npm: '>=7'}
-    dependencies:
-      '@types/ws': 8.5.10
-      tldts: 6.1.11
-      tslib: 2.6.2
-      undici: 6.6.2
-    dev: false
-
-  /@sapphire/plugin-logger@4.0.2:
-    resolution: {integrity: sha512-5Nr++u+fA3/jZwj1aL9Z16RgyJZRE1gyUftfWjrzdndE5FkcbnLiVCKvnI8WzSupVhdn6kMaCWAteOSgAaq3lQ==}
-    engines: {node: '>=v18', npm: '>=7'}
-    dependencies:
-      '@sapphire/timestamp': 1.0.3
-      colorette: 2.0.20
-    dev: false
-
-  /@sapphire/ratelimits@2.4.9:
-    resolution: {integrity: sha512-eEE385IrFsD90gg696MWNqbeDjo1ZgtBvL66BezIwJEwDguhLP5AVsBsT4uCacX/92aeHl8i2nVvtusIBXZNSg==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dev: false
-
-  /@sapphire/result@2.6.6:
-    resolution: {integrity: sha512-QCjj7X/QlY0QUCeAaZQmnrsMH/b2BMQYee3F1Y5iF17JagUQqO3KZlG7vfXWQU3SRAJX5OgZZynBjixUH+nNGg==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dev: false
-
   /@sapphire/shapeshift@3.9.6:
     resolution: {integrity: sha512-4+Na/fxu2SEepZRb9z0dbsVh59QtwPuBg/UVaDib3av7ZY14b14+z09z6QVn0P6Dv6eOU2NDTsjIi0mbtgP56g==}
     engines: {node: '>=v18'}
@@ -3676,29 +3610,12 @@ packages:
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
     dev: false
 
-  /@sapphire/stopwatch@1.5.2:
-    resolution: {integrity: sha512-FrR1GnaEIuXpEfnaz7DjNgoN/Cp8dJ5XFgb8CxXTCAJi8LYk0YsyGSdmmcs9R3ZNZrA1vOSv0dFVLitgiVA36Q==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dependencies:
-      tslib: 2.6.2
-    dev: false
-
-  /@sapphire/timestamp@1.0.3:
-    resolution: {integrity: sha512-I2TwqlLDA2Uu576VUgyBaT1gP1WSWPxeW3NqFxsSJfwFyvzXkTzyQiYce0eWMpM6BdBCq7Dddg+Yayls/5K1RA==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-    dev: false
-
-  /@sapphire/utilities@3.15.3:
-    resolution: {integrity: sha512-K5dFGOB5XvblXFN+Av+Tch/dVBAifmxtZ9/2mFo8VqzbiaFJIRUuoPAoNsp8pWYaU423yV8bfD8WsCSNd9w1YQ==}
-    engines: {node: '>=v14.0.0'}
-    dev: false
-
   /@serverless/dashboard-plugin@7.2.0(@aws-sdk/credential-provider-node@3.515.0)(supports-color@8.1.1):
     resolution: {integrity: sha512-Gqzgef+KmrX1OxJW9aubrIN6AvPrtDARMv+NegMNEe+pfkZA/IMuZiSyYUaHgARokdw2/IALOysTLgdFJIrXvA==}
     engines: {node: '>=12.0'}
     dependencies:
       '@aws-sdk/client-cloudformation': 3.511.0
-      '@aws-sdk/client-sts': 3.511.0(@aws-sdk/credential-provider-node@3.515.0)
+      '@aws-sdk/client-sts': 3.515.0(@aws-sdk/credential-provider-node@3.515.0)
       '@serverless/event-mocks': 1.1.1
       '@serverless/platform-client': 4.5.1(supports-color@8.1.1)
       '@serverless/utils': 6.15.0
@@ -4245,6 +4162,12 @@ packages:
       - supports-color
     dev: false
 
+  /@types/adm-zip@0.5.5:
+    resolution: {integrity: sha512-YCGstVMjc4LTY5uK9/obvxBya93axZOVOyf2GSUulADzmLhYE45u2nAssCs/fWBs1Ifq5Vat75JTPwd5XZoPJw==}
+    dependencies:
+      '@types/node': 20.11.16
+    dev: true
+
   /@types/aws-lambda@8.10.133:
     resolution: {integrity: sha512-sr852MAL/79rjDelXP6ZuJ6GwOvXIRrFAoC8a+w91mZ5XR71CuzSgo1d0+pG1qgfPhjFgaibu7SWaoC5BA7pyQ==}
     dev: true
@@ -4288,6 +4211,7 @@ packages:
 
   /@types/cookie@0.6.0:
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
+    dev: false
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
@@ -4375,6 +4299,13 @@ packages:
 
   /@types/stack-utils@2.0.3:
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
+    dev: true
+
+  /@types/tar@6.1.11:
+    resolution: {integrity: sha512-ThA1WD8aDdVU4VLuyq5NEqriwXErF5gEIJeyT6gHBWU7JtSmW2a5qjNv3/vR82O20mW+1vhmeZJfBQPT3HCugg==}
+    dependencies:
+      '@types/node': 20.11.16
+      minipass: 4.2.8
     dev: true
 
   /@types/webidl-conversions@7.0.3:
@@ -4946,7 +4877,6 @@ packages:
   /atomic-sleep@1.0.0:
     resolution: {integrity: sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==}
     engines: {node: '>=8.0.0'}
-    dev: false
 
   /available-typed-arrays@1.0.6:
     resolution: {integrity: sha512-j1QzY8iPNPG4o4xmO3ptzpRxTciqD3MgEHtifP/YnJpIo58Xu+ne4BejlbkuaLfXn/nz6HFiw29bLpj2PNMdGg==}
@@ -5217,7 +5147,6 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
-    dev: false
 
   /builtin-modules@3.3.0:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
@@ -5524,6 +5453,7 @@ packages:
 
   /colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
+    dev: true
 
   /combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -5677,6 +5607,10 @@ packages:
   /damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
     dev: false
+
+  /dateformat@4.6.3:
+    resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
+    dev: true
 
   /dayjs@1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
@@ -6554,7 +6488,6 @@ packages:
   /events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
-    dev: false
 
   /execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
@@ -6635,6 +6568,10 @@ packages:
     engines: {node: '>=8.0.0'}
     dependencies:
       pure-rand: 6.0.4
+    dev: true
+
+  /fast-copy@3.0.1:
+    resolution: {integrity: sha512-Knr7NOtK3HWRYGtHoJrjkaWepqT8thIVGAwt0p0aUs1zqkAzXZV4vo9fFNwyb5fcqK1GKYFYxldQdIDVKhUAfA==}
     dev: true
 
   /fast-deep-equal@3.1.3:
@@ -6994,7 +6931,6 @@ packages:
     resolution: {integrity: sha512-wuMsz4leaj5hbGgg4IvDU0bqJagpftG5l5cXIAvo8uZrqn0NJqwtfupTN00VnkQJPcIRrxYrm1Ue24btpCha2A==}
     dependencies:
       resolve-pkg-maps: 1.0.0
-    dev: false
 
   /glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -7177,6 +7113,10 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       function-bind: 1.1.2
+
+  /help-me@5.0.0:
+    resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
+    dev: true
 
   /hexoid@1.0.0:
     resolution: {integrity: sha512-QFLV0taWQOZtvIRIAdBChesmogZrtuXvVWsFHZTk2SU+anspqZ2vMnoLg7IE1+Uk16N19APic1BuF8bC8c2m5g==}
@@ -8593,13 +8533,17 @@ packages:
 
   /minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
-    dev: false
 
   /minipass@3.3.6:
     resolution: {integrity: sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw==}
     engines: {node: '>=8'}
     dependencies:
       yallist: 4.0.0
+
+  /minipass@4.2.8:
+    resolution: {integrity: sha512-fNzuVyifolSLFL4NzpF+wEF4qrgqaaKX0haXPQEdQ7NKAN+WecoKMHV09YcuL/DHxrUsYQOK3MiuDf7Ip2OXfQ==}
+    engines: {node: '>=8'}
+    dev: true
 
   /minipass@5.0.0:
     resolution: {integrity: sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==}
@@ -8994,7 +8938,6 @@ packages:
   /on-exit-leak-free@2.1.2:
     resolution: {integrity: sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA==}
     engines: {node: '>=14.0.0'}
-    dev: false
 
   /once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
@@ -9257,7 +9200,26 @@ packages:
     dependencies:
       readable-stream: 4.5.2
       split2: 4.2.0
-    dev: false
+
+  /pino-pretty@10.3.1:
+    resolution: {integrity: sha512-az8JbIYeN/1iLj2t0jR9DV48/LQ3RC6hZPpapKPkb84Q+yTidMCpgWxIT3N0flnBDilyBQ1luWNpOeJptjdp/g==}
+    hasBin: true
+    dependencies:
+      colorette: 2.0.20
+      dateformat: 4.6.3
+      fast-copy: 3.0.1
+      fast-safe-stringify: 2.1.1
+      help-me: 5.0.0
+      joycon: 3.1.1
+      minimist: 1.2.8
+      on-exit-leak-free: 2.1.2
+      pino-abstract-transport: 1.1.0
+      pump: 3.0.0
+      readable-stream: 4.5.2
+      secure-json-parse: 2.7.0
+      sonic-boom: 3.8.0
+      strip-json-comments: 3.1.1
+    dev: true
 
   /pino-std-serializers@6.2.2:
     resolution: {integrity: sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==}
@@ -9381,7 +9343,6 @@ packages:
   /process@0.11.10:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
-    dev: false
 
   /promise-queue@2.2.5:
     resolution: {integrity: sha512-p/iXrPSVfnqPft24ZdNNLECw/UrtLTpT3jpAAMzl/o5/rDsGCPo3/CQS2611flL6LkoEJ3oQZw7C8Q80ZISXRQ==}
@@ -10042,7 +10003,6 @@ packages:
       events: 3.3.0
       process: 0.11.10
       string_decoder: 1.3.0
-    dev: false
 
   /readable-web-to-node-stream@3.0.2:
     resolution: {integrity: sha512-ePeK6cc1EcKLEhJFt/AebMCLL+GgSKhuygrZ/GLaKZYEecIgIECf4UaUuaByiGtzckwR4ain9VzUh95T1exYGw==}
@@ -10129,7 +10089,6 @@ packages:
 
   /resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
-    dev: false
 
   /resolve.exports@2.0.2:
     resolution: {integrity: sha512-X2UW6Nw3n/aMgDVy+0rSqgHlv39WZAlZrXCdnbyEiKm17DSqHX4MmQMaST3FbeWR5FTuRcUwYAziZajji0Y7mg==}
@@ -10281,6 +10240,10 @@ packages:
       compute-scroll-into-view: 3.1.0
     dev: false
 
+  /secure-json-parse@2.7.0:
+    resolution: {integrity: sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw==}
+    dev: true
+
   /seek-bzip@1.0.6:
     resolution: {integrity: sha512-e1QtP3YL5tWww8uKaOCQ18UxIT2laNBXHjV/S2WYCiK4udiv8lkG89KRIoCjUagnAmCBurjF4zEVX2ByBbnCjQ==}
     hasBin: true
@@ -10342,16 +10305,6 @@ packages:
       ramda: 0.28.0
       semver: 7.5.4
     dev: true
-
-  /serverless-offline-lambda-function-urls@1.0.3(serverless-offline@13.3.3)(serverless@3.38.0):
-    resolution: {integrity: sha512-GyXL40vCGrrAzuInL0pRqhYdeD0P3JjO2vuo8XOBOrJL4YTx/vis+8wJdJQ/oo9KAsZZzeGhedzqeAlwx7r4yg==}
-    peerDependencies:
-      serverless: 3.x
-      serverless-offline: '>= 12.x'
-    dependencies:
-      serverless: 3.38.0(@aws-sdk/credential-provider-node@3.515.0)
-      serverless-offline: 13.3.3(serverless@3.38.0)
-    dev: false
 
   /serverless-offline@13.3.3(serverless@3.38.0):
     resolution: {integrity: sha512-KVw+khABJumgHsOrddtRvjKY5CDPCShOS4SYPvXXvmOrsOcS/upLEPdgcExXgAaF3OUBRsrHmroqXiLko06cbw==}
@@ -10595,7 +10548,6 @@ packages:
     resolution: {integrity: sha512-ybz6OYOUjoQQCQ/i4LU8kaToD8ACtYP+Cj5qd2AO36bwbdewxWJ3ArmJ2cr6AvxlL2o0PqnCcPGUgkILbfkaCA==}
     dependencies:
       atomic-sleep: 1.0.0
-    dev: false
 
   /sort-keys-length@1.0.1:
     resolution: {integrity: sha512-GRbEOUqCxemTAk/b32F2xa8wDTs+Z1QHOkbhJDQTvv/6G3ZkbJ+frYWsTcc7cBB3Fu4wy4XlLCuNtJuMn7Gsvw==}
@@ -10655,7 +10607,6 @@ packages:
   /split2@4.2.0:
     resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
     engines: {node: '>= 10.x'}
-    dev: false
 
   /sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
@@ -11060,17 +11011,6 @@ packages:
       es5-ext: 0.10.62
       next-tick: 1.1.0
 
-  /tldts-core@6.1.11:
-    resolution: {integrity: sha512-ZFcT+/fdEc5VRndQIJtArNBHsaq4udRoeE4E6cwLzGaH0dq7Ng2L7cAoea6riM2uhNFD09EDa1bN8lrfrOBCLg==}
-    dev: false
-
-  /tldts@6.1.11:
-    resolution: {integrity: sha512-AAgE/IWvbsg4Lr4KGFNR7bL/MhQfBlgGV9UBg2uy5mCwSGi5f12eZ7ZydAqv4ACys6pUYjNoV2qfZdcCn4RS+Q==}
-    hasBin: true
-    dependencies:
-      tldts-core: 6.1.11
-    dev: false
-
   /tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}
     engines: {node: '>=0.6.0'}
@@ -11242,6 +11182,17 @@ packages:
       - supports-color
       - ts-node
 
+  /tsx@4.7.1:
+    resolution: {integrity: sha512-8d6VuibXHtlN5E3zFkgY8u4DX7Y3Z27zvvPKVmLon/D4AjuKzarkUBTLDBgj9iTQ0hg5xM7c/mYiRVM+HETf0g==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    dependencies:
+      esbuild: 0.19.12
+      get-tsconfig: 4.7.2
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
   /turbo-darwin-64@1.12.4:
     resolution: {integrity: sha512-dBwFxhp9isTa9RS/fz2gDVk5wWhKQsPQMozYhjM7TT4jTrnYn0ZJMzr7V3B/M/T8QF65TbniW7w1gtgxQgX5Zg==}
     cpu: [x64]
@@ -11400,13 +11351,6 @@ packages:
   /undici@5.27.2:
     resolution: {integrity: sha512-iS857PdOEy/y3wlM3yRp+6SNQQ6xU0mmZcwRSriqk+et/cwWAtwmIGf6WkoDN2EK/AMdCO/dfXzIwi+rFMrjjQ==}
     engines: {node: '>=14.0'}
-    dependencies:
-      '@fastify/busboy': 2.1.0
-    dev: false
-
-  /undici@6.6.2:
-    resolution: {integrity: sha512-vSqvUE5skSxQJ5sztTZ/CdeJb1Wq0Hf44hlYMciqHghvz+K88U0l7D6u1VsndoFgskDcnU+nG3gYmMzJVzd9Qg==}
-    engines: {node: '>=18.0'}
     dependencies:
       '@fastify/busboy': 2.1.0
     dev: false

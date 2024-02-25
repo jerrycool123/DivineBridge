@@ -4,7 +4,6 @@
     "declarationMap": true,
     "declarationDir": "./dist"
   },
-  "files": ["./src/index.ts"],
-  "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts"]
+  "include": ["./src/**/*"],
+  "extends": "./tsconfig.json"
 }

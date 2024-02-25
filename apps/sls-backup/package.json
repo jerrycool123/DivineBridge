@@ -1,0 +1,46 @@
+{
+  "name": "sls-backup",
+  "version": "0.0.1",
+  "dependencies": {
+    "@divine-bridge/common": "workspace:^",
+    "@divine-bridge/ocr-service": "workspace:^",
+    "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
+    "adm-zip": "^0.5.10",
+    "discord.js": "^14.14.1",
+    "esbuild": "^0.20.0",
+    "pino-abstract-transport": "^1.1.0",
+    "process": "^0.11.10",
+    "readable-stream": "^4.5.2",
+    "serverless-offline": "^13.3.3",
+    "split2": "^4.2.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@divine-bridge/eslint-config-custom": "workspace:^",
+    "@divine-bridge/prettier-config-custom": "workspace:^",
+    "@types/adm-zip": "^0.5.5",
+    "@types/aws-lambda": "^8.10.133",
+    "@types/node": "^20.11.16",
+    "@types/tar": "^6.1.11",
+    "dotenv": "^16.4.1",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import-esm": "^1.2.1",
+    "prettier": "^3.2.5",
+    "serverless": "^3.38.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-esbuild": "^1.51.0",
+    "tar": "^6.2.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "#noop",
+    "deploy": "serverless deploy --stage production",
+    "dev": "serverless offline start --verbose",
+    "download-mongodump": "tsx ./scripts/download-mongodump.ts",
+    "package": "serverless package --stage production",
+    "postinstall": "pnpm run download-mongodump"
+  },
+  "type": "module"
+}

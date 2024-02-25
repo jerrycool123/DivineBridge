@@ -1,29 +1,28 @@
 import { Database, Embeds, YouTubeChannelCollection } from '@divine-bridge/common';
-import { Command } from '@sapphire/framework';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Utils } from '../utils/index.js';
 import { youtubeApiKeyApi } from '../utils/youtube.js';
 
-export class AddYouTubeChannelCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, options);
-  }
-
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('add-youtube-channel')
-        .setDescription("Add a YouTube channel to the bot's supported list")
-        .addStringOption((option) =>
-          option
-            .setName('id')
-            .setDescription('YouTube channel ID (UCXXXX...) or video ID')
-            .setRequired(true),
-        ),
+export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
+  public readonly command = new SlashCommandBuilder()
+    .setName('add-youtube-channel')
+    .setDescription("Add a YouTube channel to the bot's supported list")
+    .addStringOption((option) =>
+      option
+        .setName('id')
+        .setDescription('YouTube channel ID (UCXXXX...) or video ID')
+        .setRequired(true),
     );
+  public readonly global = true;
+  public readonly guildOnly = false;
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+  public async execute(interaction: ChatInputCommandInteraction) {
     const { options } = interaction;
 
     await interaction.deferReply({ ephemeral: true });

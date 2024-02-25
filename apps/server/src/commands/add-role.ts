@@ -3,49 +3,52 @@ import {
   YouTubeChannelCollection,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
-import { Command } from '@sapphire/framework';
-import { PermissionFlagsBits } from 'discord.js';
+import {
+  AutocompleteInteraction,
+  ChatInputCommandInteraction,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 import { VerifyCommand } from './verify.js';
 
-export class AddRoleCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, { ...options, preconditions: ['GuildOnly'] });
+export class AddRoleCommand extends ChatInputCommand {
+  public readonly command = new SlashCommandBuilder()
+    .setName('add-role')
+    .setDescription('Add a YouTube membership role in this server')
+    .addRoleOption((option) =>
+      option
+        .setName('role')
+        .setDescription('The YouTube Membership role in this server')
+        .setRequired(true),
+    )
+    .addStringOption((option) =>
+      option
+        .setName('keyword')
+        .setDescription("The YouTube channel's ID (UCXXXX...), name or custom URL (@xxx...)")
+        .setRequired(true)
+        .setAutocomplete(true),
+    )
+    .addStringOption((option) =>
+      option
+        .setName('alias')
+        .setDescription('The alias of the `/verify` command for this membership role')
+        .setRequired(true),
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .setDMPermission(false);
+  public readonly global = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('add-role')
-        .setDescription('Add a YouTube membership role in this server')
-        .addRoleOption((option) =>
-          option
-            .setName('role')
-            .setDescription('The YouTube Membership role in this server')
-            .setRequired(true),
-        )
-        .addStringOption((option) =>
-          option
-            .setName('keyword')
-            .setDescription("The YouTube channel's ID (UCXXXX...), name or custom URL (@xxx...)")
-            .setRequired(true)
-            .setAutocomplete(true),
-        )
-        .addStringOption((option) =>
-          option
-            .setName('alias')
-            .setDescription('The alias of the `/verify` command for this membership role')
-            .setRequired(true),
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-        .setDMPermission(false),
-    );
-  }
-
-  public async autocompleteRun(interaction: Command.AutocompleteInteraction) {
+  public override async autocomplete(interaction: AutocompleteInteraction) {
     const focusedOption = interaction.options.getFocused(true);
     if (focusedOption.name === 'keyword') {
       const keyword = focusedOption.value;
@@ -65,8 +68,11 @@ export class AddRoleCommand extends Command {
     }
   }
 
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options, client } = interaction;
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+    { guild }: ChatInputCommand.ExecuteContext,
+  ) {
+    const { options, client } = interaction;
     if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });
@@ -90,8 +96,8 @@ export class AddRoleCommand extends Command {
     }
 
     // Check if the alias is available
-    const alias = options.getString('alias', true);
-    const aliasResult = await Validators.isAliasAvailable(guild, alias);
+    const aliasCommandName = options.getString('alias', true);
+    const aliasResult = await Validators.isAliasAvailable(this.bot, guild, aliasCommandName);
     if (!aliasResult.success) {
       return await interaction.editReply({
         content: aliasResult.error,
@@ -115,23 +121,35 @@ export class AddRoleCommand extends Command {
     const confirmResult = await Utils.awaitUserConfirm(interaction, 'add-role', {
       content:
         `Are you sure you want to add the membership role <@&${role.id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`?\n` +
-        `Members in this server can use \`/verify\` or \`/${alias}\` to verify their YouTube membership.`,
+        `Members in this server can use \`/verify\` or \`/${aliasCommandName}\` to verify their YouTube membership.`,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
 
     // Create command alias in this guild
-    const aliasCommand = VerifyCommand.createAliasCommand(alias, youtubeChannelDoc.profile.title);
+    const onFailToCreateAliasCommand = async () => {
+      return await confirmedInteraction.editReply({
+        content: `Failed to create the command alias \`/${aliasCommandName}\` in this server. Please try again later.`,
+      });
+    };
+
+    const verifyCommand = this.bot.chatInputCommandMap['verify'] ?? null;
+    if (verifyCommand !== null && verifyCommand instanceof VerifyCommand === false) {
+      return await onFailToCreateAliasCommand();
+    }
+    const aliasCommand = verifyCommand.commandFactory({
+      alias: true,
+      name: aliasCommandName,
+      youtubeChannelTitle: youtubeChannelDoc.profile.title,
+    });
     const createResult = await discordBotApi.createGuildApplicationCommand(
       client.user.id,
       guild.id,
       aliasCommand.toJSON(),
     );
     if (!createResult.success) {
-      return await confirmedInteraction.editReply({
-        content: `Failed to create the command alias \`/${alias}\` in this server. Please try again later.`,
-      });
+      return await onFailToCreateAliasCommand();
     }
     const aliasCommandId = createResult.command.id;
 
@@ -144,7 +162,7 @@ export class AddRoleCommand extends Command {
       },
       config: {
         aliasCommandId,
-        aliasCommandName: alias,
+        aliasCommandName,
       },
       guild: guild.id,
       youtube: youtubeChannelDoc._id,

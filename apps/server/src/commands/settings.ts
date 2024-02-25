@@ -4,29 +4,29 @@ import {
   MembershipRoleCollection,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
-import { Command } from '@sapphire/framework';
-import { PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Utils } from '../utils/index.js';
 
-export class SettingsCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, { ...options, preconditions: ['GuildOnly'] });
+export class SettingsCommand extends ChatInputCommand {
+  public readonly command = new SlashCommandBuilder()
+    .setName('settings')
+    .setDescription('Display guild settings')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .setDMPermission(false);
+  public readonly global = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('settings')
-        .setDescription('Display guild settings')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-        .setDMPermission(false),
-    );
-  }
-
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, user } = interaction;
-    if (guild === null) return;
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+    { guild }: ChatInputCommand.ExecuteContext,
+  ) {
+    const { user } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
 

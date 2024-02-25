@@ -4,34 +4,35 @@ import {
   MembershipDoc,
   MembershipRoleDoc,
 } from '@divine-bridge/common';
-import { Command } from '@sapphire/framework';
-import { PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Utils } from '../utils/index.js';
 
-export class CheckMemberCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, { ...options, preconditions: ['GuildOnly'] });
+export class CheckMemberCommand extends ChatInputCommand {
+  public readonly command = new SlashCommandBuilder()
+    .setName('check-member')
+    .setDescription("Check a member's membership status in this server")
+    .addUserOption((option) =>
+      option
+        .setName('member')
+        .setDescription('The member to check the membership status for')
+        .setRequired(true),
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .setDMPermission(false);
+  public readonly global = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('check-member')
-        .setDescription("Check a member's membership status in this server")
-        .addUserOption((option) =>
-          option
-            .setName('member')
-            .setDescription('The member to check the membership status for')
-            .setRequired(true),
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-        .setDMPermission(false),
-    );
-  }
-
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options } = interaction;
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+    { guild }: ChatInputCommand.ExecuteContext,
+  ) {
+    const { options } = interaction;
     if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });

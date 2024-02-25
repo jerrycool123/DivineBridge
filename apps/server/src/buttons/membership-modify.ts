@@ -1,5 +1,4 @@
 import { Modals } from '@divine-bridge/common';
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import {
@@ -10,33 +9,22 @@ import {
 } from 'discord.js';
 
 import { Constants } from '../constants.js';
+import { Button } from '../structures/button.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
 dayjs.extend(utc);
 
-export class MembershipModifyButtonHandler extends InteractionHandler {
-  public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
-    super(ctx, {
-      ...options,
-      interactionHandlerType: InteractionHandlerTypes.Button,
-    });
+export class MembershipModifyButton extends Button {
+  public readonly customId = Constants.membership.modify;
+  public readonly sameClientOnly = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: Button.Context) {
+    super(context);
   }
 
-  public override parse(interaction: ButtonInteraction) {
-    const { guild } = interaction;
-    if (
-      guild === null ||
-      interaction.message.author.id !== this.container.client.id ||
-      interaction.customId !== Constants.membership.modify
-    ) {
-      return this.none();
-    }
-
-    return this.some();
-  }
-
-  public async run(interaction: ButtonInteraction) {
+  public async execute(interaction: ButtonInteraction) {
     const { user: moderator } = interaction;
 
     const modalCustomId = `${Constants.membership.modify}-modify-modal`;

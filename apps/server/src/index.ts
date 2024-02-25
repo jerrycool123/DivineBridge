@@ -1,26 +1,16 @@
-import { LogLevel, SapphireClient, container } from '@sapphire/framework';
-import { ClientOptions, GatewayIntentBits } from 'discord.js';
 import mongoose from 'mongoose';
 
-import './plugins.js';
+import { bot } from './bot.js';
+import { httpServer } from './http.js';
 import { Env } from './utils/env.js';
+import { registerProcessHandlers } from './utils/events.js';
+import { logger } from './utils/logger.js';
 
-const clientOptions: ClientOptions = {
-  intents: [GatewayIntentBits.Guilds],
-  loadMessageCommandListeners: true,
-  api: {
-    listenOptions: {
-      port: parseInt(Env.PORT, 10),
-    },
-  },
-  logger: {
-    level: Env.NODE_ENV === 'development' ? LogLevel.Debug : LogLevel.Info,
-  },
-};
-
-const client = new SapphireClient(clientOptions);
+registerProcessHandlers(logger, httpServer);
 
 await mongoose.connect(Env.MONGO_URI);
-container.logger.info('Connected to MongoDB');
+logger.debug('Connected to MongoDB');
 
-await client.login(Env.DISCORD_BOT_TOKEN);
+await bot.start(Env.DISCORD_BOT_TOKEN);
+
+httpServer.listen(Env.PORT);

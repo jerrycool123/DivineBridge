@@ -37,6 +37,8 @@
     "prettier/prettier": "error"
   },
   "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
     "project": true,
     "tsconfigRootDir": "../../"
   }

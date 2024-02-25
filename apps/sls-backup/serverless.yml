@@ -1,0 +1,34 @@
+service: sls-backup
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+functions:
+  backup:
+    handler: src/index.backup
+    timeout: 900
+    url: true
+
+package:
+  include:
+    - mongodump
+    - node_modules/pino-abstract-transport/**
+    - node_modules/split2/**
+    - node_modules/readable-stream/**
+    - node_modules/process/**
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-esbuild
+  - '@divine-bridge/serverless-offline-lambda-function-urls'
+  - serverless-offline
+
+custom:
+  esbuild:
+    config: esbuild.config.cjs
+  serverless-offline:
+    lambdaPort: 3012
+    urlLambdaFunctionsHttpPort: 5012
+    urlLambdaFunctionsHttpVerbs:
+      - POST

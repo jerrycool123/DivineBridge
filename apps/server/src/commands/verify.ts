@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import {
   ActionRows,
   Database,
@@ -9,55 +8,56 @@ import {
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { OCRService, supportedOCRLanguages } from '@divine-bridge/ocr-service';
-import { Command } from '@sapphire/framework';
-import { Attachment, Guild, RepliableInteraction } from 'discord.js';
+import {
+  Attachment,
+  AutocompleteInteraction,
+  ChatInputCommandInteraction,
+  Guild,
+  RepliableInteraction,
+  SlashCommandBuilder,
+} from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Env } from '../utils/env.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
-export class VerifyCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, { ...options, preconditions: ['GuildOnly'] });
+export class VerifyCommand extends ChatInputCommand {
+  public readonly command = this.commandFactory({ alias: false });
+  public readonly global = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public static createAliasCommand(alias: string, youtubeChannelTitle: string) {
-    return new SlashCommandBuilder()
-      .setName(alias)
+  public commandFactory(
+    args:
+      | {
+          alias: false;
+        }
+      | {
+          alias: true;
+          name: string;
+          youtubeChannelTitle: string;
+        },
+  ) {
+    const command = new SlashCommandBuilder()
+      .setName(args.alias ? args.name : 'verify')
       .setDescription(
-        `Provide a screenshot and verify your ${youtubeChannelTitle} membership in this server.`,
+        `Provide a screenshot and verify your ${
+          args.alias ? args.youtubeChannelTitle : 'YouTube'
+        } membership in this server.`,
       )
       .addAttachmentOption((option) =>
         option
           .setName('screenshot')
           .setDescription('Your YouTube membership proof screenshot')
           .setRequired(true),
-      )
-      .addStringOption((option) =>
-        option
-          .setName('language')
-          .setDescription('The language of the text in your picture')
-          .addChoices(
-            ...supportedOCRLanguages.map(({ language, code }) => ({
-              name: language,
-              value: code,
-            })),
-          )
-          .setRequired(false),
       );
-  }
-
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('verify')
-        .setDescription('Provide a screenshot and verify your YouTube membership in this server.')
-        .addAttachmentOption((option) =>
-          option
-            .setName('screenshot')
-            .setDescription('Your YouTube membership proof screenshot')
-            .setRequired(true),
-        )
+    if (!args.alias) {
+      // Global command
+      command
         .addStringOption((option) =>
           option
             .setName('membership_role')
@@ -65,25 +65,28 @@ export class VerifyCommand extends Command {
             .setRequired(true)
             .setAutocomplete(true),
         )
-        .addStringOption((option) =>
-          option
-            .setName('language')
-            .setDescription('The language of the text in your picture')
-            .addChoices(
-              ...supportedOCRLanguages.map(({ language, code }) => ({
-                name: language,
-                value: code,
-              })),
-            )
-            .setRequired(false),
+        .setDMPermission(false);
+    }
+    command.addStringOption((option) =>
+      option
+        .setName('language')
+        .setDescription('The language of the text in your picture')
+        .addChoices(
+          ...supportedOCRLanguages.map(({ language, code }) => ({
+            name: language,
+            value: code,
+          })),
         )
-        .setDMPermission(false),
+        .setRequired(false),
     );
+
+    return command;
   }
 
-  public async autocompleteRun(interaction: Command.AutocompleteInteraction) {
-    const { guild } = interaction;
-    if (guild === null) return;
+  public override async autocomplete(
+    interaction: AutocompleteInteraction,
+    { guild }: ChatInputCommand.AutocompleteContext,
+  ) {
     const focusedOption = interaction.options.getFocused(true);
     if (focusedOption.name === 'membership_role') {
       const keyword = focusedOption.value.toLocaleLowerCase();
@@ -124,19 +127,21 @@ export class VerifyCommand extends Command {
     }
   }
 
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options } = interaction;
-    if (guild === null) return;
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+    { guild }: ChatInputCommand.ExecuteContext,
+  ) {
+    const { options } = interaction;
 
     const picture = options.getAttachment('screenshot', true);
     const membershipRoleId = options.getString('membership_role', true);
     const langCode = options.getString('language');
 
-    await this._chatInputRun(interaction, { guild, picture, membershipRoleId, langCode });
+    await this._execute(interaction, { guild, picture, membershipRoleId, langCode });
   }
 
-  public async chatInputRunAlias(
-    interaction: Command.ChatInputCommandInteraction,
+  public async executeAlias(
+    interaction: ChatInputCommandInteraction,
     args: { membershipRoleId: string },
   ) {
     const { guild, options } = interaction;
@@ -146,11 +151,11 @@ export class VerifyCommand extends Command {
     const picture = options.getAttachment('screenshot', true);
     const langCode = options.getString('language');
 
-    await this._chatInputRun(interaction, { guild, picture, membershipRoleId, langCode });
+    await this._execute(interaction, { guild, picture, membershipRoleId, langCode });
   }
 
-  private async _chatInputRun(
-    interaction: Command.ChatInputCommandInteraction,
+  private async _execute(
+    interaction: ChatInputCommandInteraction,
     args: {
       guild: Guild;
       picture: Attachment;
@@ -253,34 +258,30 @@ export class VerifyCommand extends Command {
 
     // Send picture to membership service for OCR
     // ? Do not send error to user if OCR failed due to errors that are not related to the user
-    try {
-      const ocrService = new OCRService(Env.OCR_API_ENDPOINT, Env.OCR_API_KEY);
-      const recognizedResult = await ocrService.recognizeBillingDate(
-        picture.url,
-        selectedLanguage.code,
-      );
-      if (!recognizedResult.success) {
-        this.container.logger.error(recognizedResult.error);
-      }
-      const recognizedDate = recognizedResult.success
-        ? recognizedResult.date
-        : { year: null, month: null, day: null };
-
-      const adminActionRow = ActionRows.adminVerificationButton();
-      const membershipVerificationRequestEmbed = Embeds.membershipVerificationRequest(
-        Utils.convertUser(user),
-        recognizedDate,
-        membershipRoleDoc._id,
-        selectedLanguage.language,
-        picture.url,
-      );
-
-      await logChannel.send({
-        components: [adminActionRow],
-        embeds: [membershipVerificationRequestEmbed],
-      });
-    } catch (error) {
-      this.container.logger.error(error);
+    const ocrService = new OCRService(Env.OCR_API_ENDPOINT, Env.OCR_API_KEY);
+    const recognizedResult = await ocrService.recognizeBillingDate(
+      picture.url,
+      selectedLanguage.code,
+    );
+    if (!recognizedResult.success) {
+      this.bot.logger.error(recognizedResult.error);
     }
+    const recognizedDate = recognizedResult.success
+      ? recognizedResult.date
+      : { year: null, month: null, day: null };
+
+    const adminActionRow = ActionRows.adminVerificationButton();
+    const membershipVerificationRequestEmbed = Embeds.membershipVerificationRequest(
+      Utils.convertUser(user),
+      recognizedDate,
+      membershipRoleDoc._id,
+      selectedLanguage.language,
+      picture.url,
+    );
+
+    await logChannel.send({
+      components: [adminActionRow],
+      embeds: [membershipVerificationRequestEmbed],
+    });
   }
 }

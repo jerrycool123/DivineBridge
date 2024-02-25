@@ -20,8 +20,10 @@
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
+    "@types/node": "^20.11.16",
     "eslint": "^8.56.0",
     "eslint-plugin-import-esm": "^1.2.1",
+    "pino-pretty": "^10.3.1",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
@@ -29,7 +31,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsup --minify && pnpm run build:dts",
-    "build:dts": "tsc -p tsc-tsconfig.json --emitDeclarationOnly && echo \"\\033[1;35mDTS\\033[0m 🚀 Successfully Built\"",
+    "build:dts": "tsc -p ./dts-tsconfig.json --emitDeclarationOnly && echo \"\\033[1;35mDTS\\033[0m 🚀 Successfully Built\"",
     "dev": "tsup --watch --onSuccess \"pnpm run build:dts\"",
     "format": "prettier --write .",
     "lint": "eslint ."

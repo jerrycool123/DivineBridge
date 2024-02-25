@@ -1,0 +1,8 @@
+.serverless/
+.env.bak
+.env.*.local
+node_modules/
+.esbuild/
+invoke-local.json
+mongodump*
+mongodb-database-tools-*

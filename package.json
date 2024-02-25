@@ -20,6 +20,7 @@
   "scripts": {
     "build": "turbo run build",
     "deploy": "vercel --prod deploy",
+    "deploy:sls-backup": "turbo run deploy --filter sls-backup",
     "deploy:sls-check-membership": "turbo run deploy --filter sls-check-membership",
     "deploy:sls-ocr": "turbo run deploy --filter sls-ocr",
     "dev": "turbo run dev",

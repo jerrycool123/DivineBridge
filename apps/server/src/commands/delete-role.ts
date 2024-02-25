@@ -1,40 +1,37 @@
 import { AppEventLogService, MembershipCollection, MembershipService } from '@divine-bridge/common';
-import { Command } from '@sapphire/framework';
-import { PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
 
-export class DeleteRoleCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, {
-      ...options,
-      preconditions: ['GuildOnly'],
-      requiredClientPermissions: [PermissionFlagsBits.ManageRoles],
-    });
+export class DeleteRoleCommand extends ChatInputCommand {
+  public readonly command = new SlashCommandBuilder()
+    .setName('delete-role')
+    .setDescription('Delete a YouTube membership role in this server')
+    .addRoleOption((option) =>
+      option
+        .setName('role')
+        .setDescription('The YouTube Membership role in this server')
+        .setRequired(true),
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .setDMPermission(false);
+  public readonly global = true;
+  public readonly guildOnly = true;
+  public readonly requiredClientPermissions = [PermissionFlagsBits.ManageRoles];
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('delete-role')
-        .setDescription('Delete a YouTube membership role in this server')
-        .addRoleOption((option) =>
-          option
-            .setName('role')
-            .setDescription('The YouTube Membership role in this server')
-            .setRequired(true),
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-        .setDMPermission(false),
-    );
-  }
-
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options, client } = interaction;
-    if (guild === null) return;
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+    { guild }: ChatInputCommand.ExecuteContext,
+  ) {
+    const { options, client } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
 
@@ -84,7 +81,7 @@ export class DeleteRoleCommand extends Command {
     );
     if (!deleteResult.success) {
       // ? We do not want to stop the process if the command alias deletion failed
-      this.container.logger.error(deleteResult.error);
+      this.bot.logger.error(deleteResult.error);
     }
 
     // Initialize log service and membership service

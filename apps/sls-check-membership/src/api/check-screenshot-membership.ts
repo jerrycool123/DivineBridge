@@ -6,7 +6,7 @@ import {
   MembershipRoleCollection,
   MembershipService,
 } from '@divine-bridge/common';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 

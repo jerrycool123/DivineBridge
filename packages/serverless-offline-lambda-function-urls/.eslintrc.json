@@ -1,3 +1,6 @@
 {
-  "extends": ["@divine-bridge/eslint-config-custom", "plugin:import-esm/recommended"]
+  "extends": ["@divine-bridge/eslint-config-custom", "plugin:import-esm/recommended"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
 }

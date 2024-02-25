@@ -1,37 +1,43 @@
 import { MembershipCollection } from '@divine-bridge/common';
-import { Command } from '@sapphire/framework';
 import { createObjectCsvStringifier } from 'csv-writer';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
-import { AttachmentBuilder, PermissionFlagsBits } from 'discord.js';
+import {
+  AttachmentBuilder,
+  ChatInputCommandInteraction,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
+import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Validators } from '../utils/validators.js';
 
 dayjs.extend(utc);
 
-export class ViewMembersCommand extends Command {
-  public constructor(context: Command.LoaderContext, options: Command.Options) {
-    super(context, { ...options, preconditions: ['GuildOnly'] });
+export class ViewMembersCommand extends ChatInputCommand {
+  public readonly command = new SlashCommandBuilder()
+    .setName('view-members')
+    .setDescription('View all members with a specific membership role in this server')
+    .addRoleOption((option) =>
+      option
+        .setName('role')
+        .setDescription('The YouTube Membership role in this server')
+        .setRequired(true),
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .setDMPermission(false);
+  public readonly global = true;
+  public readonly guildOnly = true;
+
+  public constructor(context: ChatInputCommand.Context) {
+    super(context);
   }
 
-  public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName('view-members')
-        .setDescription('View all members with a specific membership role in this server')
-        .addRoleOption((option) =>
-          option
-            .setName('role')
-            .setDescription('The YouTube Membership role in this server')
-            .setRequired(true),
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-        .setDMPermission(false),
-    );
-  }
-
-  public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const { guild, options } = interaction;
+  public async execute(
+    interaction: ChatInputCommandInteraction,
+    { guild }: ChatInputCommand.ExecuteContext,
+  ) {
+    const { options } = interaction;
     if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });

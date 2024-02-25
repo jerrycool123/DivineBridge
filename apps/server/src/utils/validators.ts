@@ -4,7 +4,6 @@ import {
   MembershipRoleDoc,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
-import { ApplicationCommandRegistries, container } from '@sapphire/framework';
 import dayjs from 'dayjs';
 import {
   Guild,
@@ -13,6 +12,8 @@ import {
   GuildTextBasedChannel,
   PermissionFlagsBits,
 } from 'discord.js';
+
+import { Bot } from '../structures/bot.js';
 
 export namespace Validators {
   export const isValidLogChannel = async (
@@ -28,18 +29,18 @@ export namespace Validators {
         error: string;
       }
   > => {
-    const { user: botUser } = container.client;
-
+    let botMember: GuildMember | null = null;
     let logChannel: GuildBasedChannel | null = null;
     try {
+      botMember = await guild.members.fetchMe();
       logChannel = await guild.channels.fetch(logChannelId);
     } catch (error) {
       // The bot can't find the log channel, ignore the error
     }
-    if (botUser === null) {
+    if (botMember === null) {
       return {
         success: false,
-        error: 'Service is temporarily unavailable.',
+        error: `The bot is not in the server.`,
       };
     } else if (logChannel === null) {
       return {
@@ -52,15 +53,22 @@ export namespace Validators {
         error: `The log channel is not a valid text channel.`,
       };
     } else if (
-      !(logChannel.permissionsFor(botUser)?.has(PermissionFlagsBits.ViewChannel) ?? false)
+      !(logChannel.permissionsFor(botMember).has(PermissionFlagsBits.ViewChannel) ?? false)
     ) {
       return {
         success: false,
         error: `The bot doesn't have enough permission to view the log channel.`,
       };
     } else if (
-      !(logChannel.permissionsFor(botUser)?.has(PermissionFlagsBits.SendMessages) ?? false) ||
-      !(logChannel.permissionsFor(botUser)?.has(PermissionFlagsBits.EmbedLinks) ?? false)
+      logChannel.permissionsFor(guild.roles.everyone).has(PermissionFlagsBits.ViewChannel)
+    ) {
+      return {
+        success: false,
+        error: `The log channel is visible to everyone in the server. For security reasons, please change the channel to a private channel, and then try again.`,
+      };
+    } else if (
+      !logChannel.permissionsFor(botMember).has(PermissionFlagsBits.SendMessages) ||
+      !logChannel.permissionsFor(botMember).has(PermissionFlagsBits.EmbedLinks)
     ) {
       return {
         success: false,
@@ -228,6 +236,7 @@ export namespace Validators {
   };
 
   export const isAliasAvailable = async (
+    bot: Bot,
     guild: Guild,
     alias: string,
   ): Promise<
@@ -255,8 +264,7 @@ export namespace Validators {
     }
 
     // Check if the alias is conflicting with the built-in commands
-    const builtInCommandNames = Array.from(ApplicationCommandRegistries.registries.keys());
-    if (builtInCommandNames.includes(alias)) {
+    if (alias in bot.chatInputCommandMap) {
       return {
         success: false,
         error: `The alias \`${alias}\` is already used for a built-in command.`,
