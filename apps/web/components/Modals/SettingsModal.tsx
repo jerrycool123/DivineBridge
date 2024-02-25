@@ -29,7 +29,7 @@ export default function SettingsModal({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [action, setAction] = useState<'revoke' | 'delete' | null>(null);
 
-  const errorHandler = useErrorHandler();
+  const errorHandler = useErrorHandler(messageApi);
 
   const authorize = useYouTubeAuthorize({
     setLinkingAccount,

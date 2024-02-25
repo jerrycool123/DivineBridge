@@ -17,7 +17,7 @@ const useYouTubeAuthorize = ({
 }) => {
   const { setUser } = useContext(MainContext);
 
-  const errorHandler = useErrorHandler();
+  const errorHandler = useErrorHandler(messageApi);
 
   return useGoogleLogin({
     onSuccess: async ({ code }) => {

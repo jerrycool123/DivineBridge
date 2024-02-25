@@ -1,18 +1,15 @@
+import { MessageInstance } from 'antd/es/message/interface';
 import 'client-only';
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 
-import { MainContext } from '../contexts/MainContext';
-
-export const useErrorHandler = () => {
-  const { messageApi } = useContext(MainContext);
-
+export const useErrorHandler = (messageApi: MessageInstance) => {
   return useCallback(
     (error: unknown) => {
       console.error(error);
       if (error instanceof Error) {
-        void messageApi.error(`[${error.name}]: ${error.message}`);
+        void messageApi?.error(`[${error.name}]: ${error.message}`);
       } else {
-        void messageApi.error('An unknown error has occurred');
+        void messageApi?.error('An unknown error has occurred');
       }
     },
     [messageApi],

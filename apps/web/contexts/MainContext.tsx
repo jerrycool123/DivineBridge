@@ -35,7 +35,7 @@ export const MainProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<TMainContext['user']>(null);
   const [guilds, setGuilds] = useState<TMainContext['guilds'] | null>(null);
 
-  const errorHandler = useErrorHandler();
+  const errorHandler = useErrorHandler(messageApi);
 
   useEffect(() => {
     if (status !== 'authenticated') return;

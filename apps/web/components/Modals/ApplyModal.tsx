@@ -33,7 +33,7 @@ export default function ApplyModal({
   const [linkingAccount, setLinkingAccount] = useState(false);
   const [verifyingMembership, setVerifyingMembership] = useState(false);
 
-  const errorHandler = useErrorHandler();
+  const errorHandler = useErrorHandler(messageApi);
 
   const authorize = useYouTubeAuthorize({
     setLinkingAccount,
