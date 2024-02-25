@@ -35,12 +35,11 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "#noop",
-    "deploy": "serverless deploy --stage production",
-    "dev": "serverless offline start --verbose",
+    "build": "pnpm run download-mongodump",
+    "deploy": "pnpm run download-mongodump && serverless deploy --stage production",
+    "dev": "pnpm run download-mongodump && serverless offline start --verbose",
     "download-mongodump": "tsx ./scripts/download-mongodump.ts",
-    "package": "serverless package --stage production",
-    "postinstall": "pnpm run download-mongodump"
+    "package": "pnpm run download-mongodump && serverless package --stage production"
   },
   "type": "module"
 }
