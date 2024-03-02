@@ -73,10 +73,10 @@ export namespace Database {
         $set: {
           'profile.username': user.name,
           'profile.image': user.image,
+          ...(user.locale !== undefined && { 'preference.locale': user.locale }),
         },
         $setOnInsert: {
           _id: user.id,
-          ...(user.locale !== undefined && { 'preference.locale': user.locale }),
         },
       },
       {
