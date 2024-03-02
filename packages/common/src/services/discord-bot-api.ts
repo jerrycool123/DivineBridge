@@ -15,6 +15,8 @@ import {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPICurrentUserCreateDMChannelJSONBody,
   RESTPostAPICurrentUserCreateDMChannelResult,
+  RESTPutAPIApplicationCommandsJSONBody,
+  RESTPutAPIApplicationCommandsResult,
   Routes,
 } from 'discord-api-types/v10';
 
@@ -31,6 +33,31 @@ export class DiscordBotAPI {
 
   constructor(botToken: string) {
     this.rest.setToken(botToken);
+  }
+
+  public async overwriteGlobalApplicationCommands(
+    applicationId: string,
+    rawCommands: RESTPutAPIApplicationCommandsJSONBody,
+  ): Promise<
+    | {
+        success: true;
+        commands: RESTPutAPIApplicationCommandsResult;
+      }
+    | {
+        success: false;
+        error: string;
+      }
+  > {
+    try {
+      const commands = (await this.rest.put(Routes.applicationCommands(applicationId), {
+        body: rawCommands,
+      })) as RESTPutAPIApplicationCommandsResult;
+
+      return { success: true, commands };
+    } catch (error) {
+      const errorMessage = DiscordUtils.parseError(error);
+      return { success: false, error: errorMessage };
+    }
   }
 
   public async createGuildApplicationCommand(

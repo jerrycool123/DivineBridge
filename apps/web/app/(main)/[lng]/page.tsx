@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { DiscordLoginButton } from 'react-social-login-buttons';
 
-import styles from '../../styles/Home.module.css';
+import styles from '../../../styles/Home.module.css';
 
 export default function Home() {
   return (

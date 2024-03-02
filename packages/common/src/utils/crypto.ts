@@ -46,4 +46,14 @@ export class CryptoUtils {
       return { success: false, error };
     }
   }
+
+  public hash(plain: string): { success: true; hash: string } | { success: false; error: unknown } {
+    try {
+      const hash = crypto.createHash('sha256').update(plain).digest('base64');
+      return { success: true, hash };
+    } catch (error) {
+      // Failed to hash
+      return { success: false, error };
+    }
+  }
 }

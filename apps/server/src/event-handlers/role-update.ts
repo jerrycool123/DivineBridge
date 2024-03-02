@@ -7,11 +7,7 @@ export class RoleUpdateEventHandler extends EventHandler<Events.GuildRoleUpdate>
   public readonly event = Events.GuildRoleUpdate;
   public readonly once = false;
 
-  public constructor(context: EventHandler.Context) {
-    super(context);
-  }
-
-  public async execute(_oldRole: Role, newRole: Role) {
+  public override async execute(_oldRole: Role, newRole: Role) {
     await Database.updateMembershipRole({
       id: newRole.id,
       name: newRole.name,

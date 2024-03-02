@@ -18,35 +18,32 @@ import { VerifyCommand } from './verify.js';
 
 export class AddRoleCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
-    .setName('add-role')
-    .setDescription('Add a YouTube membership role in this server')
+    .setI18nName('add_role_command.name')
+    .setI18nDescription('add_role_command.description')
     .addRoleOption((option) =>
       option
-        .setName('role')
-        .setDescription('The YouTube Membership role in this server')
+        .setI18nName('add_role_command.role_option_name')
+        .setI18nDescription('add_role_command.role_option_description')
         .setRequired(true),
     )
     .addStringOption((option) =>
       option
-        .setName('keyword')
-        .setDescription("The YouTube channel's ID (UCXXXX...), name or custom URL (@xxx...)")
+        .setI18nName('add_role_command.keyword_option_name')
+        .setI18nDescription('add_role_command.keyword_option_description')
         .setRequired(true)
         .setAutocomplete(true),
     )
     .addStringOption((option) =>
       option
-        .setName('alias')
-        .setDescription('The alias of the `/verify` command for this membership role')
+        .setI18nName('add_role_command.alias_option_name')
+        .setI18nDescription('add_role_command.alias_option_description')
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
   public readonly global = true;
   public readonly guildOnly = true;
-
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
+  public readonly moderatorOnly = true;
 
   public override async autocomplete(interaction: AutocompleteInteraction) {
     const focusedOption = interaction.options.getFocused(true);
@@ -68,18 +65,17 @@ export class AddRoleCommand extends ChatInputCommand {
     }
   }
 
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    { guild, author_t }: ChatInputCommand.ExecuteContext,
   ) {
     const { options, client } = interaction;
-    if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });
 
     // Check if the role is manageable
     const role = options.getRole('role', true);
-    const manageableResult = await Validators.isManageableRole(guild, role.id);
+    const manageableResult = await Validators.isManageableRole(author_t, guild, role.id);
     if (!manageableResult.success) {
       return await interaction.editReply({
         content: manageableResult.error,
@@ -91,13 +87,13 @@ export class AddRoleCommand extends ChatInputCommand {
     const youtubeChannelDoc = await YouTubeChannelCollection.findById(keyword);
     if (youtubeChannelDoc === null) {
       return await interaction.editReply({
-        content: `YouTube channel not found. You can use the \`/add-youtube-channel\` command to add a new channel to the bot's supported list.`,
+        content: `${author_t('server.YouTube channel not found You can use the')} \`/${author_t('add_youtube_channel_command.name')}\` ${author_t('server.command to add a new channel to the bots supported list')}`,
       });
     }
 
     // Check if the alias is available
     const aliasCommandName = options.getString('alias', true);
-    const aliasResult = await Validators.isAliasAvailable(this.bot, guild, aliasCommandName);
+    const aliasResult = await Validators.isAliasAvailable(author_t, guild, aliasCommandName);
     if (!aliasResult.success) {
       return await interaction.editReply({
         content: aliasResult.error,
@@ -113,15 +109,15 @@ export class AddRoleCommand extends ChatInputCommand {
     }>('youtube');
     if (oldMembershipRoleDoc !== null && oldMembershipRoleDoc.youtube !== null) {
       return await interaction.editReply({
-        content: `The membership role <@&${oldMembershipRoleDoc._id}> is already assigned to the YouTube channel \`${oldMembershipRoleDoc.youtube.profile.title}\`.`,
+        content: `${author_t('server.The membership role')} <@&${oldMembershipRoleDoc._id}> ${author_t('server.is already assigned to the YouTube channel')} \`${oldMembershipRoleDoc.youtube.profile.title}\``,
       });
     }
 
     // Ask for confirmation
-    const confirmResult = await Utils.awaitUserConfirm(interaction, 'add-role', {
+    const confirmResult = await Utils.awaitUserConfirm(author_t, interaction, 'add-role', {
       content:
-        `Are you sure you want to add the membership role <@&${role.id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`?\n` +
-        `Members in this server can use \`/verify\` or \`/${aliasCommandName}\` to verify their YouTube membership.`,
+        `${author_t('server.Are you sure you want to add the membership role')} <@&${role.id}> ${author_t('server.for the YouTube channel')} \`${youtubeChannelDoc.profile.title}\`?\n` +
+        `${author_t('server.Members in this server can use')} \`/${author_t('verify_command.name')}\` ${author_t('server.or')} \`/${aliasCommandName}\` ${author_t('server.to verify their YouTube membership')}`,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
@@ -130,11 +126,11 @@ export class AddRoleCommand extends ChatInputCommand {
     // Create command alias in this guild
     const onFailToCreateAliasCommand = async () => {
       return await confirmedInteraction.editReply({
-        content: `Failed to create the command alias \`/${aliasCommandName}\` in this server. Please try again later.`,
+        content: `${author_t('server.Failed to create the command alias')} \`/${aliasCommandName}\` ${author_t('server.in this server Please try again later')}`,
       });
     };
 
-    const verifyCommand = this.bot.chatInputCommandMap['verify'] ?? null;
+    const verifyCommand = this.context.bot.chatInputCommandMap['verify'] ?? null;
     if (verifyCommand !== null && verifyCommand instanceof VerifyCommand === false) {
       return await onFailToCreateAliasCommand();
     }
@@ -168,7 +164,7 @@ export class AddRoleCommand extends ChatInputCommand {
       youtube: youtubeChannelDoc._id,
     });
     await confirmedInteraction.editReply({
-      content: `Successfully added the membership role <@&${newMembershipRoleDoc._id}> for the YouTube channel \`${youtubeChannelDoc.profile.title}\`.`,
+      content: `${author_t('server.Successfully added the membership role')} <@&${newMembershipRoleDoc._id}> ${author_t('server.for the YouTube channel')} \`${youtubeChannelDoc.profile.title}\`.`,
     });
   }
 }

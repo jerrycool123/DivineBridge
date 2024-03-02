@@ -14,10 +14,10 @@ export const authAction = createSafeActionClient({
 
     // Upsert user
     const {
-      user: { id, name, image },
+      user: { id, name, image, locale },
     } = session;
     await dbConnect();
-    const userDoc = await Database.upsertUser({ id, username: name, image });
+    const userDoc = await Database.upsertUser({ id, name, image, locale });
 
     return { session, userDoc };
   },

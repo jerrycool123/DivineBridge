@@ -1,17 +1,13 @@
-import {
-  ActionRows,
-  MembershipRoleDoc,
-  UserPayload,
-  YouTubeChannelDoc,
-} from '@divine-bridge/common';
+import { ActionRows, GuildPayload, UserPayload } from '@divine-bridge/common';
+import { TFunc } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import {
   ButtonInteraction,
   ComponentType,
   Embed,
+  Guild,
   InteractionEditReplyOptions,
-  MessageCreateOptions,
   RepliableInteraction,
   User,
 } from 'discord.js';
@@ -25,7 +21,14 @@ export namespace Utils {
     image: user.displayAvatarURL(),
   });
 
+  export const convertGuild = (guild: Guild): GuildPayload => ({
+    id: guild.id,
+    name: guild.name,
+    icon: guild.iconURL(),
+  });
+
   export const awaitUserConfirm = async (
+    t: TFunc,
     originalInteraction: RepliableInteraction,
     uniqueIdentifier: string,
     payload: InteractionEditReplyOptions,
@@ -49,7 +52,7 @@ export namespace Utils {
       `${uniqueIdentifier}-confirm-button`,
       `${uniqueIdentifier}-cancel-button`,
     ];
-    const confirmActionRow = ActionRows.confirmButton(confirmCustomId, cancelCustomId);
+    const confirmActionRow = ActionRows.confirmButton(t, confirmCustomId, cancelCustomId);
     const response = await originalInteraction.editReply({
       ...payload,
       components: [confirmActionRow],
@@ -71,7 +74,7 @@ export namespace Utils {
     } catch (error) {
       // Timeout
       await originalInteraction.editReply({
-        content: 'Timed out. Please try again.',
+        content: t('server.Timed out Please try again'),
         components: [confirmActionRow],
       });
       return { confirmed: false, reason: 'timed-out' };
@@ -90,13 +93,14 @@ export namespace Utils {
       components: [confirmActionRow],
     });
     await buttonInteraction.reply({
-      content: 'Cancelled.',
+      content: t('server.Cancelled'),
       ephemeral: true,
     });
     return { confirmed: false, reason: 'cancelled' };
   };
 
   export const parseMembershipVerificationRequestEmbed = async (
+    t: TFunc,
     interaction: ButtonInteraction,
   ): Promise<
     | {
@@ -114,7 +118,7 @@ export namespace Utils {
       }
   > => {
     const returnError = async (error: string) => {
-      const invalidActionRow = ActionRows.disabledInvalidButton();
+      const invalidActionRow = ActionRows.disabledInvalidButton(t);
       await interaction.message.edit({
         components: [invalidActionRow],
       });
@@ -122,26 +126,26 @@ export namespace Utils {
     };
 
     if (interaction.message.embeds.length === 0) {
-      return await returnError('The message does not contain an embed.');
+      return await returnError(t('server.The message does not contain an embed'));
     }
     const embed = interaction.message.embeds[0];
 
-    const userId = embed.footer?.text.split('User ID: ')[1] ?? null;
+    const userId = embed.footer?.text.split(`: `)[1] ?? null;
     if (userId === null) {
       return await returnError(
-        'The embed footer does not contain a user ID in the form of `User ID: {userId}`.',
+        `${t('server.The embed footer does not contain a valid user ID')} 🪪`,
       );
     }
 
     const beginDateString = embed.timestamp;
     const beginDate = beginDateString !== null ? dayjs.utc(beginDateString).startOf('date') : null;
     if (beginDate === null || !beginDate.isValid()) {
-      return await returnError(`The embed timestamp does not contain a valid date.`);
+      return await returnError(t(`server.The embed timestamp does not contain a valid date`));
     }
 
-    const endDateIndex = embed.fields.findIndex(({ name }) => name === 'Recognized Date');
+    const endDateIndex = embed.fields.findIndex(({ name }) => name.startsWith('📅'));
     if (endDateIndex === -1) {
-      return await returnError('The embed does not contain a `Recognized Date` field.');
+      return await returnError(t('server.The embed does not contain a valid recognized date'));
     }
     const endDateString = endDateIndex !== -1 ? embed.fields[endDateIndex].value : null;
     const rawEndDate =
@@ -150,44 +154,11 @@ export namespace Utils {
 
     const roleRegex = /<@&(\d+)>/;
     const roleId =
-      embed.fields.find(({ name }) => name === 'Membership Role')?.value?.match(roleRegex)?.[1] ??
-      null;
+      embed.fields.find(({ name }) => name.startsWith('⭐️'))?.value?.match(roleRegex)?.[1] ?? null;
     if (roleId === null) {
-      return await returnError(
-        'The embed does not contain a valid role ID in the `Membership Role` field.',
-      );
+      return await returnError(t('server.The embed does not contain a valid membership role ID'));
     }
 
     return { success: true, embed, userId, beginDate, endDate, endDateIndex, roleId };
-  };
-
-  export const getRoleRemoveErrorPayload = (
-    membershipRole:
-      | string
-      | (Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        }),
-    userId: string,
-  ): MessageCreateOptions => {
-    // Parse membership role data
-    let membershipRoleId: string, membershipRoleString: string;
-    if (typeof membershipRole === 'string') {
-      membershipRoleId = membershipRole;
-      membershipRoleString = `<@&${membershipRoleId}> (ID: ${membershipRoleId})`;
-    } else {
-      membershipRoleId = membershipRole._id;
-      membershipRoleString = `**@${membershipRole.profile.name}**`;
-    }
-
-    return {
-      content:
-        `I cannot remove the membership role ${membershipRoleString} from the user <@${userId}> due to one of the following reasons:\n` +
-        '- The user has left the server\n' +
-        '- The membership role has been removed from the server\n' +
-        '- The bot does not have the permission to manage roles\n' +
-        '- The bot is no longer in the server\n' +
-        '- Other unknown bot error\n' +
-        '\nIf you believe this is an unexpected error, please check if every settings is fine, or contact the bot owner to resolve this issue.',
-    };
   };
 }

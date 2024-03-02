@@ -1,5 +1,11 @@
-import { AppEventLogService, Database, Embeds, MembershipCollection } from '@divine-bridge/common';
-import { MembershipService } from '@divine-bridge/common';
+import {
+  AppEventLogService,
+  Database,
+  Embeds,
+  MembershipCollection,
+  MembershipService,
+} from '@divine-bridge/common';
+import { t } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import utc from 'dayjs/plugin/utc.js';
@@ -21,48 +27,46 @@ dayjs.extend(customParseFormat);
 
 export class AddMemberCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
-    .setName('add-member')
-    .setDescription('Manually assign a YouTube membership role to a member in this server')
+    .setI18nName('add_member_command.name')
+    .setI18nDescription('add_member_command.description')
     .addUserOption((option) =>
-      option.setName('member').setDescription('The member to assign the role to').setRequired(true),
+      option
+        .setI18nName('add_member_command.member_option_name')
+        .setI18nDescription('add_member_command.member_option_description')
+        .setRequired(true),
     )
     .addRoleOption((option) =>
       option
-        .setName('role')
-        .setDescription('The YouTube Membership role in this server')
+        .setI18nName('add_member_command.role_option_name')
+        .setI18nDescription('add_member_command.role_option_description')
         .setRequired(true),
     )
     .addStringOption((option) =>
       option
-        .setName('end_date')
-        .setDescription(
-          'The end date of the granted membership in YYYY-MM-DD, default to tomorrow',
-        ),
+        .setI18nName('add_member_command.end_date_option_name')
+        .setI18nDescription('add_member_command.end_date_option_description'),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
   public readonly global = true;
   public readonly guildOnly = true;
+  public readonly moderatorOnly = true;
   public readonly requiredClientPermissions = [PermissionFlagsBits.ManageRoles];
 
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
-
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    { guild, guildLocale, guild_t, author_t }: ChatInputCommand.ExecuteContext,
   ) {
     const { user: moderator, options } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
 
-    // Get log channel and membership role, and check if the role is manageable
+    // Get log channel and membership role, check if the role is manageable
     const role = options.getRole('role', true);
     const [logChannelResult, membershipRoleResult, manageableResult] = await Promise.all([
-      Validators.isGuildHasLogChannel(guild),
-      Validators.isGuildHasMembershipRole(guild.id, role.id),
-      Validators.isManageableRole(guild, role.id),
+      Validators.isGuildHasLogChannel(author_t, guild),
+      Validators.isGuildHasMembershipRole(author_t, guild.id, role.id),
+      Validators.isManageableRole(author_t, guild, role.id),
     ]);
     if (!logChannelResult.success) {
       return await interaction.editReply({
@@ -87,7 +91,7 @@ export class AddMemberCommand extends ChatInputCommand {
       endDate = dayjs.utc(end_date, 'YYYY-MM-DD', true);
       if (!endDate.isValid()) {
         return await interaction.editReply({
-          content: `The end date \`${end_date}\` is not a valid date in YYYY-MM-DD format.`,
+          content: `${author_t('server.The end date')} \`${end_date}\` ${author_t('server.is not a valid date in YYYY-MM-DD format')}`,
         });
       }
       endDate = endDate.startOf('date');
@@ -96,7 +100,7 @@ export class AddMemberCommand extends ChatInputCommand {
     }
 
     // Check if the end date is too far in the future
-    const validDateResult = Validators.isValidDateInterval(endDate, currentDate);
+    const validDateResult = Validators.isValidDateInterval(author_t, endDate, currentDate);
     if (!validDateResult.success) {
       return await interaction.editReply({
         content: validDateResult.error,
@@ -108,16 +112,13 @@ export class AddMemberCommand extends ChatInputCommand {
     const memberResult = await discordBotApi.fetchGuildMember(guild.id, user.id);
     if (!memberResult.success) {
       return await interaction.editReply({
-        content: `The user <@${user.id}> is not a member of this server.`,
+        content: `${author_t('server.The user')} <@${user.id}> ${author_t('server.is not a member of this server')}`,
       });
     }
 
     // Upsert user
-    await Database.upsertUser({
-      id: user.id,
-      username: user.username,
-      image: user.displayAvatarURL(),
-    });
+    const userDoc = await Database.upsertUser(Utils.convertUser(user));
+    const userLocale = userDoc.preference.locale;
 
     // Check if the user already has membership
     const oldMembershipDoc = await MembershipCollection.findOne({
@@ -127,11 +128,12 @@ export class AddMemberCommand extends ChatInputCommand {
     let activeInteraction: RepliableInteraction = interaction;
     if (oldMembershipDoc !== null) {
       const confirmResult = await Utils.awaitUserConfirm(
+        author_t,
         activeInteraction,
         'add-member-existing-membership',
         {
-          content: `The user <@${user.id}> already has an existing membership. Do you want to overwrite it?`,
-          embeds: [Embeds.membership(Utils.convertUser(user), oldMembershipDoc)],
+          content: `${author_t('server.The user')} <@${user.id}> ${author_t('server.already has an existing membership Do you want to overwrite it')}`,
+          embeds: [Embeds.membership(author_t, Utils.convertUser(user), oldMembershipDoc)],
         },
       );
       if (!confirmResult.confirmed) return;
@@ -140,21 +142,28 @@ export class AddMemberCommand extends ChatInputCommand {
     }
 
     // Ask for confirmation
-    const confirmResult = await Utils.awaitUserConfirm(activeInteraction, 'add-member', {
+    const confirmResult = await Utils.awaitUserConfirm(author_t, activeInteraction, 'add-member', {
       content:
-        `Are you sure you want to assign the membership role <@&${role.id}> to <@${user.id}>?\n` +
-        `Their membership will expire on \`${endDate.format('YYYY-MM-DD')}\`.`,
+        `${author_t('server.Are you sure you want to assign the membership role')} <@&${role.id}> ${author_t('server.to')} <@${user.id}>?\n` +
+        `${author_t('server.Their membership will expire on')} \`${endDate.format('YYYY-MM-DD')}\``,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guild.id).init();
-    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+    const appEventLogService = await new AppEventLogService(
+      guild_t,
+      logger,
+      discordBotApi,
+      guild.id,
+    ).init();
+    const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
 
     // Add membership to user
     const addMembershipResult = await membershipService.add({
+      userLocale,
+      guildLocale,
       guildId: guild.id,
       guildName: guild.name,
       membershipRoleDoc,
@@ -171,9 +180,9 @@ export class AddMemberCommand extends ChatInputCommand {
     }
 
     await confirmedInteraction.editReply({
-      content: `Successfully assigned the membership role <@&${role.id}> to <@${
+      content: `${author_t('server.Successfully assigned the membership role')} <@&${role.id}> ${author_t('server.to')} <@${
         user.id
-      }>.\nTheir membership will expire on \`${endDate.format('YYYY-MM-DD')}\`.`,
+      }>\n${author_t('server.Their membership will expire on')} \`${endDate.format('YYYY-MM-DD')}\``,
     });
   }
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import styles from '../../../styles/Document.module.css';
+import styles from '../../../../styles/Document.module.css';
 
 export default function Privacy() {
   return (

@@ -2,11 +2,13 @@ import {
   ActionRows,
   Database,
   Embeds,
+  GuildDoc,
   MembershipCollection,
   MembershipRoleCollection,
   MembershipRoleDoc,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
+import { TFunc, defaultLocale, supportedLocales, t } from '@divine-bridge/i18n';
 import { OCRService, supportedOCRLanguages } from '@divine-bridge/ocr-service';
 import {
   Attachment,
@@ -26,10 +28,7 @@ export class VerifyCommand extends ChatInputCommand {
   public readonly command = this.commandFactory({ alias: false });
   public readonly global = true;
   public readonly guildOnly = true;
-
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
+  public readonly moderatorOnly = false;
 
   public commandFactory(
     args:
@@ -42,17 +41,40 @@ export class VerifyCommand extends ChatInputCommand {
           youtubeChannelTitle: string;
         },
   ) {
-    const command = new SlashCommandBuilder()
-      .setName(args.alias ? args.name : 'verify')
+    const command = new SlashCommandBuilder().setName(
+      args.alias ? args.name : t('verify_command.name', 'en-US'),
+    );
+    if (args.alias === false) {
+      command.setNameLocalizations(
+        supportedLocales.reduce(
+          (acc, locale) =>
+            locale === defaultLocale ? acc : { ...acc, [locale]: t('verify_command.name', locale) },
+          {},
+        ),
+      );
+    }
+    command
       .setDescription(
-        `Provide a screenshot and verify your ${
-          args.alias ? args.youtubeChannelTitle : 'YouTube'
-        } membership in this server.`,
+        `${t('verify_command.description_1', 'en-US')} ${args.alias ? args.youtubeChannelTitle : 'YouTube'} ${t('verify_command.description_2', 'en-US')}`,
+      )
+      .setDescriptionLocalizations(
+        supportedLocales.reduce(
+          (acc, locale) =>
+            locale === defaultLocale
+              ? acc
+              : {
+                  ...acc,
+                  [locale]: `${t('verify_command.description_1', locale)} ${
+                    args.alias ? args.youtubeChannelTitle : 'YouTube'
+                  } ${t('verify_command.description_2', locale)}`,
+                },
+          {},
+        ),
       )
       .addAttachmentOption((option) =>
         option
-          .setName('screenshot')
-          .setDescription('Your YouTube membership proof screenshot')
+          .setI18nName('verify_command.screenshot_option_name')
+          .setI18nDescription('verify_command.screenshot_option_description')
           .setRequired(true),
       );
     if (!args.alias) {
@@ -60,8 +82,8 @@ export class VerifyCommand extends ChatInputCommand {
       command
         .addStringOption((option) =>
           option
-            .setName('membership_role')
-            .setDescription('The membership role you would like to apply for in this server')
+            .setI18nName('verify_command.membership_role_option_name')
+            .setI18nDescription('verify_command.membership_role_option_description')
             .setRequired(true)
             .setAutocomplete(true),
         )
@@ -69,8 +91,8 @@ export class VerifyCommand extends ChatInputCommand {
     }
     command.addStringOption((option) =>
       option
-        .setName('language')
-        .setDescription('The language of the text in your picture')
+        .setI18nName('verify_command.language_option_name')
+        .setI18nDescription('verify_command.language_option_description')
         .addChoices(
           ...supportedOCRLanguages.map(({ language, code }) => ({
             name: language,
@@ -85,7 +107,7 @@ export class VerifyCommand extends ChatInputCommand {
 
   public override async autocomplete(
     interaction: AutocompleteInteraction,
-    { guild }: ChatInputCommand.AutocompleteContext,
+    { guild }: ChatInputCommand.ExecuteContext,
   ) {
     const focusedOption = interaction.options.getFocused(true);
     if (focusedOption.name === 'membership_role') {
@@ -127,9 +149,9 @@ export class VerifyCommand extends ChatInputCommand {
     }
   }
 
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    context: ChatInputCommand.ExecuteContext,
   ) {
     const { options } = interaction;
 
@@ -137,46 +159,52 @@ export class VerifyCommand extends ChatInputCommand {
     const membershipRoleId = options.getString('membership_role', true);
     const langCode = options.getString('language');
 
-    await this._execute(interaction, { guild, picture, membershipRoleId, langCode });
+    await this._execute(interaction, { ...context, picture, membershipRoleId, langCode });
   }
 
   public async executeAlias(
     interaction: ChatInputCommandInteraction,
     args: { membershipRoleId: string },
+    context: ChatInputCommand.ExecuteContext,
   ) {
-    const { guild, options } = interaction;
+    const { options } = interaction;
     const { membershipRoleId } = args;
-    if (guild === null) return;
 
     const picture = options.getAttachment('screenshot', true);
     const langCode = options.getString('language');
 
-    await this._execute(interaction, { guild, picture, membershipRoleId, langCode });
+    await this._execute(interaction, { ...context, picture, membershipRoleId, langCode });
   }
 
   private async _execute(
     interaction: ChatInputCommandInteraction,
     args: {
       guild: Guild;
+      guildDoc: GuildDoc;
+      guildLocale: string;
+      guild_t: TFunc;
+      authorLocale: string;
+      author_t: TFunc;
       picture: Attachment;
       membershipRoleId: string;
       langCode: string | null;
     },
   ) {
     const { user } = interaction;
-    const { guild, picture, membershipRoleId, langCode } = args;
+    const { guild, guild_t, author_t, picture, membershipRoleId, langCode } = args;
 
     await interaction.deferReply({ ephemeral: true });
 
     // Get user attachment
     if (!(picture.contentType?.startsWith('image/') ?? false)) {
       return await interaction.editReply({
-        content: 'Please provide an image file.',
+        content: author_t('server.Please provide an image file'),
       });
     }
 
     // Get membership role
     const membershipRoleResult = await Validators.isGuildHasMembershipRole(
+      author_t,
       guild.id,
       membershipRoleId,
     );
@@ -187,14 +215,10 @@ export class VerifyCommand extends ChatInputCommand {
     }
     const membershipRoleDoc = membershipRoleResult.data;
 
-    // Upsert user config, check log channel
+    // Upsert user config, and check log channel
     const [userDoc, logChannelResult] = await Promise.all([
-      Database.upsertUser({
-        id: user.id,
-        username: user.username,
-        image: user.displayAvatarURL(),
-      }),
-      Validators.isGuildHasLogChannel(guild),
+      Database.upsertUser(Utils.convertUser(user)),
+      Validators.isGuildHasLogChannel(author_t, guild),
     ]);
     if (!logChannelResult.success) {
       return await interaction.editReply({
@@ -227,12 +251,15 @@ export class VerifyCommand extends ChatInputCommand {
       (existingMembershipDoc.type === 'auth' || existingMembershipDoc.type === 'live_chat')
     ) {
       const confirmedResult = await Utils.awaitUserConfirm(
+        author_t,
         activeInteraction,
         'verify-detected-oauth',
         {
           content:
-            `You already have a membership with this membership role, which is periodically renewed with ${existingMembershipDoc.type === 'auth' ? 'your authorized YouTube channel credentials' : 'your message activity in the live chat room'}.\n` +
-            'If your screenshot request is accepted, your current membership will be overwritten and no longer be renewed automatically. Do you want to continue?',
+            `${author_t('server.You already have a membership with this membership role which is periodically renewed with')} ${existingMembershipDoc.type === 'auth' ? author_t('server.your authorized YouTube channel credentials') : author_t('server.your message activity in the live chat room')}\n` +
+            author_t(
+              'server.If your screenshot request is accepted your current membership will be overwritten and no longer be renewed automatically Do you want to continue',
+            ),
         },
       );
       if (!confirmedResult.confirmed) return;
@@ -246,6 +273,7 @@ export class VerifyCommand extends ChatInputCommand {
 
     // Send response to user
     const screenshotSubmission = Embeds.screenshotSubmission(
+      author_t,
       Utils.convertUser(user),
       membershipRoleDoc,
       selectedLanguage.language,
@@ -264,14 +292,15 @@ export class VerifyCommand extends ChatInputCommand {
       selectedLanguage.code,
     );
     if (!recognizedResult.success) {
-      this.bot.logger.error(recognizedResult.error);
+      this.context.logger.error(recognizedResult.error);
     }
     const recognizedDate = recognizedResult.success
       ? recognizedResult.date
       : { year: null, month: null, day: null };
 
-    const adminActionRow = ActionRows.adminVerificationButton();
+    const adminActionRow = ActionRows.adminVerificationButton(guild_t);
     const membershipVerificationRequestEmbed = Embeds.membershipVerificationRequest(
+      guild_t,
       Utils.convertUser(user),
       recognizedDate,
       membershipRoleDoc._id,

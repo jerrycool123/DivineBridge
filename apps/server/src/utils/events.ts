@@ -1,7 +1,7 @@
 import { Logger } from '@divine-bridge/common';
 import { Server } from 'node:http';
 
-export const registerProcessHandlers = (logger: Logger, httpServer: Server) => {
+export const registerProcessEventListeners = (logger: Logger, httpServer: Server) => {
   let cleanup = false;
   const stopHandler = () => {
     if (cleanup) return;
@@ -18,6 +18,7 @@ export const registerProcessHandlers = (logger: Logger, httpServer: Server) => {
   });
   process.on('uncaughtException', async (error: Error) => {
     logger.fatal(`Uncaught Exception: ${error.message}`);
+    console.error(error);
     stopHandler();
     await new Promise((resolve) => setTimeout(resolve, 1000));
     process.exit(1);

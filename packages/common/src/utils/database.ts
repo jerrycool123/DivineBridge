@@ -5,14 +5,15 @@ import { MembershipRoleCollection, MembershipRoleDoc } from '../models/membershi
 import { MembershipCollection, MembershipDoc } from '../models/membership.js';
 import { UserCollection, UserDoc } from '../models/user.js';
 import { YouTubeChannelCollection, YouTubeChannelDoc } from '../models/youtube-channel.js';
+import { GuildPayload, UserPayload } from '../types/common.js';
 
 export namespace Database {
-  export const upsertGuild = async (guild: {
-    id: string;
-    name: string;
-    icon: string | null;
-    logChannel?: string | null;
-  }): Promise<GuildDoc> => {
+  export const upsertGuild = async (
+    guild: GuildPayload & {
+      logChannel?: string | null;
+      locale?: string;
+    },
+  ): Promise<GuildDoc> => {
     return await GuildCollection.findByIdAndUpdate(
       guild.id,
       {
@@ -20,6 +21,7 @@ export namespace Database {
           'profile.name': guild.name,
           'profile.icon': guild.icon,
           ...(guild.logChannel !== undefined && { 'config.logChannel': guild.logChannel }),
+          ...(guild.locale !== undefined && { 'config.locale': guild.locale }),
         },
         $setOnInsert: {
           _id: guild.id,
@@ -60,19 +62,22 @@ export namespace Database {
     );
   };
 
-  export const upsertUser = async (user: {
-    id: string;
-    username: string;
-    image: string;
-  }): Promise<UserDoc> => {
+  export const upsertUser = async (
+    user: UserPayload & {
+      locale?: string;
+    },
+  ): Promise<UserDoc> => {
     return await UserCollection.findByIdAndUpdate(
       user.id,
       {
         $set: {
-          'profile.username': user.username,
+          'profile.username': user.name,
           'profile.image': user.image,
         },
-        $setOnInsert: { _id: user.id },
+        $setOnInsert: {
+          _id: user.id,
+          ...(user.locale !== undefined && { 'preference.locale': user.locale }),
+        },
       },
       {
         upsert: true,

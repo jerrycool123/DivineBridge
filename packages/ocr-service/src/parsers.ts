@@ -18,17 +18,17 @@ import {
  * For developers: you can extend this to support more languages
  * */
 export const billingDateParsers = {
-  'English': new EngBillingDateParser('eng'),
-  'Chinese - Simplified': new ChiSimBillingDateParser('chi_sim'),
-  'Chinese - Traditional': new ChiTraBillingDateParser('chi_tra'),
-  'German': new DeuBillingDateParser('deu'),
-  'Filipino': new FilBillingDateParser('fil'),
-  'Indonesian': new IndBillingDateParser('ind'),
-  'Japanese': new JpnBillingDateParser('jpn'),
-  'Korean': new KorBillingDateParser('kor'),
-  'Malay': new MsaBillingDateParser('msa'),
-  'Thai': new ThaBillingDateParser('tha'),
-  'Vietnamese': new VieBillingDateParser('vie'),
+  English: new EngBillingDateParser('eng'),
+  简体中文: new ChiSimBillingDateParser('chi_sim'),
+  繁體中文: new ChiTraBillingDateParser('chi_tra'),
+  German: new DeuBillingDateParser('deu'),
+  Filipino: new FilBillingDateParser('fil'),
+  Indonesian: new IndBillingDateParser('ind'),
+  Japanese: new JpnBillingDateParser('jpn'),
+  Korean: new KorBillingDateParser('kor'),
+  Malay: new MsaBillingDateParser('msa'),
+  Thai: new ThaBillingDateParser('tha'),
+  Vietnamese: new VieBillingDateParser('vie'),
 };
 
 /* ======================================================================== */

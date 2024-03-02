@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@divine-bridge/common": "workspace:^",
+    "@divine-bridge/i18n": "workspace:^",
     "@divine-bridge/ocr-service": "workspace:^",
     "axios": "^1.6.7",
     "csv-writer": "^1.6.0",

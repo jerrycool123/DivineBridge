@@ -9,5 +9,8 @@
     { "pattern": "packages/*/" }
   ],
   "javascript.validate.enable": false,
-  "typescript.preferences.quoteStyle": "single"
+  "typescript.preferences.quoteStyle": "single",
+  "i18n-ally.localesPaths": ["./packages/i18n/src/locales"],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.namespace": true
 }

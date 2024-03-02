@@ -1,5 +1,6 @@
 import {
   AppEventLogService,
+  CryptoUtils,
   GoogleOAuth,
   GuildCollection,
   MembershipCollection,
@@ -11,7 +12,7 @@ import {
   YouTubeChannelCollection,
   YouTubeOAuthAPI,
 } from '@divine-bridge/common';
-import { CryptoUtils } from '@divine-bridge/common';
+import { defaultLocale, getTFunc, initI18n, t } from '@divine-bridge/i18n';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -37,6 +38,7 @@ export const checkAuthMembership = async (
 
   logger.info(`Start checking auth membership.`);
   await dbConnect(logger);
+  await initI18n();
   let removalCount = 0,
     removalFailCount = 0;
 
@@ -85,6 +87,7 @@ export const checkAuthMembership = async (
       );
       continue;
     }
+    const guildLocale = guildDoc.config.locale ?? defaultLocale;
 
     // Get YouTube channel from DB
     const youtubeChannelId = membershipRoleDoc.youtube;
@@ -97,14 +100,20 @@ export const checkAuthMembership = async (
     }
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guildId).init();
-    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+    const appEventLogService = await new AppEventLogService(
+      getTFunc(guildLocale),
+      logger,
+      discordBotApi,
+      guildId,
+    ).init();
+    const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
 
     // Check membership
     const failedRoleRemovalUserIds: string[] = [];
     for (const membershipDoc of membershipDocGroup) {
       const userId = membershipDoc.user;
       const userDoc = userId in userDocRecord ? userDocRecord[userId] : null;
+      const userLocale = userDoc?.preference.locale;
 
       // Verify the user's membership via Google API
       const decryptResult =
@@ -165,12 +174,15 @@ export const checkAuthMembership = async (
       const endDate = dayjs.utc(membershipDoc.end).startOf('day');
       if (endDate.isBefore(currentDate, 'date')) {
         const removeMembershipResult = await membershipService.remove({
+          userLocale,
+          guildLocale,
           guildId,
           membershipDoc,
           membershipRoleDoc,
           removeReason:
-            'we cannot verify your membership from YouTube API.\n' +
-            'Please go to our [website](https://divine-bridge.jerrycool123.com) to verify your membership again.',
+            t('membership.check_auth_membership_failed_1', userLocale) +
+            '\n' +
+            t('membership.check_auth_membership_failed_2', userLocale),
           manual: false,
         });
         if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
@@ -185,11 +197,13 @@ export const checkAuthMembership = async (
     if (failedRoleRemovalUserIds.length > 0) {
       await appEventLogService.log({
         content:
-          `[Auth membership check]\n` +
-          `Following are the users whose membership has expired, ` +
-          `but the bot failed to remove their membership role <@&${membershipRoleId}>:\n` +
+          t('membership.check_auth_membership', guildLocale) +
+          '\n' +
+          t('membership.check_membership_failed_removal_guild_log_1', guildLocale) +
+          ` <@&${membershipRoleId}>:\n` +
           failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
-          `\n\nPlease manually remove the role from these users, and check if the bot has correct permissions.`,
+          '\n\n' +
+          t('membership.check_membership_failed_removal_guild_log_2', guildLocale),
       });
     }
   }

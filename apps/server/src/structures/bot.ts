@@ -1,76 +1,104 @@
 import { Logger } from '@divine-bridge/common';
-import { Client, ClientOptions, Events } from 'discord.js';
+import { Client, ClientEvents, ClientOptions } from 'discord.js';
+import fs from 'node:fs';
+import { z } from 'zod';
 
-import { Buttons, ChatInputCommands, EventHandlers } from '../bot.js';
+import { cryptoUtils } from '../utils/crypto.js';
+import { discordBotApi } from '../utils/discord.js';
 import { Button } from './button.js';
 import { ChatInputCommand } from './chat-input-command.js';
+import { Core } from './core.js';
 import { EventHandler } from './event-handler.js';
 
-export class Bot<Ready extends boolean = boolean> {
-  public readonly client: Client<Ready>;
-  public readonly logger: Logger;
-  public readonly eventHandlers: EventHandler<Events>[] = [];
-  public readonly chatInputCommandMap: Record<
+export namespace Bot {
+  export type EventHandlers = EventHandler<keyof ClientEvents>[];
+  export type ChatInputCommandsMap = Record<
     string,
     ChatInputCommand<true> | ChatInputCommand<false>
-  > = {};
-  public readonly buttonMap: Record<string, Button<true> | Button<false>> = {};
+  >;
+  export type ButtonsMap = Record<string, Button<true> | Button<false>>;
+  export type EventHandlersClass = EventHandler<keyof ClientEvents>;
+  export type ChatInputCommandClass = ChatInputCommand<boolean>;
+  export type ButtonClass = Button<boolean>;
+}
 
-  private readonly eventHandlerClasses: EventHandlers;
-  private readonly chatInputCommandClasses: ChatInputCommands;
-  private readonly buttonClasses: Buttons;
+export class Bot extends Core {
+  public readonly eventHandlers: Bot.EventHandlers = [];
+  public readonly chatInputCommandMap: Bot.ChatInputCommandsMap = {};
+  public readonly buttonMap: Bot.ButtonsMap = {};
 
   public constructor(args: {
-    options: ClientOptions;
     logger: Logger;
-    eventHandlers: EventHandlers;
-    chatInputCommands: ChatInputCommands;
-    buttons: Buttons;
+    options: ClientOptions;
+    eventHandlers: Bot.EventHandlersClass[];
+    chatInputCommands: Bot.ChatInputCommandClass[];
+    buttons: Bot.ButtonClass[];
   }) {
-    this.client = new Client(args.options);
-    this.logger = args.logger;
-    this.eventHandlerClasses = args.eventHandlers;
-    this.chatInputCommandClasses = args.chatInputCommands;
-    this.buttonClasses = args.buttons;
+    super();
+    this.context.logger = args.logger;
+    this.context.client = new Client(args.options);
+    this.context.bot = this;
+    this.eventHandlers = args.eventHandlers;
+    for (const chatInputCommand of args.chatInputCommands) {
+      this.chatInputCommandMap[chatInputCommand.command.name] = chatInputCommand;
+    }
+    for (const button of args.buttons) {
+      this.buttonMap[button.customId] = button;
+    }
   }
 
   public async start(token: string) {
     this.registerEventHandlers();
-    return await this.client.login(token);
+    return await this.context.client.login(token);
+  }
+
+  public async registerCommands(applicationId: string) {
+    // Hash the commands and compare with the previous hash
+    const rawCommands = Object.values(this.chatInputCommandMap).map(({ command }) =>
+      command.toJSON(),
+    );
+    const hashResult = cryptoUtils.hash(JSON.stringify(rawCommands));
+    if (!hashResult.success) {
+      throw new Error('Failed to hash the commands');
+    }
+    const { hash } = hashResult;
+
+    // Load the previous hash from './.commands-hash.json'
+    const hashFile = './.commands-hash.json';
+    let cached = false;
+    if (fs.existsSync(hashFile)) {
+      try {
+        const hashSchema = z.object({ hash: z.string() });
+        const previousHash = hashSchema.parse(
+          JSON.parse(fs.readFileSync('./.commands-hash.json', 'utf-8')),
+        ).hash;
+        if (previousHash === hash) {
+          cached = true;
+        }
+      } catch (error) {
+        this.context.logger.error('Failed to read the previous hash', error);
+      }
+    }
+
+    // Write the new hash to './.commands-hash.json'
+    fs.writeFileSync(hashFile, JSON.stringify({ hash }), 'utf-8');
+
+    if (cached === false) {
+      this.context.logger.debug('Cache miss, overwriting global application commands');
+      await discordBotApi.overwriteGlobalApplicationCommands(applicationId, rawCommands);
+    } else {
+      this.context.logger.debug('Cache hit, skipping updating global application commands');
+    }
+    this.context.logger.debug('Registered chat input commands');
   }
 
   private registerEventHandlers() {
-    for (const eventHandlerClass of this.eventHandlerClasses) {
-      const eventHandler = new eventHandlerClass({ bot: this });
-      eventHandler.register();
-      this.eventHandlers.push(eventHandler);
+    for (const eventHandler of this.eventHandlers) {
+      this.context.client[eventHandler.once ? 'once' : 'on'](
+        eventHandler.event,
+        eventHandler.execute.bind(eventHandler),
+      );
     }
-    this.logger.debug('Registered event handlers');
-  }
-
-  public registerChatInputCommands() {
-    if (!this.client.isReady()) {
-      throw new Error('Client is not ready');
-    }
-
-    for (const chatInputCommandClass of this.chatInputCommandClasses) {
-      const chatInputCommand = new chatInputCommandClass({ bot: this as Bot<true> });
-      this.chatInputCommandMap[chatInputCommand.command.name] = chatInputCommand;
-    }
-    this.logger.debug('Registered chat input commands');
-  }
-
-  public registerButtons() {
-    if (!this.client.isReady()) {
-      throw new Error('Client is not ready');
-    }
-
-    if (this.client.isReady()) {
-      for (const buttonClass of this.buttonClasses) {
-        const button = new buttonClass({ bot: this as Bot<true> });
-        this.buttonMap[button.customId] = button;
-      }
-    }
-    this.logger.debug('Registered buttons');
+    this.context.logger.debug('Registered event handlers');
   }
 }

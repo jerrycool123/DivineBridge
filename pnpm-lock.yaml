@@ -26,6 +26,9 @@ importers:
       '@divine-bridge/common':
         specifier: workspace:^
         version: link:../../packages/common
+      '@divine-bridge/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
       '@divine-bridge/ocr-service':
         specifier: workspace:^
         version: link:../../packages/ocr-service
@@ -185,6 +188,9 @@ importers:
       '@divine-bridge/eslint-config-custom':
         specifier: workspace:^
         version: link:../../packages/eslint-config-custom
+      '@divine-bridge/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
       '@divine-bridge/prettier-config-custom':
         specifier: workspace:^
         version: link:../../packages/prettier-config-custom
@@ -324,12 +330,18 @@ importers:
       '@divine-bridge/eslint-config-custom':
         specifier: workspace:^
         version: link:../../packages/eslint-config-custom
+      '@divine-bridge/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
       '@divine-bridge/prettier-config-custom':
         specifier: workspace:^
         version: link:../../packages/prettier-config-custom
       '@eisberg-labs/next-google-analytics':
         specifier: ^5.0.1
         version: 5.0.1(next@14.1.0)(react-dom@18.2.0)(react@18.2.0)
+      '@formatjs/intl-localematcher':
+        specifier: ^0.5.4
+        version: 0.5.4
       '@react-oauth/google':
         specifier: ^0.12.1
         version: 0.12.1(react-dom@18.2.0)(react@18.2.0)
@@ -369,9 +381,15 @@ importers:
       eslint-plugin-import:
         specifier: ^2.29.1
         version: 2.29.1(@typescript-eslint/parser@6.20.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
+      i18next:
+        specifier: ^23.10.0
+        version: 23.10.0
       mongoose:
         specifier: ^8.1.1
         version: 8.1.1
+      negotiator:
+        specifier: ^0.6.3
+        version: 0.6.3
       next:
         specifier: 14.1.0
         version: 14.1.0(react-dom@18.2.0)(react@18.2.0)
@@ -390,6 +408,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      react-i18next:
+        specifier: ^14.0.5
+        version: 14.0.5(i18next@23.10.0)(react-dom@18.2.0)(react@18.2.0)
       react-social-login-buttons:
         specifier: ^3.9.1
         version: 3.9.1(react@18.2.0)
@@ -405,6 +426,10 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
+    devDependencies:
+      '@types/negotiator':
+        specifier: ^0.6.3
+        version: 0.6.3
 
   packages/common:
     dependencies:
@@ -414,6 +439,9 @@ importers:
       '@discordjs/rest':
         specifier: ^2.2.0
         version: 2.2.0
+      '@divine-bridge/i18n':
+        specifier: workspace:^
+        version: link:../i18n
       '@divine-bridge/ocr-service':
         specifier: workspace:^
         version: link:../ocr-service
@@ -510,6 +538,40 @@ importers:
         specifier: workspace:^
         version: link:../prettier-config-custom
 
+  packages/i18n:
+    dependencies:
+      i18next:
+        specifier: ^23.10.0
+        version: 23.10.0
+      tsup:
+        specifier: ^8.0.1
+        version: 8.0.1(typescript@5.3.3)
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      '@divine-bridge/eslint-config-custom':
+        specifier: workspace:^
+        version: link:../eslint-config-custom
+      '@divine-bridge/prettier-config-custom':
+        specifier: workspace:^
+        version: link:../prettier-config-custom
+      '@types/node':
+        specifier: ^20.11.16
+        version: 20.11.16
+      eslint:
+        specifier: ^8.56.0
+        version: 8.56.0
+      eslint-plugin-import-esm:
+        specifier: ^1.2.1
+        version: 1.2.1(eslint@8.56.0)
+      prettier:
+        specifier: ^3.2.5
+        version: 3.2.5
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
   packages/ocr-service:
     dependencies:
       tsup:
@@ -561,18 +623,9 @@ importers:
 
   packages/serverless-offline-lambda-function-urls:
     devDependencies:
-      '@divine-bridge/eslint-config-custom':
-        specifier: workspace:^
-        version: link:../eslint-config-custom
       '@divine-bridge/prettier-config-custom':
         specifier: workspace:^
         version: link:../prettier-config-custom
-      eslint:
-        specifier: ^8.56.0
-        version: 8.56.0
-      eslint-plugin-import-esm:
-        specifier: ^1.2.1
-        version: 1.2.1(eslint@8.56.0)
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -2498,6 +2551,12 @@ packages:
     engines: {node: '>=14'}
     dev: false
 
+  /@formatjs/intl-localematcher@0.5.4:
+    resolution: {integrity: sha512-zTwEpWOzZ2CiKcB93BLngUX59hQkuZjT2+SAQEscSm52peDW/getsawMcWF1rGRpMCX6D7nSJA3CzJ8gn13N/g==}
+    dependencies:
+      tslib: 2.6.2
+    dev: false
+
   /@hapi/accept@6.0.3:
     resolution: {integrity: sha512-p72f9k56EuF0n3MwlBNThyVE5PXX40g+aQh+C/xbKrfzahM2Oispv3AXmOIU51t3j77zay1qrX7IIziZXspMlw==}
     dependencies:
@@ -4220,6 +4279,10 @@ packages:
 
   /@types/lodash@4.14.202:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
+
+  /@types/negotiator@0.6.3:
+    resolution: {integrity: sha512-JkXTOdKs5MF086b/pt8C3+yVp3iDUwG635L7oCH6HvJvvr6lSUU5oe/gLXnPEfYRROHjJIPgCV6cuAg8gGkntQ==}
+    dev: true
 
   /@types/node@20.11.16:
     resolution: {integrity: sha512-gKb0enTmRCzXSSUJDq6/sPcqrfCv2mkkG6Jt/clpn5eiCbKTY+SgZUxo+p8ZKMof5dCp9vHQUAB7wOUTod22wQ==}
@@ -7099,6 +7162,12 @@ packages:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
     dev: true
 
+  /html-parse-stringify@3.0.1:
+    resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
+    dependencies:
+      void-elements: 3.1.0
+    dev: false
+
   /http-cache-semantics@4.1.1:
     resolution: {integrity: sha512-er295DKPVsV82j5kw1Gjt+ADA/XYHsajl82cGNQG2eyoPkvgUhX+nDIyelzhIWbbsXP39EHcI6l5tYs2FYqYXQ==}
 
@@ -7141,6 +7210,12 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
     dev: true
+
+  /i18next@23.10.0:
+    resolution: {integrity: sha512-/TgHOqsa7/9abUKJjdPeydoyDc0oTi/7u9F8lMSj6ufg4cbC1Oj3f/Jja7zj7WRIhEQKB7Q4eN6y68I9RDxxGQ==}
+    dependencies:
+      '@babel/runtime': 7.23.9
+    dev: false
 
   /iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -8647,6 +8722,11 @@ packages:
       fs2: 0.3.9
       type: 2.7.2
 
+  /negotiator@0.6.3:
+    resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
+    engines: {node: '>= 0.6'}
+    dev: false
+
   /next-auth@5.0.0-beta.5(next@14.1.0)(react@18.2.0):
     resolution: {integrity: sha512-tEYIPhm/i0byW4xf9Ldlsnh7ckBQfNvMjOA3B3eXQX9taAQWb8earravSn1fjk4fKfKvaOApFJkks0VeI7Vy/A==}
     peerDependencies:
@@ -9913,6 +9993,26 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
+
+  /react-i18next@14.0.5(i18next@23.10.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-5+bQSeEtgJrMBABBL5lO7jPdSNAbeAZ+MlFWDw//7FnVacuVu3l9EeWFzBQvZsKy+cihkbThWOAThEdH8YjGEw==}
+    peerDependencies:
+      i18next: '>= 23.2.3'
+      react: '>= 16.8.0'
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.9
+      html-parse-stringify: 3.0.1
+      i18next: 23.10.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-is@16.13.1:
@@ -11420,6 +11520,11 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /void-elements@3.1.0:
+    resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
+    engines: {node: '>=0.10.0'}
     dev: false
 
   /walker@1.0.8:

@@ -1,12 +1,86 @@
+import { initI18n } from '@divine-bridge/i18n';
 import mongoose from 'mongoose';
 
-import { bot } from './bot.js';
+import './augmentations.js';
+import {
+  MembershipAcceptButton,
+  MembershipModifyButton,
+  MembershipRejectButton,
+} from './buttons/index.js';
+import {
+  AddMemberCommand,
+  AddRoleCommand,
+  AddYouTubeChannelCommand,
+  CheckMemberCommand,
+  DeleteMemberCommand,
+  DeleteRoleCommand,
+  PingCommand,
+  SetLanguageCommand,
+  SetLogChannelCommand,
+  SettingsCommand,
+  VerifyCommand,
+  ViewMembersCommand,
+} from './commands/index.js';
+import { Constants } from './constants.js';
+import {
+  DebugEventHandler,
+  ErrorEventHandler,
+  GuildCreateEventHandler,
+  GuildUpdateEventHandler,
+  InteractionCreateEventHandler,
+  ReadyEventHandler,
+  RoleUpdateEventHandler,
+  WarnEventHandler,
+} from './event-handlers/index.js';
 import { httpServer } from './http.js';
+import { Bot } from './structures/bot.js';
 import { Env } from './utils/env.js';
-import { registerProcessHandlers } from './utils/events.js';
+import { registerProcessEventListeners } from './utils/events.js';
 import { logger } from './utils/logger.js';
 
-registerProcessHandlers(logger, httpServer);
+await initI18n({ debug: Env.NODE_ENV === 'development' });
+
+registerProcessEventListeners(logger, httpServer);
+
+const eventHandlers = [
+  new DebugEventHandler(),
+  new ErrorEventHandler(),
+  new GuildCreateEventHandler(),
+  new GuildUpdateEventHandler(),
+  new InteractionCreateEventHandler(),
+  new ReadyEventHandler(),
+  new RoleUpdateEventHandler(),
+  new WarnEventHandler(),
+];
+
+const chatInputCommands = [
+  new AddMemberCommand(),
+  new AddRoleCommand(),
+  new AddYouTubeChannelCommand(),
+  new CheckMemberCommand(),
+  new DeleteMemberCommand(),
+  new DeleteRoleCommand(),
+  new PingCommand(),
+  new SetLanguageCommand(),
+  new SetLogChannelCommand(),
+  new SettingsCommand(),
+  new VerifyCommand(),
+  new ViewMembersCommand(),
+];
+
+const buttons = [
+  new MembershipAcceptButton(),
+  new MembershipModifyButton(),
+  new MembershipRejectButton(),
+];
+
+export const bot = new Bot({
+  options: { intents: Constants.intents },
+  logger,
+  eventHandlers,
+  chatInputCommands,
+  buttons,
+});
 
 await mongoose.connect(Env.MONGO_URI);
 logger.debug('Connected to MongoDB');

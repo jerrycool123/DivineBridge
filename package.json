@@ -16,7 +16,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@8.15.3",
+  "packageManager": "pnpm@8.15.4",
   "scripts": {
     "build": "turbo run build",
     "deploy": "vercel --prod deploy",
@@ -24,7 +24,7 @@
     "deploy:sls-check-membership": "turbo run deploy --filter sls-check-membership",
     "deploy:sls-ocr": "turbo run deploy --filter sls-ocr",
     "dev": "turbo run dev",
-    "dev:web": "turbo run dev --filter web --filter @divine-bridge/common",
+    "dev:web": "turbo run dev --filter web --filter @divine-bridge/common --filter @divine-bridge/i18n",
     "format": "turbo run format",
     "lint": "turbo run lint",
     "preinstall": "npx only-allow pnpm",

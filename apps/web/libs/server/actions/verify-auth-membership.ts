@@ -9,6 +9,7 @@ import {
   YouTubeChannelDoc,
   YouTubeOAuthAPI,
 } from '@divine-bridge/common';
+import { defaultLocale } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { cookies } from 'next/headers';
@@ -16,10 +17,11 @@ import { z } from 'zod';
 
 import { authAction } from '.';
 import { VerifyAuthMembershipActionData } from '../../../types/server-actions';
-import { getAccessTokenFromCookie } from '../authjs';
+import { getJWTFromCookie } from '../authjs';
 import { cryptoUtils } from '../crypto';
 import { discordBotApi } from '../discord';
 import { googleOAuth } from '../google';
+import { getServerTranslation } from '../i18n';
 import { logger } from '../logger';
 
 dayjs.extend(utc);
@@ -63,7 +65,9 @@ export const verifyAuthMembershipAction = authAction<
 
   // Get access token from cookie
   const cookieStore = cookies();
-  const accessToken = await getAccessTokenFromCookie(cookieStore);
+  const { access_token: accessToken } = await getJWTFromCookie(cookieStore);
+  const userLocale = userDoc.preference.locale;
+  const { original_t: t } = await getServerTranslation(userLocale);
 
   // Check if user is a member of the guild that owns the membership role
   const discordOAuthApi = new DiscordOAuthAPI(accessToken);
@@ -78,6 +82,7 @@ export const verifyAuthMembershipAction = authAction<
     throw new Error('Membership role not found');
   }
   const guildDoc = membershipRoleDoc.guild;
+  const guildLocale = guildDoc.config.locale ?? defaultLocale;
 
   // Check if the guild exists, and the bot and the user is in the guild
   const guildResult = await discordBotApi.fetchGuild(guildDoc._id);
@@ -141,16 +146,19 @@ export const verifyAuthMembershipAction = authAction<
 
   // Initialize log service and membership service
   const appEventLogService = await new AppEventLogService(
+    (key) => t(key, guildLocale),
     logger,
     discordBotApi,
     guildDoc._id,
   ).init();
-  const membershipService = new MembershipService(discordBotApi, appEventLogService);
+  const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
 
   // Add membership to user
   const currentDate = dayjs.utc().startOf('day');
   const endDate = currentDate.add(30, 'days');
   const addMembershipResult = await membershipService.add({
+    userLocale,
+    guildLocale,
     guildId: guildDoc._id,
     guildName: guildDoc.profile.name,
     membershipRoleDoc,

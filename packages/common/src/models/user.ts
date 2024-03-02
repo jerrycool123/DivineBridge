@@ -12,6 +12,7 @@ export interface UserDoc extends UserAttrs, Document<string> {
   _id: string;
   preference: {
     language: string;
+    locale: string;
   };
   youtube: {
     id: string;
@@ -46,6 +47,11 @@ const userSchema = new Schema<UserDoc>(
         type: String,
         required: true,
         default: 'eng',
+      },
+      locale: {
+        type: String,
+        required: true,
+        default: 'en-US',
       },
     },
     youtube: {

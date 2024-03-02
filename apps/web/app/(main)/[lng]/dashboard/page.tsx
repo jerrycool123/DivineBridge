@@ -9,12 +9,12 @@ import utc from 'dayjs/plugin/utc';
 import Image from 'next/image';
 import { useContext, useState } from 'react';
 
-import styles from '../../../styles/Dashboard.module.css';
+import styles from '../../../../styles/Dashboard.module.css';
 
-import ApplyModal from '../../../components/Modals/ApplyModal';
-import { MainContext } from '../../../contexts/MainContext';
-import { getDiscordBotInviteLink } from '../../../libs/common/discord';
-import { GetGuildsActionData } from '../../../types/server-actions';
+import ApplyModal from '../../../../components/Modals/ApplyModal';
+import { MainContext } from '../../../../contexts/MainContext';
+import { getDiscordBotInviteLink } from '../../../../libs/common/discord';
+import { GetGuildsActionData } from '../../../../types/server-actions';
 
 dayjs.extend(utc);
 

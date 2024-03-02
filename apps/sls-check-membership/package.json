@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
+    "@divine-bridge/i18n": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
     "@types/aws-lambda": "^8.10.133",
     "eslint": "^8.56.0",

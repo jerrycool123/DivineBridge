@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "./dist"
+  },
+  "include": ["./src/**/*"],
+  "extends": "./tsconfig.json"
+}

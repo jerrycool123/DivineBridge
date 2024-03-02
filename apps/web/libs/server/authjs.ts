@@ -9,7 +9,7 @@ const jwtSchema = z.object({
   access_token: z.string(),
 });
 
-export const getAccessTokenFromCookie = async (cookieStore: ReadonlyRequestCookies) => {
+export const getJWTFromCookie = async (cookieStore: ReadonlyRequestCookies) => {
   const secureCookie = privateEnv.AUTH_URL.startsWith('https://');
   const cookieName = secureCookie ? '__Secure-authjs.session-token' : 'authjs.session-token';
   const jwtCookie = cookieStore.get(cookieName);
@@ -26,5 +26,5 @@ export const getAccessTokenFromCookie = async (cookieStore: ReadonlyRequestCooki
   if (!jwtData.success) {
     throw new Error('Unauthorized');
   }
-  return jwtData.data.access_token;
+  return jwtData.data;
 };

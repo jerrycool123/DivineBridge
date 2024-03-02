@@ -1,4 +1,3 @@
-import { Database } from '@divine-bridge/common';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
@@ -6,23 +5,23 @@ import { Validators } from '../utils/validators.js';
 
 export class SetLogChannelCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
-    .setName('set-log-channel')
-    .setDescription('Set a log channel where the membership verification requests would be sent')
+    .setI18nName('set_log_channel_command.name')
+    .setI18nDescription('set_log_channel_command.description')
     .addChannelOption((option) =>
-      option.setName('channel').setDescription('The log channel in this server').setRequired(true),
+      option
+        .setI18nName('set_log_channel_command.channel_option_name')
+        .setI18nDescription('set_log_channel_command.channel_option_description')
+        .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
   public readonly global = true;
   public readonly guildOnly = true;
+  public readonly moderatorOnly = true;
 
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
-
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    { guild, guildDoc, guild_t, author_t }: ChatInputCommand.ExecuteContext,
   ) {
     const { options } = interaction;
 
@@ -30,7 +29,7 @@ export class SetLogChannelCommand extends ChatInputCommand {
 
     // Get log channel
     const channel = options.getChannel('channel', true);
-    const logChannelResult = await Validators.isValidLogChannel(guild, channel.id);
+    const logChannelResult = await Validators.isValidLogChannel(author_t, guild, channel.id);
     if (!logChannelResult.success) {
       return await interaction.editReply({
         content: logChannelResult.error,
@@ -41,31 +40,21 @@ export class SetLogChannelCommand extends ChatInputCommand {
     // Check if the bot can send messages in the log channel
     try {
       await logChannel.send({
-        content: 'I will send membership screenshots to this channel.',
+        content: guild_t('server.I will send membership screenshots to this channel'),
       });
     } catch (error) {
-      this.bot.logger.debug(error);
+      this.context.logger.debug(error);
       return await interaction.editReply({
-        content: `The bot does not enough permission to send messages in  <#${logChannel.id}>.`,
+        content: `${author_t('server.The bot does not enough permission to send messages in')}  <#${logChannel.id}>`,
       });
     }
 
     // Add the log channel to DB
-    const guildDoc = await Database.upsertGuild({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.iconURL(),
-      logChannel: channel.id,
-    });
-
-    if (guildDoc.config.logChannel === null) {
-      return await interaction.editReply({
-        content: 'Failed to set the log channel.',
-      });
-    }
+    guildDoc.config.logChannel = channel.id;
+    await guildDoc.save();
 
     await interaction.editReply({
-      content: `The log channel has been set to <#${guildDoc.config.logChannel}>.`,
+      content: `${author_t('server.The log channel has been set to')} <#${guildDoc.config.logChannel}>`,
     });
   }
 }

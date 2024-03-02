@@ -11,29 +11,25 @@ import { Utils } from '../utils/index.js';
 
 export class CheckMemberCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
-    .setName('check-member')
-    .setDescription("Check a member's membership status in this server")
+    .setI18nName('check_member_command.name')
+    .setI18nDescription('check_member_command.description')
     .addUserOption((option) =>
       option
-        .setName('member')
-        .setDescription('The member to check the membership status for')
+        .setI18nName('check_member_command.member_option_name')
+        .setI18nDescription('check_member_command.member_option_description')
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
   public readonly global = true;
   public readonly guildOnly = true;
+  public readonly moderatorOnly = true;
 
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
-
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    { guild, author_t }: ChatInputCommand.ExecuteContext,
   ) {
     const { options } = interaction;
-    if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });
 
@@ -64,7 +60,11 @@ export class CheckMemberCommand extends ChatInputCommand {
     }
 
     // Organize membership status to embed and display
-    const membershipStatusEmbed = Embeds.membershipStatus(Utils.convertUser(user), memberships);
+    const membershipStatusEmbed = Embeds.membershipStatus(
+      author_t,
+      Utils.convertUser(user),
+      memberships,
+    );
     await interaction.editReply({
       embeds: [membershipStatusEmbed],
     });

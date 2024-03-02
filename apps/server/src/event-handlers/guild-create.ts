@@ -1,22 +1,21 @@
 import { Database } from '@divine-bridge/common';
-import { Events } from 'discord.js';
+import { Events, GuildFeature } from 'discord.js';
 import { Guild } from 'discord.js';
 
 import { EventHandler } from '../structures/event-handler.js';
+import { Utils } from '../utils/index.js';
 
 export class GuildCreateEventHandler extends EventHandler<Events.GuildCreate> {
   public readonly event = Events.GuildCreate;
   public readonly once = false;
 
-  public constructor(context: EventHandler.Context) {
-    super(context);
-  }
+  public override async execute(guild: Guild) {
+    // Set locale of the guild if the guild is a Community Guild
+    let locale: string | undefined = undefined;
+    if (guild.features.includes(GuildFeature.Community)) {
+      locale = guild.preferredLocale;
+    }
 
-  public async execute(guild: Guild) {
-    await Database.upsertGuild({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.iconURL(),
-    });
+    await Database.upsertGuild({ ...Utils.convertGuild(guild), locale });
   }
 }

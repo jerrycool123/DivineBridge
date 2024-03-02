@@ -2,11 +2,13 @@
 
 import {
   AppEventLogService,
+  GuildDoc,
   MembershipCollection,
   MembershipDoc,
   MembershipRoleDoc,
   MembershipService,
 } from '@divine-bridge/common';
+import { defaultLocale } from '@divine-bridge/i18n';
 import { z } from 'zod';
 
 import { authAction } from '.';
@@ -14,6 +16,7 @@ import type { DeleteAccountActionData } from '../../../types/server-actions';
 import { cryptoUtils } from '../crypto';
 import { discordBotApi } from '../discord';
 import { googleOAuth } from '../google';
+import { getServerTranslation } from '../i18n';
 import { logger } from '../logger';
 
 const deleteAccountActionInputSchema = z.object({});
@@ -22,6 +25,9 @@ export const deleteAccountAction = authAction<
   typeof deleteAccountActionInputSchema,
   DeleteAccountActionData
 >(deleteAccountActionInputSchema, async (_input, { userDoc }) => {
+  const userLocale = userDoc.preference.locale;
+  const { original_t: t } = await getServerTranslation(undefined);
+
   // Revoke YouTube refresh token if user has connected their YouTube account
   if (userDoc.youtube !== null) {
     const decryptResult = cryptoUtils.decrypt(userDoc.youtube.refreshToken);
@@ -37,12 +43,18 @@ export const deleteAccountAction = authAction<
   const membershipDocs = await MembershipCollection.find({
     user: userDoc._id,
   }).populate<{
-    membershipRole: MembershipRoleDoc | null;
-  }>('membershipRole');
+    membershipRole:
+      | (Omit<MembershipRoleDoc, 'guild'> & {
+          guild: GuildDoc | null;
+        })
+      | null;
+  }>({ path: 'membershipRole', populate: 'guild' });
 
   // Split valid and invalid memberships
   const validMembershipDocs: (Omit<MembershipDoc, 'membershipRole'> & {
-    membershipRole: MembershipRoleDoc;
+    membershipRole: Omit<MembershipRoleDoc, 'guild'> & {
+      guild: GuildDoc;
+    };
   })[] = [];
   const invalidMembershipDocs: (Omit<MembershipDoc, 'membershipRole'> & {
     membershipRole: null;
@@ -51,7 +63,9 @@ export const deleteAccountAction = authAction<
     if (membershipDoc.membershipRole !== null) {
       validMembershipDocs.push(
         membershipDoc as Omit<MembershipDoc, 'membershipRole'> & {
-          membershipRole: MembershipRoleDoc;
+          membershipRole: Omit<MembershipRoleDoc, 'guild'> & {
+            guild: GuildDoc;
+          };
         },
       );
     } else {
@@ -75,11 +89,13 @@ export const deleteAccountAction = authAction<
     Record<
       string,
       (Omit<MembershipDoc, 'membershipRole'> & {
-        membershipRole: MembershipRoleDoc;
+        membershipRole: Omit<MembershipRoleDoc, 'guild'> & {
+          guild: GuildDoc;
+        };
       })[]
     >
   >((prev, membershipDoc) => {
-    const guildId = membershipDoc.membershipRole.guild;
+    const guildId = membershipDoc.membershipRole.guild._id;
     return { ...prev, [guildId]: [...(guildId in prev ? prev[guildId] : []), membershipDoc] };
   }, {});
 
@@ -87,14 +103,23 @@ export const deleteAccountAction = authAction<
   for (const [guildId, membershipDocGroup] of Object.entries(membershipDocRecord)) {
     if (membershipDocGroup.length === 0) continue;
 
+    const guildLocale = membershipDocGroup[0].membershipRole.guild.config.locale ?? defaultLocale;
+
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guildId).init();
-    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+    const appEventLogService = await new AppEventLogService(
+      (key) => t(key, guildLocale),
+      logger,
+      discordBotApi,
+      guildId,
+    ).init();
+    const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
 
     // Remove membership
     const failedRoleRemovalIds: string[] = [];
     for (const membershipDoc of membershipDocGroup) {
       const removeMembershipResult = await membershipService.remove({
+        userLocale,
+        guildLocale,
         guildId,
         membershipRoleDoc: membershipDoc.membershipRole,
         membershipDoc,

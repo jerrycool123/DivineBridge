@@ -16,37 +16,35 @@ dayjs.extend(utc);
 
 export class ViewMembersCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
-    .setName('view-members')
-    .setDescription('View all members with a specific membership role in this server')
+    .setI18nName('view_members_command.name')
+    .setI18nDescription('view_members_command.description')
     .addRoleOption((option) =>
       option
-        .setName('role')
-        .setDescription('The YouTube Membership role in this server')
+        .setI18nName('view_members_command.role_option_name')
+        .setI18nDescription('view_members_command.role_option_description')
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
   public readonly global = true;
   public readonly guildOnly = true;
+  public readonly moderatorOnly = true;
 
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
-
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    { guild, author_t }: ChatInputCommand.ExecuteContext,
   ) {
     const { options } = interaction;
-    if (guild === null) return;
 
     await interaction.deferReply({ ephemeral: true });
 
     // Get membership role
     const role = options.getRole('role', true);
-    const [membershipRoleResult] = await Promise.all([
-      Validators.isGuildHasMembershipRole(guild.id, role.id),
-    ]);
+    const membershipRoleResult = await Validators.isGuildHasMembershipRole(
+      author_t,
+      guild.id,
+      role.id,
+    );
     if (!membershipRoleResult.success) {
       return await interaction.editReply({
         content: membershipRoleResult.error,
@@ -81,8 +79,8 @@ export class ViewMembersCommand extends ChatInputCommand {
 
     await interaction.editReply({
       content:
-        `Here are the members with the <@&${membershipRoleDoc._id}> role in this server.\n` +
-        `You can use \`/check-member\` to check a member's membership status.`,
+        `${author_t('server.Here are the members with the')} <@&${membershipRoleDoc._id}> ${author_t('server.role in this server')}\n` +
+        `${author_t('server.You can use')} \`/${author_t('check_member_command.name')}\` ${author_t('server.to check a members membership status')}.`,
       files: [
         new AttachmentBuilder(Buffer.from(csvData, 'utf-8'), {
           name: `${membershipRoleDoc.profile.name}_members.csv`,

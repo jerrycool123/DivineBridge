@@ -1,4 +1,5 @@
 import { EmbedBuilder } from '@discordjs/builders';
+import { TFunc } from '@divine-bridge/i18n';
 import type { RecognizedDate } from '@divine-bridge/ocr-service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -18,39 +19,45 @@ export namespace Embeds {
     return new EmbedBuilder().setTimestamp().setColor(CommonUtils.getRandomColor());
   };
 
-  const baseUserEmbed = (user: UserPayload): EmbedBuilder => {
+  const baseUserEmbed = (t: TFunc, user: UserPayload): EmbedBuilder => {
     return baseEmbed()
       .setAuthor({ name: user.name, iconURL: user.image })
-      .setFooter({ text: `User ID: ${user.id}` });
+      .setFooter({ text: `🪪 ${t('common.User ID')}: ${user.id}` });
   };
 
-  export const guildSettings = (
+  export const serverSettings = (
+    t: TFunc,
     user: UserPayload,
     guildDoc: GuildDoc,
     membershipRoleDocs: (Omit<MembershipRoleDoc, 'youtube'> & {
       youtube: YouTubeChannelDoc | null;
     })[],
   ): EmbedBuilder => {
-    return baseUserEmbed(user)
-      .setTitle('Guild Settings')
+    return baseUserEmbed(t, user)
+      .setTitle(t('common.Server Settings'))
       .setThumbnail(guildDoc.profile.icon)
       .addFields([
         {
-          name: 'Guild name',
+          name: t('common.Server Name'),
           value: guildDoc.profile.name,
           inline: true,
         },
         {
-          name: 'Guild ID',
+          name: t('common.Server ID'),
           value: guildDoc._id,
           inline: true,
         },
         {
-          name: 'Log channel',
+          name: t('common.Server Language'),
+          value: guildDoc.config.locale ?? t('common.Auto'),
+          inline: true,
+        },
+        {
+          name: t('common.Log Channel'),
           value: guildDoc.config.logChannel !== null ? `<#${guildDoc.config.logChannel}>` : 'None',
         },
         {
-          name: 'Membership Roles',
+          name: t('common.Membership Roles'),
           value:
             membershipRoleDocs.length > 0
               ? membershipRoleDocs
@@ -58,23 +65,26 @@ export namespace Embeds {
                     ({ _id: membershipRoleId, config, youtube }) =>
                       `\`/${config.aliasCommandName}\` - <@&${membershipRoleId}> - ${
                         youtube !== null
-                          ? `[${youtube.profile.title}](https://www.youtube.com/channel/${youtube._id}) ([${youtube.profile.customUrl}](https://www.youtube.com/${youtube.profile.customUrl}))`
-                          : '[Unknown Channel]'
+                          ? `[${youtube.profile.title}](https://www.youtube.com/channel/${youtube._id})`
+                          : `[${t('common.Unknown Channel')}]`
                       }`,
                   )
                   .join('\n')
-              : 'None',
+              : t('common.None'),
         },
       ]);
   };
 
-  export const youtubeChannel = (youtubeChannel: {
-    id: string;
-    title: string;
-    description: string;
-    customUrl: string;
-    thumbnail: string;
-  }): EmbedBuilder => {
+  export const youtubeChannel = (
+    t: TFunc,
+    youtubeChannel: {
+      id: string;
+      title: string;
+      description: string;
+      customUrl: string;
+      thumbnail: string;
+    },
+  ): EmbedBuilder => {
     return baseEmbed()
       .setAuthor({
         name: youtubeChannel.title,
@@ -85,66 +95,67 @@ export namespace Embeds {
       .setThumbnail(youtubeChannel.thumbnail)
       .addFields([
         {
-          name: 'Channel ID',
+          name: t('common.Channel ID'),
           value: youtubeChannel.id,
           inline: true,
         },
         {
-          name: 'Channel Link',
+          name: t('common.Channel Link'),
           value: `[${youtubeChannel.customUrl}](https://www.youtube.com/${youtubeChannel.customUrl})`,
           inline: true,
         },
       ]);
   };
 
-  export const membership = (user: UserPayload, membership: MembershipDoc) => {
-    return baseUserEmbed(user)
-      .setTitle('Membership')
+  export const membership = (t: TFunc, user: UserPayload, membership: MembershipDoc) => {
+    return baseUserEmbed(t, user)
+      .setTitle(t('common.Membership'))
       .addFields([
         {
-          name: 'Membership Role',
+          name: t('common.Membership Role'),
           value: `<@&${membership.membershipRole}>`,
           inline: true,
         },
         {
-          name: 'Begin Date',
+          name: t('common.Begin Date'),
           value: dayjs(membership.begin).format('YYYY-MM-DD'),
         },
         {
-          name: 'End Date',
+          name: t('common.End Date'),
           value: dayjs(membership.end).format('YYYY-MM-DD'),
         },
       ]);
   };
 
   export const manualMembershipAssignment = (
+    t: TFunc,
     user: UserPayload,
     begin: Date,
     end: Date,
     roleId: string,
     moderatorId?: string,
   ): EmbedBuilder => {
-    return baseUserEmbed(user)
-      .setTitle('✅ Manual Membership Assignment')
+    return baseUserEmbed(t, user)
+      .setTitle(`✅ ${t('common.Manual Membership Assignment')}`)
       .addFields([
         {
-          name: 'Membership Role',
+          name: t('common.Membership Role'),
           value: `<@&${roleId}>`,
           inline: true,
         },
         {
-          name: 'Begin Date',
+          name: t('common.Begin Date'),
           value: dayjs.utc(begin).format('YYYY-MM-DD'),
           inline: true,
         },
         {
-          name: 'End Date',
+          name: t('common.End Date'),
           value: dayjs.utc(end).format('YYYY-MM-DD'),
           inline: true,
         },
         {
-          name: 'Assigned By',
-          value: moderatorId !== undefined ? `<@${moderatorId}>` : 'Unknown',
+          name: t('common.Assigned By'),
+          value: moderatorId !== undefined ? `<@${moderatorId}>` : t('common.Unknown'),
           inline: true,
         },
       ])
@@ -152,20 +163,21 @@ export namespace Embeds {
   };
 
   export const manualMembershipRemoval = (
+    t: TFunc,
     user: UserPayload,
     roleId: string,
     moderatorId: string,
   ): EmbedBuilder => {
-    return baseUserEmbed(user)
-      .setTitle(`❌ Manual Membership Removal`)
+    return baseUserEmbed(t, user)
+      .setTitle(`❌ ${t('common.Manual Membership Removal')}`)
       .addFields([
         {
-          name: 'Membership Role',
+          name: t('common.Membership Role'),
           value: `<@&${roleId}>`,
           inline: true,
         },
         {
-          name: 'Removed By',
+          name: t('common.Removed By'),
           value: `<@${moderatorId}>`,
           inline: true,
         },
@@ -174,6 +186,7 @@ export namespace Embeds {
   };
 
   export const membershipStatus = (
+    t: TFunc,
     user: UserPayload,
     memberships: {
       manual: (Omit<MembershipDoc, 'membershipRole'> & { membershipRole: MembershipRoleDoc })[];
@@ -187,7 +200,7 @@ export namespace Embeds {
         membershipRole: MembershipRoleDoc;
       })[],
     ): string => {
-      if (input.length === 0) return 'None';
+      if (input.length === 0) return t('common.None');
       return input
         .map(
           (membershipDoc) =>
@@ -197,29 +210,30 @@ export namespace Embeds {
         )
         .join('\n');
     };
-    return baseUserEmbed(user)
-      .setTitle(`Membership Status`)
+    return baseUserEmbed(t, user)
+      .setTitle(t('common.Membership Status'))
       .addFields([
         {
-          name: 'Manual Memberships',
+          name: t('common.Manual Memberships'),
           value: toString(memberships.manual),
         },
         {
-          name: 'Screenshot Memberships',
+          name: t('common.Screenshot Memberships'),
           value: toString(memberships.screenshot),
         },
         {
-          name: 'Auth Memberships',
+          name: t('common.Auth Memberships'),
           value: toString(memberships.auth),
         },
         {
-          name: 'Live Chat Memberships',
+          name: t('common.Live Chat Memberships'),
           value: toString(memberships.live_chat),
         },
       ]);
   };
 
   export const screenshotSubmission = (
+    t: TFunc,
     user: UserPayload,
     membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
       youtube: YouTubeChannelDoc;
@@ -228,26 +242,28 @@ export namespace Embeds {
     guildName: string,
     imageUrl: string,
   ): EmbedBuilder => {
-    return baseUserEmbed(user)
-      .setTitle('Screenshot Submitted')
+    return baseUserEmbed(t, user)
+      .setTitle(t('common.Screenshot Submitted'))
       .setDescription(
-        'After I finished recognizing your screenshot, ' +
-          'it will be sent to the moderators of the server for further verification.\n' +
-          'You will receive a DM when your membership is verified.',
+        t(
+          'common.After I finished recognizing your screenshot it will be sent to the moderators of the server for further verification',
+        ) +
+          '\n' +
+          t('common.You will receive a DM when your membership is verified'),
       )
       .addFields([
         {
-          name: 'Membership Role',
+          name: t('common.Membership Role'),
           value: `<@&${membershipRoleDoc._id}>`,
           inline: true,
         },
         {
-          name: 'Language',
+          name: t('common.Language'),
           value: languageName,
           inline: true,
         },
         {
-          name: 'Discord Server',
+          name: t('common.Discord Server'),
           value: guildName,
           inline: true,
         },
@@ -257,6 +273,7 @@ export namespace Embeds {
   };
 
   export const membershipVerificationRequest = (
+    t: TFunc,
     user: UserPayload,
     date: RecognizedDate,
     roleId: string,
@@ -265,24 +282,24 @@ export namespace Embeds {
   ): EmbedBuilder => {
     const { year, month, day } = date;
 
-    return baseUserEmbed(user)
-      .setTitle('Membership Verification Request')
+    return baseUserEmbed(t, user)
+      .setTitle(t('common.Membership Verification Request'))
       .addFields([
         {
-          name: 'Membership Role',
+          name: `⭐️ ${t('common.Membership Role')}`,
           value: `<@&${roleId}>`,
           inline: true,
         },
         {
-          name: 'Recognized Date',
+          name: `📅 ${t('common.Recognized Date')}`,
           value:
             year !== null && month !== null && day !== null
               ? `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-              : '**Not Recognized**',
+              : `**${t('common.Not Recognized')}**`,
           inline: true,
         },
         {
-          name: 'Language',
+          name: t('common.Language'),
           value: languageName,
           inline: true,
         },
@@ -292,25 +309,26 @@ export namespace Embeds {
   };
 
   export const authMembership = (
+    t: TFunc,
     user: UserPayload,
     membershipRoleId: string,
     membershipDoc: MembershipDoc,
   ): EmbedBuilder => {
-    return baseUserEmbed(user)
-      .setTitle('✅ New Auth Membership')
+    return baseUserEmbed(t, user)
+      .setTitle(`✅ ${t('common.New Auth Membership')}`)
       .addFields([
         {
-          name: 'Membership Role',
+          name: t('common.Membership Role'),
           value: `<@&${membershipRoleId}>`,
           inline: true,
         },
         {
-          name: 'Begin Date',
+          name: t('common.Begin Date'),
           value: dayjs(membershipDoc.begin).format('YYYY-MM-DD'),
           inline: true,
         },
         {
-          name: 'End Date',
+          name: t('common.End Date'),
           value: dayjs(membershipDoc.end).format('YYYY-MM-DD'),
           inline: true,
         },

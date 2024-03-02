@@ -5,6 +5,7 @@ export { CheckMemberCommand } from './check-member.js';
 export { DeleteMemberCommand } from './delete-member.js';
 export { DeleteRoleCommand } from './delete-role.js';
 export { PingCommand } from './ping.js';
+export { SetLanguageCommand } from './set-language.js';
 export { SetLogChannelCommand } from './set-log-channel.js';
 export { SettingsCommand } from './settings.js';
 export { VerifyCommand } from './verify.js';

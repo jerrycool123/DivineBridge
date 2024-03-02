@@ -12,7 +12,7 @@ import { z } from 'zod';
 
 import { authAction } from '.';
 import type { GetGuildsActionData } from '../../../types/server-actions';
-import { getAccessTokenFromCookie } from '../authjs';
+import { getJWTFromCookie } from '../authjs';
 
 const getGuildsActionInputSchema = z.object({});
 
@@ -26,7 +26,7 @@ export const getGuildsAction = authAction<typeof getGuildsActionInputSchema, Get
 
     // Get access token from cookie
     const cookieStore = cookies();
-    const accessToken = await getAccessTokenFromCookie(cookieStore);
+    const { access_token: accessToken } = await getJWTFromCookie(cookieStore);
 
     // Get guilds from Discord API
     const discordOAuthApi = new DiscordOAuthAPI(accessToken);

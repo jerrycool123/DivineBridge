@@ -11,6 +11,7 @@ export interface GuildAttrs {
 export interface GuildDoc extends GuildAttrs, Document<string> {
   _id: string;
   config: {
+    locale: string | null;
     logChannel: string | null; // Discord Text Channel ID
     screenshotEnabled: boolean;
     authEnabled: boolean;
@@ -38,6 +39,10 @@ const guildSchema = new Schema<GuildDoc>(
       },
     },
     config: {
+      locale: {
+        type: String,
+        default: null,
+      },
       logChannel: {
         type: String,
         default: null,

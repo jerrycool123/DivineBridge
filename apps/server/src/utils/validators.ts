@@ -4,6 +4,7 @@ import {
   MembershipRoleDoc,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
+import { TFunc } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 import {
   Guild,
@@ -13,10 +14,11 @@ import {
   PermissionFlagsBits,
 } from 'discord.js';
 
-import { Bot } from '../structures/bot.js';
+import { store } from '../structures/store.js';
 
 export namespace Validators {
   export const isValidLogChannel = async (
+    t: TFunc,
     guild: Guild,
     logChannelId: string,
   ): Promise<
@@ -40,31 +42,35 @@ export namespace Validators {
     if (botMember === null) {
       return {
         success: false,
-        error: `The bot is not in the server.`,
+        error: t(`server.The bot is not in the server`),
       };
     } else if (logChannel === null) {
       return {
         success: false,
-        error: `The bot can't find the log channel or doesn't have enough permission to view it.`,
+        error: t(
+          `server.The bot cant find the log channel or doesnt have enough permission to view it`,
+        ),
       };
     } else if (!logChannel.isTextBased()) {
       return {
         success: false,
-        error: `The log channel is not a valid text channel.`,
+        error: t(`server.The log channel is not a valid text channel`),
       };
     } else if (
       !(logChannel.permissionsFor(botMember).has(PermissionFlagsBits.ViewChannel) ?? false)
     ) {
       return {
         success: false,
-        error: `The bot doesn't have enough permission to view the log channel.`,
+        error: t(`server.The bot doesnt have enough permission to view the log channel`),
       };
     } else if (
       logChannel.permissionsFor(guild.roles.everyone).has(PermissionFlagsBits.ViewChannel)
     ) {
       return {
         success: false,
-        error: `The log channel is visible to everyone in the server. For security reasons, please change the channel to a private channel, and then try again.`,
+        error: t(
+          `server.The log channel is visible to everyone in the server For security reasons please change the channel to a private channel and then try again`,
+        ),
       };
     } else if (
       !logChannel.permissionsFor(botMember).has(PermissionFlagsBits.SendMessages) ||
@@ -72,7 +78,9 @@ export namespace Validators {
     ) {
       return {
         success: false,
-        error: `The bot doesn't have enough permission to send embed messages in the log channel.`,
+        error: t(
+          `server.The bot doesnt have enough permission to send embed messages in the log channel`,
+        ),
       };
     }
 
@@ -83,6 +91,7 @@ export namespace Validators {
   };
 
   export const isGuildHasLogChannel = async (
+    t: TFunc,
     guild: Guild,
   ): Promise<
     | {
@@ -98,7 +107,7 @@ export namespace Validators {
     if (guildDoc === null) {
       return {
         success: false,
-        error: `The server does not exist in the database.`,
+        error: t(`server.The server does not exist in the database`),
       };
     }
 
@@ -106,14 +115,15 @@ export namespace Validators {
     if (logChannelId === null) {
       return {
         success: false,
-        error: `This server does not have a log channel.`,
+        error: t(`server.This server does not have a log channel`),
       };
     }
 
-    return await isValidLogChannel(guild, logChannelId);
+    return await isValidLogChannel(t, guild, logChannelId);
   };
 
   export const isGuildHasMembershipRole = async (
+    t: TFunc,
     guildId: string,
     roleId: string,
   ): Promise<
@@ -137,14 +147,16 @@ export namespace Validators {
     if (membershipRoleDoc === null) {
       return {
         success: false,
-        error: `The role <@&${roleId}> is not a membership role in the server.`,
+        error: `${t('server.The role')} <@&${roleId}> ${t('server.is not a membership role in the server')}`,
       };
     } else if (membershipRoleDoc.youtube === null) {
       return {
         success: false,
         error:
-          `The associated YouTube channel of the membership role <@&${roleId}> is not found in the database.\n` +
-          'This is likely a database inconsistency. Please contact the bot developer to fix this issue.',
+          `${t('server.The associated YouTube channel of the membership role')} <@&${roleId}> ${t('server.is not found in the database')}\n` +
+          t(
+            'server.This is likely a database inconsistency Please contact the bot developer to fix this issue',
+          ),
       };
     }
     return {
@@ -156,6 +168,7 @@ export namespace Validators {
   };
 
   export const isManageableRole = async (
+    t: TFunc,
     guild: Guild,
     roleId: string,
   ): Promise<
@@ -176,7 +189,7 @@ export namespace Validators {
     if (botMember === null) {
       return {
         success: false,
-        error: 'The bot is not in the server.',
+        error: t('server.The bot is not in the server'),
       };
     }
 
@@ -184,22 +197,23 @@ export namespace Validators {
       // @everyone
       return {
         success: false,
-        error:
-          'The bot cannot manipulate @everyone role.\n' +
-          'Please try again with another valid role.',
+        error: t(
+          'server.The bot cannot manipulate everyone role Please try again with another valid role',
+        ),
       };
     } else if (botMember.roles.highest.comparePositionTo(roleId) <= 0) {
       return {
         success: false,
         error:
-          `Due to the role hierarchy, the bot cannot manage the role <@&${roleId}>.\n` +
-          `The bot can only manage a role whose order is lower than that of its highest role <@&${botMember.roles.highest.id}>.`,
+          `${t('server.Due to the role hierarchy the bot cannot manage the role')} <@&${roleId}>\n` +
+          `${t('server.The bot can only manage a role whose order is lower than that of its highest role')} <@&${botMember.roles.highest.id}>`,
       };
     }
     return { success: true };
   };
 
   export const isValidDateInterval = (
+    t: TFunc,
     targetDate: dayjs.Dayjs,
     baseDate: dayjs.Dayjs,
     limitDays = 60,
@@ -216,27 +230,27 @@ export namespace Validators {
     if (targetDate.isBefore(baseDate)) {
       return {
         success: false,
-        error: `The target date (\`${targetDate.format(
+        error: `${t('server.The target date')} (\`${targetDate.format(
           'YYYY-MM-DD',
-        )}\`) must be later than the base date (\`${baseDate.format('YYYY-MM-DD')}\`).`,
+        )}\`) ${t('server.must be later than the base date')} (\`${baseDate.format('YYYY-MM-DD')}\`).`,
       };
     } else if (targetDate.isAfter(timeLimit)) {
       return {
         success: false,
         error:
-          'The target date is too far in the future.\n' +
-          `The target date (\`${targetDate.format(
+          `${t('server.The target date is too far in the future')}\n` +
+          `${t('server.The target date')} (\`${targetDate.format(
             'YYYY-MM-DD',
-          )}\`) must not be more than ${limitDays} days after the base date (\`${baseDate.format(
+          )}\`) ${t('server.must not be more than')} ${limitDays} ${t('server.days after the base date')} (\`${baseDate.format(
             'YYYY-MM-DD',
-          )}\`).`,
+          )}\`)`,
       };
     }
     return { success: true };
   };
 
   export const isAliasAvailable = async (
-    bot: Bot,
+    t: TFunc,
     guild: Guild,
     alias: string,
   ): Promise<
@@ -258,16 +272,16 @@ export namespace Validators {
       return {
         success: false,
         error:
-          `The alias \`${alias}\` is not a valid command name.\n` +
-          `Please check the naming rules [here](https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming).`,
+          `${t('server.The alias')} \`${alias}\` ${t('server.is not a valid command name')}\n` +
+          t('server.Please check the naming rules here'),
       };
     }
 
     // Check if the alias is conflicting with the built-in commands
-    if (alias in bot.chatInputCommandMap) {
+    if (alias in store.bot.chatInputCommandMap) {
       return {
         success: false,
-        error: `The alias \`${alias}\` is already used for a built-in command.`,
+        error: `${t('server.The alias')} \`${alias}\` ${t('server.is already used for a built-in command')}`,
       };
     }
 
@@ -279,7 +293,7 @@ export namespace Validators {
     if (membershipRoleDoc !== null) {
       return {
         success: false,
-        error: `The alias \`${alias}\` is already used for the role <@&${membershipRoleDoc._id}> in this server.`,
+        error: `${t('server.The alias')} \`${alias}\` ${t('server.is already used for the role')} <@&${membershipRoleDoc._id}> ${t('server.in this server')}`,
       };
     }
     return { success: true };

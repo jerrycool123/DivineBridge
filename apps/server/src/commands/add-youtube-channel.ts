@@ -7,22 +7,22 @@ import { youtubeApiKeyApi } from '../utils/youtube.js';
 
 export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
   public readonly command = new SlashCommandBuilder()
-    .setName('add-youtube-channel')
-    .setDescription("Add a YouTube channel to the bot's supported list")
+    .setI18nName('add_youtube_channel_command.name')
+    .setI18nDescription('add_youtube_channel_command.description')
     .addStringOption((option) =>
       option
-        .setName('id')
-        .setDescription('YouTube channel ID (UCXXXX...) or video ID')
+        .setI18nName('add_youtube_channel_command.id_option_name')
+        .setI18nDescription('add_youtube_channel_command.id_option_description')
         .setRequired(true),
     );
   public readonly global = true;
   public readonly guildOnly = false;
+  public readonly moderatorOnly = false;
 
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
-
-  public async execute(interaction: ChatInputCommandInteraction) {
+  public override async execute(
+    interaction: ChatInputCommandInteraction,
+    { author_t }: ChatInputCommand.ExecuteContext<false>,
+  ) {
     const { options } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
@@ -39,9 +39,10 @@ export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
       if (!videoResult.success) {
         return await interaction.editReply({
           content:
-            `Could not find a YouTube video for the video ID: \`${id}\`. Please try again. Here are some examples:\n\n` +
-            `The channel ID of <https://www.youtube.com/channel/UCZlDXzGoo7d44bwdNObFacg> is \`UCZlDXzGoo7d44bwdNObFacg\`. It must begins with 'UC...'. Currently we don't support custom channel ID search (e.g. \`@AmaneKanata\`). If you cannot find a valid channel ID, please provide a video ID instead.\n\n` +
-            `The video ID of <https://www.youtube.com/watch?v=Dji-ehIz5_k> is \`Dji-ehIz5_k\`.`,
+            `${author_t('server.Could not find a YouTube chanel or video for the ID')} \`${id}\`\n` +
+            `${author_t('server.Please try again Here are some examples')}\n` +
+            `- ${author_t('server.youtube_channel_id_description_1')} <https://www.youtube.com/channel/UCZlDXzGoo7d44bwdNObFacg> ${author_t('server.youtube_channel_id_description_2')} \`UCZlDXzGoo7d44bwdNObFacg\`${author_t('server.youtube_channel_id_description_3')}\n` +
+            `- ${author_t('server.youtube_video_id_description_1')} <https://www.youtube.com/watch?v=Dji-ehIz5_k> ${author_t('server.youtube_video_id_description_2')} \`Dji-ehIz5_k\`.`,
         });
       }
       youtubeChannelId = videoResult.video.snippet.channelId;
@@ -51,7 +52,7 @@ export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
     const existingYoutubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
     if (existingYoutubeChannelDoc !== null) {
       return await interaction.editReply({
-        content: `The YouTube channel \`${existingYoutubeChannelDoc.profile.title}\` is already in the bot's supported list.`,
+        content: `${author_t('server.The YouTube channel')} \`${existingYoutubeChannelDoc.profile.title}\` ${author_t('server.is already in the bots supported list')}`,
       });
     }
 
@@ -59,7 +60,7 @@ export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
     const channelResult = await youtubeApiKeyApi.getChannel(youtubeChannelId);
     if (!channelResult.success) {
       return await interaction.editReply({
-        content: `Could not find a YouTube channel for the channel ID: \`${youtubeChannelId}\`. Please try again.`,
+        content: `${author_t('server.Could not find a YouTube channel for the channel ID')} \`${youtubeChannelId}\``,
       });
     }
     const { channel: parsedChannel } = channelResult;
@@ -72,10 +73,11 @@ export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
     };
 
     // Ask for confirmation
-    const youtubeChannelEmbed = Embeds.youtubeChannel(youtubeChannel);
-    const confirmResult = await Utils.awaitUserConfirm(interaction, 'add-yt-channel', {
-      content:
-        "Are you sure you want to add the following YouTube channel to the bot's supported list?",
+    const youtubeChannelEmbed = Embeds.youtubeChannel(author_t, youtubeChannel);
+    const confirmResult = await Utils.awaitUserConfirm(author_t, interaction, 'add-yt-channel', {
+      content: author_t(
+        'server.Are you sure you want to add the following YouTube channel to the bots supported list',
+      ),
       embeds: [youtubeChannelEmbed],
     });
     if (!confirmResult.confirmed) return;
@@ -89,7 +91,7 @@ export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
     );
     if (memberOnlyVideoIds.length === 0) {
       return await confirmedInteraction.editReply({
-        content: `Could not find any member only videos for the YouTube channel: \`${youtubeChannel.title}\`. Please try again.`,
+        content: `${author_t('server.Could not find any member only videos for the YouTube channel')} \`${youtubeChannel.title}\``,
       });
     }
 
@@ -100,7 +102,7 @@ export class AddYouTubeChannelCommand extends ChatInputCommand<false> {
     );
 
     await confirmedInteraction.editReply({
-      content: `Successfully added the YouTube channel \`${youtubeChannelDoc.profile.title}\` to the bot's supported list.`,
+      content: `${author_t('server.Successfully added the YouTube channel')} \`${youtubeChannelDoc.profile.title}\` ${author_t('server.to the bots supported list')}`,
     });
   }
 }

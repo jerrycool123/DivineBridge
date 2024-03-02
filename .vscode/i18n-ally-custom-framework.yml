@@ -1,0 +1,12 @@
+languageIds:
+  - typescript
+  - typescriptreact
+
+usageMatchRegex:
+  - "[^\\w\\d]t\\(\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]setI18nName\\(\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]setI18nDescription\\(\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]original_t\\(\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]author_t\\(\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]guild_t\\(\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]user_t\\(\\s*['\"`]({key})['\"`]"

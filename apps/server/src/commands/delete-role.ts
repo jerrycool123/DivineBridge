@@ -1,4 +1,11 @@
-import { AppEventLogService, MembershipCollection, MembershipService } from '@divine-bridge/common';
+import {
+  AppEventLogService,
+  Database,
+  MembershipCollection,
+  MembershipService,
+  UserDoc,
+} from '@divine-bridge/common';
+import { t } from '@divine-bridge/i18n';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
@@ -9,38 +16,36 @@ import { Validators } from '../utils/validators.js';
 
 export class DeleteRoleCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
-    .setName('delete-role')
-    .setDescription('Delete a YouTube membership role in this server')
+    .setI18nName('delete_role_command.name')
+    .setI18nDescription('delete_role_command.description')
     .addRoleOption((option) =>
       option
-        .setName('role')
-        .setDescription('The YouTube Membership role in this server')
+        .setI18nName('delete_role_command.role_option_name')
+        .setI18nDescription('delete_role_command.role_option_description')
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
   public readonly global = true;
   public readonly guildOnly = true;
+  public readonly moderatorOnly = true;
   public readonly requiredClientPermissions = [PermissionFlagsBits.ManageRoles];
 
-  public constructor(context: ChatInputCommand.Context) {
-    super(context);
-  }
-
-  public async execute(
+  public override async execute(
     interaction: ChatInputCommandInteraction,
-    { guild }: ChatInputCommand.ExecuteContext,
+    { guild, guildLocale, guild_t, author_t }: ChatInputCommand.ExecuteContext,
   ) {
     const { options, client } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
 
-    // Get log channel and membership role, and check if the role is manageable
+    // Get log channel and membership role, check if the role is manageable, and upsert guild
     const role = options.getRole('role', true);
     const [logChannelResult, membershipRoleResult, manageableResult] = await Promise.all([
-      Validators.isGuildHasLogChannel(guild),
-      Validators.isGuildHasMembershipRole(guild.id, role.id),
-      Validators.isManageableRole(guild, role.id),
+      Validators.isGuildHasLogChannel(author_t, guild),
+      Validators.isGuildHasMembershipRole(author_t, guild.id, role.id),
+      Validators.isManageableRole(author_t, guild, role.id),
+      Database.upsertGuild(Utils.convertGuild(guild)),
     ]);
     if (!logChannelResult.success) {
       return await interaction.editReply({
@@ -60,14 +65,16 @@ export class DeleteRoleCommand extends ChatInputCommand {
     // Find members with the role in DB
     const membershipDocs = await MembershipCollection.find({
       membershipRole: membershipRoleDoc._id,
-    });
+    }).populate<{ user: UserDoc | null }>('user');
 
     // Ask for confirmation
-    const confirmResult = await Utils.awaitUserConfirm(interaction, 'delete-role', {
+    const confirmResult = await Utils.awaitUserConfirm(author_t, interaction, 'delete-role', {
       content:
-        `Are you sure you want to delete the membership role <@&${membershipRoleDoc._id}> for the YouTube channel \`${membershipRoleDoc.youtube.profile.title}\`?\n` +
-        `This action will remove the membership role from ${membershipDocs.length} members.\n\n` +
-        `Note that we won't delete the role in Discord. Instead, we just delete the membership role in the database, and remove the role from registered members.`,
+        `${author_t('server.delete_role_confirm_1')} <@&${membershipRoleDoc._id}> ${author_t('server.delete_role_confirm_2')} \`${membershipRoleDoc.youtube.profile.title}\` ${author_t('server.delete_role_confirm_3')} \n` +
+        `${author_t('server.delete_role_confirm_4')} ${membershipDocs.length} ${author_t('server.delete_role_confirm_5')}\n\n` +
+        author_t(
+          'server.Note that we wont delete the role in Discord Instead we just delete the membership role in the database and remove the role from registered members',
+        ),
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
@@ -81,23 +88,29 @@ export class DeleteRoleCommand extends ChatInputCommand {
     );
     if (!deleteResult.success) {
       // ? We do not want to stop the process if the command alias deletion failed
-      this.bot.logger.error(deleteResult.error);
+      this.context.logger.error(deleteResult.error);
     }
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guild.id).init();
-    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+    const appEventLogService = await new AppEventLogService(
+      guild_t,
+      logger,
+      discordBotApi,
+      guild.id,
+    ).init();
+    const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
 
     // Remove membership role from DB
     await membershipService.purgeRole({
+      guildLocale,
       guildId: guild.id,
       membershipDocs,
       membershipRoleDoc,
-      removeReason: `the membership role has been deleted by a moderator in the server \`${guild.name}\``,
+      removeReason: `${guild_t('server.the membership role has been deleted by a moderator in the server')} \`${guild.name}\``,
     });
 
     await confirmedInteraction.editReply({
-      content: `Successfully deleted the membership role <@&${role.id}> for the YouTube channel \`${membershipRoleDoc.youtube.profile.title}\`.`,
+      content: `${author_t('server.delete_role_success_1')} <@&${role.id}> ${author_t('server.delete_role_success_2')} \`${membershipRoleDoc.youtube.profile.title}\` ${author_t('server.delete_role_success_3')}`,
     });
   }
 }

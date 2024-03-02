@@ -12,10 +12,15 @@ export const {
     }),
   ],
   callbacks: {
-    jwt({ token, account = null }) {
+    jwt({ token, account = null, profile }) {
       if (account !== null && account.expires_at !== undefined) {
         const { access_token, expires_at } = account;
-        return { ...token, access_token, expires_at };
+        return {
+          ...token,
+          access_token,
+          expires_at,
+          ...(profile !== undefined ? { locale: profile.locale as string } : {}),
+        };
       } else if (Date.now() > token.expires_at * 1000) {
         return null;
       }
@@ -23,8 +28,8 @@ export const {
     },
     session: ({ session, ...args }) => {
       if ('token' in args) {
-        const { sub, name, picture } = args.token;
-        session.user = { id: sub, name, image: picture };
+        const { sub, name, picture, locale } = args.token;
+        session.user = { id: sub, name, image: picture, locale };
       }
       return session;
     },

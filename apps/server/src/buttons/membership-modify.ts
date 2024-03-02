@@ -20,25 +20,25 @@ export class MembershipModifyButton extends Button {
   public readonly sameClientOnly = true;
   public readonly guildOnly = true;
 
-  public constructor(context: Button.Context) {
-    super(context);
-  }
-
-  public async execute(interaction: ButtonInteraction) {
+  public override async execute(
+    interaction: ButtonInteraction,
+    { guild_t, author_t }: Button.ExecuteContext,
+  ) {
     const { user: moderator } = interaction;
 
+    // Display modal
     const modalCustomId = `${Constants.membership.modify}-modify-modal`;
     const modalInputCustomId = `${Constants.membership.modify}-date-input`;
-    const modifyModal = Modals.dateModification(modalCustomId, modalInputCustomId);
+    const modifyModal = Modals.dateModification(author_t, modalCustomId, modalInputCustomId);
     await interaction.showModal(modifyModal);
 
     // Parse embed
     if (interaction.message.embeds.length === 0) {
       return await interaction.followUp({
-        content: 'Failed to parse the request embed.',
+        content: author_t('server.Failed to parse the request embed'),
       });
     }
-    const parsedResult = await Utils.parseMembershipVerificationRequestEmbed(interaction);
+    const parsedResult = await Utils.parseMembershipVerificationRequestEmbed(author_t, interaction);
     if (!parsedResult.success) {
       return await interaction.followUp({
         content: parsedResult.error,
@@ -66,13 +66,15 @@ export class MembershipModifyButton extends Button {
     const newEndDate = dayjs.utc(endDateString, 'YYYY-MM-DD', true);
     if (!newEndDate.isValid()) {
       return await interaction.followUp({
-        content: 'Invalid date. The date must be in YYYY-MM-DD format. Please try again.',
+        content: author_t(
+          'server.Invalid date The date must be in YYYY-MM-DD format Please try again',
+        ),
         ephemeral: true,
       });
     }
 
     // Check if the modified date is too far in the future
-    const validDateResult = Validators.isValidDateInterval(newEndDate, beginDate);
+    const validDateResult = Validators.isValidDateInterval(author_t, newEndDate, beginDate);
     if (!validDateResult.success) {
       return await interaction.followUp({
         content: validDateResult.error,
@@ -82,10 +84,9 @@ export class MembershipModifyButton extends Button {
 
     // Edit the recognized date field
     const fields = [...(embed.data.fields ?? [])];
-    const recognizedDateFieldIndex =
-      fields.findIndex(({ name }) => name === 'Recognized Date') ?? -1;
+    const recognizedDateFieldIndex = fields.findIndex(({ name }) => name.startsWith('📅')) ?? -1;
     const newRecognizedDateField: APIEmbedField = {
-      name: 'Recognized Date',
+      name: `📅 ${guild_t('common.Recognized Date')}`,
       value: newEndDate.format('YYYY-MM-DD'),
       inline: true,
     };
@@ -96,9 +97,9 @@ export class MembershipModifyButton extends Button {
     }
 
     // Edit the modified by field
-    const modifiedByFieldIndex = fields.findIndex(({ name }) => name === 'Modified By') ?? -1;
+    const modifiedByFieldIndex = fields.findIndex(({ name }) => name.startsWith('📝')) ?? -1;
     const newModifiedByField: APIEmbedField = {
-      name: 'Modified By',
+      name: `📝 ${guild_t('common.Modified By')}`,
       value: `<@${moderator.id}>`,
       inline: true,
     };
@@ -114,7 +115,7 @@ export class MembershipModifyButton extends Button {
     });
 
     await modalSubmitInteraction.followUp({
-      content: `The recognized date has been modified to \`${newEndDate.format('YYYY-MM-DD')}\`.`,
+      content: `${author_t('server.The recognized date has been modified to')} \`${newEndDate.format('YYYY-MM-DD')}\`.`,
       ephemeral: true,
     });
   }

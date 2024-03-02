@@ -1,24 +1,28 @@
+import { GuildDoc } from '@divine-bridge/common';
+import { TFunc } from '@divine-bridge/i18n';
 import { Awaitable, ButtonInteraction, Guild } from 'discord.js';
 
-import { BaseClass } from './base.js';
+import { Core } from './core.js';
 
 export namespace Button {
-  export interface Context extends Omit<BaseClass.Context, 'bot'> {
-    bot: BaseClass.Context<true>['bot'];
+  export interface CommonExecuteContext {
+    authorLocale: string;
+    author_t: TFunc;
   }
-  export interface ExecuteContext<GuildOnly extends boolean = true> {
-    guild: GuildOnly extends true ? Guild : Guild | null;
-  }
-}
 
-export abstract class Button<GuildOnly extends boolean = true> extends BaseClass<true> {
+  export type ExecuteContext<GuildOnly extends boolean = true> = GuildOnly extends true
+    ? {
+        guild: GuildOnly extends true ? Guild : Guild | null;
+        guildDoc: GuildOnly extends true ? GuildDoc : null;
+        guildLocale: string;
+        guild_t: TFunc;
+      } & CommonExecuteContext
+    : CommonExecuteContext;
+}
+export abstract class Button<GuildOnly extends boolean = true> extends Core {
   public abstract readonly customId: string;
   public abstract readonly guildOnly: GuildOnly;
   public abstract readonly sameClientOnly: boolean;
-
-  public constructor(protected readonly context: Button.Context) {
-    super(context);
-  }
 
   public isGuildOnly(): this is Button<true> {
     return this.guildOnly === true;

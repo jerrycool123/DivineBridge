@@ -1,6 +1,8 @@
+import { TLocaleFunc } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 
 import { Embeds } from '../components/embeds.js';
+import { UserDoc } from '../index.js';
 import { MembershipRoleDoc } from '../models/membership-role.js';
 import { MembershipCollection, MembershipDoc } from '../models/membership.js';
 import { YouTubeChannelDoc } from '../models/youtube-channel.js';
@@ -11,12 +13,15 @@ import { DiscordBotAPI } from './discord-bot-api.js';
 
 export class MembershipService {
   constructor(
+    private readonly t: TLocaleFunc,
     private readonly discordBotApi: DiscordBotAPI,
     private readonly appEventLogService: AppEventLogService,
   ) {}
 
   public async add(
     args: {
+      userLocale: string | undefined;
+      guildLocale: string | undefined;
       guildId: string;
       guildName: string;
       membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube' | 'guild'>;
@@ -43,6 +48,7 @@ export class MembershipService {
         error: string;
       }
   > {
+    const { userLocale, guildLocale } = args;
     const { guildId, guildName, membershipRoleDoc, userPayload, type, begin, end } = args;
     const membershipRoleId = membershipRoleDoc._id;
     const membershipRoleName = membershipRoleDoc.profile.name;
@@ -57,7 +63,7 @@ export class MembershipService {
     if (!addResult.success) {
       return {
         success: false,
-        error: 'Failed to add the role to the member.',
+        error: this.t('common.Failed to add the role to the member', guildLocale),
       };
     }
 
@@ -72,12 +78,13 @@ export class MembershipService {
 
     // DM the user
     const { success: notified } = await this.discordBotApi.createDMMessage(userId, {
-      content: `You have been granted the membership role **@${membershipRoleName}** in the server \`${guildName}\`.`,
+      content: `${this.t('common.You have been granted the membership role', userLocale)} **@${membershipRoleName}** ${this.t('common.in the server', userLocale)} \`${guildName}\``,
     });
 
     // Send event log for specific membership types
     if (type === 'auth') {
       const embed = Embeds.authMembership(
+        (key) => this.t(key, guildLocale),
         userPayload,
         membershipRoleId,
         updatedMembershipDoc,
@@ -86,6 +93,7 @@ export class MembershipService {
     } else if (type === 'manual') {
       const { moderatorId } = args;
       const embed = Embeds.manualMembershipAssignment(
+        (key) => this.t(key, guildLocale),
         userPayload,
         updatedMembershipDoc.begin,
         updatedMembershipDoc.end,
@@ -99,6 +107,7 @@ export class MembershipService {
   }
 
   public async reject(args: {
+    userLocale: string | undefined;
     guildName: string;
     membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
       youtube: YouTubeChannelDoc;
@@ -106,14 +115,17 @@ export class MembershipService {
     userId: string;
     reason: string;
   }): Promise<{ notified: boolean }> {
+    const { userLocale } = args;
     const { guildName, membershipRoleDoc, userId, reason } = args;
     const youtubeChannelTitle = membershipRoleDoc.youtube.profile.title;
 
     // DM the user
     const { success: notified } = await this.discordBotApi.createDMMessage(userId, {
       content:
-        `Your screenshot for the YouTube channel \`${youtubeChannelTitle}\` has been rejected in the server \`${guildName}\`.` +
-        (reason.length > 0 ? `\nReason: \`\`\`\n${reason}\n\`\`\`` : ''),
+        `${this.t('common.Your screenshot for the YouTube channel', userLocale)} \`${youtubeChannelTitle}\` ${this.t('common.has been rejected in the server', userLocale)} \`${guildName}\`` +
+        (reason.length > 0
+          ? `\n${this.t('common.Reason', userLocale)}: \`\`\`\n${reason}\n\`\`\``
+          : ''),
     });
 
     return { notified };
@@ -121,9 +133,13 @@ export class MembershipService {
 
   public async remove(
     args: {
+      userLocale: string | undefined;
+      guildLocale: string | undefined;
       guildId: string;
-      membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'>;
-      membershipDoc: Omit<MembershipDoc, 'membershipRole'>;
+      membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube' | 'guild'>;
+      membershipDoc: Omit<MembershipDoc, 'membershipRole' | 'user'> & {
+        user: string | UserDoc | null;
+      };
       removeReason: string;
       purge?: boolean;
     } & (
@@ -147,24 +163,26 @@ export class MembershipService {
         roleRemoved: boolean;
       }
   > {
+    const { userLocale, guildLocale } = args;
     const { guildId, membershipRoleDoc, membershipDoc, removeReason, manual, purge = false } = args;
     const membershipRoleId = membershipRoleDoc._id;
     const membershipRoleName = membershipRoleDoc.profile.name;
-    const userId = membershipDoc.user;
+    const userId =
+      membershipDoc.user === null
+        ? null
+        : typeof membershipDoc.user === 'string'
+          ? membershipDoc.user
+          : membershipDoc.user._id;
 
     // Remove the role from the guild member
-    const { success: roleRemoved } = await this.discordBotApi.removeGuildMemberRole(
-      guildId,
-      userId,
-      membershipRoleId,
-    );
-
-    // If the role is not removed, we stop when it's a manual removal
-    if (!roleRemoved && manual) {
-      return {
-        success: false,
-        error: 'Failed to remove the role from the member.',
-      };
+    let roleRemoved = false;
+    if (userId !== null) {
+      const { success } = await this.discordBotApi.removeGuildMemberRole(
+        guildId,
+        userId,
+        membershipRoleId,
+      );
+      roleRemoved = success;
     }
 
     // Remove membership record in DB
@@ -174,14 +192,19 @@ export class MembershipService {
     }
 
     // DM user about the removal
-    const { success: notified } = await this.discordBotApi.createDMMessage(userId, {
-      content: `Your membership role **@${membershipRoleName}** has been removed, since ${removeReason}.`,
-    });
+    let notified = false;
+    if (userId !== null) {
+      const { success } = await this.discordBotApi.createDMMessage(userId, {
+        content: `${this.t('common.Your membership role', userLocale)} **@${membershipRoleName}** ${this.t('common.has been removed since', userLocale)}${removeReason}`,
+      });
+      notified = success;
+    }
 
     // Send event log to the log channel when the role is removed manually
     if (manual) {
       const { userPayload, moderatorId } = args;
       const embed = Embeds.manualMembershipRemoval(
+        (key) => this.t(key, guildLocale),
         userPayload,
         membershipRoleId,
         moderatorId,
@@ -193,14 +216,17 @@ export class MembershipService {
   }
 
   public async purgeRole(args: {
+    guildLocale: string | undefined;
     guildId: string;
     membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
       youtube: YouTubeChannelDoc;
     };
-    membershipDocs: MembershipDoc[];
+    membershipDocs: (Omit<MembershipDoc, 'user'> & {
+      user: UserDoc | null;
+    })[];
     removeReason: string;
   }): Promise<void> {
-    // Remove the membership role and memberships from DB
+    const { guildLocale } = args;
     const { guildId, membershipRoleDoc, membershipDocs, removeReason } = args;
 
     // Remove the membership role from DB
@@ -213,9 +239,11 @@ export class MembershipService {
     // Send event log to the log channel
     await this.appEventLogService.log({
       content:
-        `The membership role <@&${membershipRoleDoc._id}> has been removed, since ${removeReason}.\n` +
-        'I will try to remove the role from the members, but if I failed to do so, please remove the role manually.\n' +
-        'If you believe this is an error, please contact the bot owner to resolve this issue.',
+        `${this.t('common.The membership role', guildLocale)} <@&${membershipRoleDoc._id}> ${this.t('common.has been removed since', guildLocale)}${removeReason}.\n` +
+        this.t(
+          'common.I will try to remove the role from the members but if I failed to do so please remove the role manually If you believe this is an error please contact the bot owner to resolve this issue',
+          guildLocale,
+        ),
     });
 
     // Remove the membership role from the users
@@ -223,6 +251,8 @@ export class MembershipService {
       membershipDocs.map((membershipDoc) =>
         this.discordBotApi.apiQueue.add(async () =>
           this.remove({
+            userLocale: guildLocale,
+            guildLocale,
             guildId,
             membershipRoleDoc,
             membershipDoc,

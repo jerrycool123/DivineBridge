@@ -1,3 +1,4 @@
+import { TFunc } from '@divine-bridge/i18n';
 import { RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v10';
 
 import { GuildCollection } from '../models/guild.js';
@@ -10,6 +11,7 @@ export class AppEventLogService {
   private guildName: string;
 
   constructor(
+    private readonly t: TFunc,
     private readonly logger: Logger,
     private readonly discordBotApi: DiscordBotAPI,
     private readonly guildId: string,
@@ -35,8 +37,7 @@ export class AppEventLogService {
     const modifiedPayload = { ...payload };
     if (!notified) {
       modifiedPayload.content =
-        "**[NOTE]** Due to the user's __Privacy Settings__ of this server, **I cannot send DM to notify them.**\nYou might need to notify them yourself.\n\n" +
-        (modifiedPayload.content ?? '');
+        this.t('common.event_log_not_notified') + '\n\n' + (modifiedPayload.content ?? '');
     }
 
     // Try to send event log to the log channel
@@ -53,8 +54,9 @@ export class AppEventLogService {
     // If the log is failed to send, try to DM the guild owner about the removal
     if (this.guildOwnerId !== null) {
       modifiedPayload.content =
-        `> I cannot send event log to the log channel in your server \`${this.guildName}\`.\n` +
-        `> Please make sure that the log channel is set with \`/set-log-channel\`, and that I have enough permissions to send messages in it.\n\n` +
+        `> ${this.t('common.event_log_failed_to_send')} \`${this.guildName}\`.\n` +
+        `> ${this.t('common.event_log_failed_to_send_2')} \`/${this.t('set_log_channel_command.name')}\`, ${this.t('common.event_log_failed_to_send_3')}` +
+        '\n\n' +
         (modifiedPayload.content ?? '');
       const dmResult = await this.discordBotApi.createDMMessage(this.guildOwnerId, modifiedPayload);
       if (dmResult.success) {

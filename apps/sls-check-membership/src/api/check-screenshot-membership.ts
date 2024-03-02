@@ -5,7 +5,10 @@ import {
   MembershipDoc,
   MembershipRoleCollection,
   MembershipService,
+  UserCollection,
+  UserDoc,
 } from '@divine-bridge/common';
+import { defaultLocale, getTFunc, initI18n, t } from '@divine-bridge/i18n';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -28,6 +31,7 @@ export const checkScreenshotMembership = async (
 
   logger.info(`Start checking screenshot membership.`);
   await dbConnect(logger);
+  await initI18n();
   let removalCount = 0,
     removalFailCount = 0;
 
@@ -37,6 +41,15 @@ export const checkScreenshotMembership = async (
     $or: [{ type: 'manual' }, { type: 'screenshot' }],
     end: { $lte: currentDate.toISOString() },
   });
+
+  // Get users from DB
+  const userDocs = await UserCollection.find({
+    _id: { $in: membershipDocs.map((doc) => doc.user) },
+  });
+  const userDocRecord = userDocs.reduce<Record<string, UserDoc>>(
+    (prev, userDoc) => ({ ...prev, [userDoc._id]: userDoc }),
+    {},
+  );
 
   // Group memberships by membership role
   const membershipDocRecord = membershipDocs.reduce<Record<string, MembershipDoc[]>>(
@@ -70,17 +83,25 @@ export const checkScreenshotMembership = async (
       );
       continue;
     }
+    const guildLocale = guildDoc.config.locale ?? defaultLocale;
     const guildName = guildDoc.profile.name;
 
     // Initialize log service and membership service
-    const appEventLogService = await new AppEventLogService(logger, discordBotApi, guildId).init();
-    const membershipService = new MembershipService(discordBotApi, appEventLogService);
+    const appEventLogService = await new AppEventLogService(
+      getTFunc(guildLocale),
+      logger,
+      discordBotApi,
+      guildId,
+    ).init();
+    const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
 
     // Check membership
     const failedRoleRemovalUserIds: string[] = [];
     for (const membershipDoc of membershipDocGroup) {
       const endDate = dayjs.utc(membershipDoc.end).startOf('day');
       const userId = membershipDoc.user;
+      const userDoc = userId in userDocRecord ? userDocRecord[userId] : null;
+      const userLocale = userDoc?.preference.locale;
 
       if (endDate.isSame(currentDate, 'date')) {
         // When the end date is today, we remind the user to renew their membership
@@ -89,8 +110,14 @@ export const checkScreenshotMembership = async (
         try {
           await discordBotApi.createDMMessage(userId, {
             content:
-              `Your membership role **@${membershipRoleName}** will expire tomorrow.\n` +
-              `Please use \`/${membershipRoleDoc.config.aliasCommandName}\` command to renew your membership in the server \`${guildName}\`.`,
+              t('membership.check_screenshot_membership_reminder', userLocale) +
+              ` **@${membershipRoleName}** ` +
+              t('membership.check_screenshot_membership_reminder_2', userLocale) +
+              '\n' +
+              t('membership.check_screenshot_renew_instruction_1', userLocale) +
+              ` \`/${membershipRoleDoc.config.aliasCommandName}\` ` +
+              t('membership.check_screenshot_renew_instruction_2', userLocale) +
+              ` \`${guildName}\``,
           });
         } catch (error) {
           // We cannot DM the user, so we just ignore it
@@ -102,12 +129,18 @@ export const checkScreenshotMembership = async (
         // When the end date is before today, we remove the user's membership
 
         const removeMembershipResult = await membershipService.remove({
+          userLocale,
+          guildLocale,
           guildId,
           membershipRoleDoc,
           membershipDoc,
           removeReason:
-            `it has expired.\n` +
-            `Please use \`/${membershipRoleDoc.config.aliasCommandName}\` command to renew your membership in the server \`${guildName}\``,
+            t('membership.check_screenshot_membership_failed_1', userLocale) +
+            '\n' +
+            t('membership.check_screenshot_renew_instruction_1', userLocale) +
+            ` \`/${membershipRoleDoc.config.aliasCommandName}\` ` +
+            t('membership.check_screenshot_renew_instruction_2', userLocale) +
+            ` \`${guildName}\``,
           manual: false,
         });
         if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
@@ -122,11 +155,13 @@ export const checkScreenshotMembership = async (
     if (failedRoleRemovalUserIds.length > 0) {
       await appEventLogService.log({
         content:
-          `[Screenshot membership check]\n` +
-          `Following are the users whose membership has expired, ` +
-          `but the bot failed to remove their membership role <@&${membershipRoleId}>:\n` +
+          t('membership.check_screenshot_membership', guildLocale) +
+          '\n' +
+          t('membership.check_membership_failed_removal_guild_log_1', guildLocale) +
+          ` <@&${membershipRoleId}>:\n` +
           failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
-          `\n\nPlease manually remove the role from these users, and check if the bot has correct permissions.`,
+          '\n\n' +
+          t('membership.check_membership_failed_removal_guild_log_2', guildLocale),
       });
     }
   }
