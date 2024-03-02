@@ -25,47 +25,47 @@ const testMap: Record<
   { url: string; date: RecognizedDate }
 > = {
   eng: {
-    url: 'https://i.imgur.com/YXgHJGm.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/eng.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   chi_sim: {
-    url: 'https://i.imgur.com/DTBquNF.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/chi_sim.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   chi_tra: {
-    url: 'https://i.imgur.com/p3wiZD3.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/chi_tra.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   deu: {
-    url: 'https://i.imgur.com/eYzCnni.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/deu.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   fil: {
-    url: 'https://i.imgur.com/yqMDdJS.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/fil.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   ind: {
-    url: 'https://i.imgur.com/erKLG7p.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/ind.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   jpn: {
-    url: 'https://i.imgur.com/MUdFtam.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/jpn.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   kor: {
-    url: 'https://i.imgur.com/mnB29Fc.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/kor.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   msa: {
-    url: 'https://i.imgur.com/QgnZT86.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/msa.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   tha: {
-    url: 'https://i.imgur.com/yD87ey7.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/tha.png',
     date: { year: 2024, month: 3, day: 6 },
   },
   vie: {
-    url: 'https://i.imgur.com/DNwf1rY.png',
+    url: 'https://divine-bridge-cdn.jerrycool123.com/vie.png',
     date: { year: 2024, month: 3, day: 6 },
   },
 };

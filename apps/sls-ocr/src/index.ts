@@ -11,18 +11,25 @@ export const ocr = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProx
     return { statusCode: 403 };
   }
 
-  const parsedBody = ocrBodySchema.safeParse(JSON.parse(event.body ?? ''));
-  if (!parsedBody.success) {
-    return { statusCode: 400, body: JSON.stringify({ message: parsedBody.error }) };
+  try {
+    const parsedBody = ocrBodySchema.safeParse(JSON.parse(event.body ?? ''));
+    if (!parsedBody.success) {
+      return { statusCode: 400, body: JSON.stringify({ message: parsedBody.error }) };
+    }
+    const { image, language } = parsedBody.data;
+
+    const worker = await createWorker(language, 1, {
+      workerPath: './node_modules/tesseract.js/src/worker-script/node/index.js',
+      cachePath: '/tmp',
+    });
+    const ret = await worker.recognize(image);
+    await worker.terminate();
+
+    logger.debug(JSON.stringify(ret.data.text, null, 2));
+
+    return { statusCode: 200, body: JSON.stringify({ message: ret.data.text }) };
+  } catch (error) {
+    logger.error(error);
+    return { statusCode: 500 };
   }
-  const { image, language } = parsedBody.data;
-
-  const worker = await createWorker(language, 1, {
-    workerPath: './node_modules/tesseract.js/src/worker-script/node/index.js',
-    cachePath: '/tmp',
-  });
-  const ret = await worker.recognize(image);
-  await worker.terminate();
-
-  return { statusCode: 200, body: JSON.stringify({ message: ret.data.text }) };
 };
