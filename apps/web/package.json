@@ -12,6 +12,7 @@
     "@eisberg-labs/next-google-analytics": "^5.0.1",
     "@formatjs/intl-localematcher": "^0.5.4",
     "@react-oauth/google": "^0.12.1",
+    "@types/negotiator": "^0.6.3",
     "@types/node": "^20.11.16",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
@@ -39,9 +40,6 @@
     "sharp": "^0.33.2",
     "typescript": "^5.3.3",
     "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@types/negotiator": "^0.6.3"
   },
   "scripts": {
     "build": "next build",

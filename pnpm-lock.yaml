@@ -345,6 +345,9 @@ importers:
       '@react-oauth/google':
         specifier: ^0.12.1
         version: 0.12.1(react-dom@18.2.0)(react@18.2.0)
+      '@types/negotiator':
+        specifier: ^0.6.3
+        version: 0.6.3
       '@types/node':
         specifier: ^20.11.16
         version: 20.11.16
@@ -426,10 +429,6 @@ importers:
       zod:
         specifier: ^3.22.4
         version: 3.22.4
-    devDependencies:
-      '@types/negotiator':
-        specifier: ^0.6.3
-        version: 0.6.3
 
   packages/common:
     dependencies:
@@ -4282,7 +4281,7 @@ packages:
 
   /@types/negotiator@0.6.3:
     resolution: {integrity: sha512-JkXTOdKs5MF086b/pt8C3+yVp3iDUwG635L7oCH6HvJvvr6lSUU5oe/gLXnPEfYRROHjJIPgCV6cuAg8gGkntQ==}
-    dev: true
+    dev: false
 
   /@types/node@20.11.16:
     resolution: {integrity: sha512-gKb0enTmRCzXSSUJDq6/sPcqrfCv2mkkG6Jt/clpn5eiCbKTY+SgZUxo+p8ZKMof5dCp9vHQUAB7wOUTod22wQ==}
