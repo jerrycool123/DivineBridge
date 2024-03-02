@@ -2,6 +2,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { GoogleAnalytics } from '@eisberg-labs/next-google-analytics';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { SessionProvider } from 'next-auth/react';
 import type { PropsWithChildren } from 'react';
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
             <html lang="en">
               <GoogleAnalytics trackingId={publicEnv.NEXT_PUBLIC_ANALYTICS_ID} />
               <Analytics />
+              <SpeedInsights />
               <body>{children}</body>
             </html>
           </AntdRegistry>
