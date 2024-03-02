@@ -117,7 +117,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
           const permissions = new PermissionsBitField(chatInputCommand.requiredClientPermissions);
           const [member, authorDoc, guildDoc] = await Promise.all([
             guild.members.fetchMe({ force: true }),
-            Database.upsertUser(Utils.convertUser(user)),
+            Database.upsertUser({ ...Utils.convertUser(user), locale }),
             Database.upsertGuild(Utils.convertGuild(guild)),
           ]);
           const missingPermissions = member
