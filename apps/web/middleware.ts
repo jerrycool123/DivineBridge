@@ -12,7 +12,17 @@ const protectedPaths = ['/dashboard'];
 const getLocale = (headers: Negotiator.Headers) => {
   const languages = new Negotiator({ headers }).languages();
 
-  return match(languages, supportedLocales, defaultLocale);
+  try {
+    // If the user's browser is set to use any language, we default to the defaultLocale
+    if (languages.length === 1 && languages[0] === '*') {
+      return defaultLocale;
+    }
+
+    return match(languages, supportedLocales, defaultLocale);
+  } catch (error) {
+    // If the language is not supported, we default to the defaultLocale
+    return defaultLocale;
+  }
 };
 
 export const middleware: NextMiddleware = async (request) => {
