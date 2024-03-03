@@ -19,10 +19,13 @@
   "packageManager": "pnpm@8.15.4",
   "scripts": {
     "build": "turbo run build",
-    "deploy": "vercel --prod deploy",
+    "build:server": "turbo run build --filter server",
+    "build:web": "turbo run build --filter web",
+    "config:aws": "./scripts/aws-config.sh",
     "deploy:sls-backup": "turbo run deploy --filter sls-backup",
     "deploy:sls-check-membership": "turbo run deploy --filter sls-check-membership",
     "deploy:sls-ocr": "turbo run deploy --filter sls-ocr",
+    "deploy:web": "vercel --prod deploy",
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter web --filter @divine-bridge/common --filter @divine-bridge/i18n",
     "format": "turbo run format",
@@ -30,6 +33,8 @@
     "preinstall": "npx only-allow pnpm",
     "prepare": "npx husky",
     "start": "turbo run start",
+    "start:server": "turbo run start --filter server",
+    "start:web": "turbo run start --filter web",
     "test": "turbo run test"
   },
   "syncpack": {

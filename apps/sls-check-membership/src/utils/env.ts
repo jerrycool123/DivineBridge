@@ -6,7 +6,6 @@ export const Env = z
     MONGO_URI: z.string(),
     API_TOKEN: z.string(),
     DISCORD_BOT_TOKEN: z.string(),
-    DISCORD_LOG_WEBHOOK_URL: z.string(),
     DATA_ENCRYPTION_KEY: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),

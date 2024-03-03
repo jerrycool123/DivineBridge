@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
 import tar from 'tar';
 
-// ? Note: you might need to download your plaform-specific version of mongodump in order to do local testing
+// ? Note: you might need to download your platform-specific version of mongodump in order to do local testing
 // ? Here: https://www.mongodb.com/download-center/database-tools/releases/archive
 const FILE_NAME = 'mongodb-database-tools-amazon2-x86_64-100.9.4';
 const DOWNLOAD_URL = `https://fastdl.mongodb.org/tools/db/${FILE_NAME}.tgz`;
