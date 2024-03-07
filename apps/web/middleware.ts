@@ -1,6 +1,7 @@
 import { defaultLocale, supportedLocales } from '@divine-bridge/i18n';
 import { match } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';
+import { Session } from 'next-auth';
 import { headers } from 'next/headers';
 import { NextMiddleware, NextResponse } from 'next/server';
 
@@ -9,16 +10,20 @@ import { publicEnv } from './libs/common/public-env';
 
 const protectedPaths = ['/dashboard'];
 
-const getLocale = (headers: Negotiator.Headers) => {
-  const languages = new Negotiator({ headers }).languages();
-
+const getLocale = (session: Session | null, headers: Negotiator.Headers) => {
   try {
+    // If the user has signed in, we use the user's locale
+    if (session !== null && (supportedLocales as readonly string[]).includes(session.user.locale)) {
+      return session.user.locale;
+    }
+
     // If the user's browser is set to use any language, we default to the defaultLocale
-    if (languages.length === 1 && languages[0] === '*') {
+    const headerLanguages = new Negotiator({ headers }).languages();
+    if (headerLanguages.length === 1 && headerLanguages[0] === '*') {
       return defaultLocale;
     }
 
-    return match(languages, supportedLocales, defaultLocale);
+    return match(headerLanguages, supportedLocales, defaultLocale);
   } catch (error) {
     // If the language is not supported, we default to the defaultLocale
     return defaultLocale;
@@ -32,15 +37,13 @@ export const middleware: NextMiddleware = async (request) => {
   );
   if (pathnameHasLocale) return;
 
-  if (protectedPaths.some((path) => pathname.startsWith(path))) {
-    const authorized = await auth();
-    if (authorized === null) {
-      return NextResponse.redirect(publicEnv.NEXT_PUBLIC_WEB_URL);
-    }
+  const authorized = await auth();
+  if (authorized === null && protectedPaths.some((path) => pathname.startsWith(path))) {
+    return NextResponse.redirect(publicEnv.NEXT_PUBLIC_WEB_URL);
   }
 
   const requestHeaders = Object.fromEntries(headers().entries());
-  const locale = getLocale(requestHeaders);
+  const locale = getLocale(authorized, requestHeaders);
   request.nextUrl.pathname = `/${locale}${pathname}`;
   return NextResponse.redirect(request.nextUrl);
 };
