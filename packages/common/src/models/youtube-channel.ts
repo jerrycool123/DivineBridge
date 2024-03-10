@@ -57,6 +57,15 @@ const youtubeChannelSchema = new Schema<YouTubeChannelDoc>(
         return this.create(attrs);
       },
     },
+    virtuals: {
+      membershipRoles: {
+        options: {
+          ref: 'MembershipRole',
+          localField: '_id',
+          foreignField: 'youtube',
+        },
+      },
+    },
   },
 );
 

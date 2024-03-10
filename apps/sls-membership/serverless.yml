@@ -1,4 +1,4 @@
-service: sls-check-membership
+service: sls-membership
 
 provider:
   name: aws
@@ -11,6 +11,10 @@ functions:
     url: true
   check-screenshot-membership:
     handler: src/index.checkScreenshotMembership
+    timeout: 900
+    url: true
+  update-member-only-videos:
+    handler: src/index.updateMemberOnlyVideos
     timeout: 900
     url: true
 

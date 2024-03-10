@@ -1,4 +1,4 @@
-name: Deploy sls-check-membership to AWS Lambda
+name: Deploy sls-membership to AWS Lambda
 
 on:
   push:
@@ -28,11 +28,11 @@ jobs:
         run: pnpm install
 
       - name: Load environment variables
-        run: echo "${{ secrets.SLS_CHECK_MEMBERSHIP_ENV }}" | base64 --decode >> ./apps/sls-check-membership/.env.production.local
+        run: echo "${{ secrets.SLS_MEMBERSHIP_ENV }}" | base64 --decode >> ./apps/sls-membership/.env.production.local
 
       - name: Deploy to AWS Lambda
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'us-east-1'
-        run: pnpm run deploy:sls-check-membership
+        run: pnpm run deploy:sls-membership

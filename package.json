@@ -23,7 +23,7 @@
     "build:web": "turbo run build --filter web",
     "config:aws": "./scripts/aws-config.sh",
     "deploy:sls-backup": "turbo run deploy --filter sls-backup",
-    "deploy:sls-check-membership": "turbo run deploy --filter sls-check-membership",
+    "deploy:sls-membership": "turbo run deploy --filter sls-membership",
     "deploy:sls-ocr": "turbo run deploy --filter sls-ocr",
     "deploy:web": "vercel --prod deploy",
     "dev": "turbo run dev",

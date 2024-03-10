@@ -152,7 +152,7 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
 
-  apps/sls-check-membership:
+  apps/sls-membership:
     dependencies:
       '@discordjs/rest':
         specifier: ^2.2.0

@@ -15,7 +15,7 @@ Applications are located in the `./apps` directory.
 - `server`: The server that runs the Discord bot.
 - `sls-ocr`: A serverless app that utilizes [tesseract](https://github.com/tesseract-ocr/tesseract) to perform OCR.
 - `sls-backup`: A serverless app that backs up the database.
-- `sls-check-membership`: A serverless app that removes expired memberships.
+- `sls-membership`: A serverless app that removes expired memberships and update YouTube membership video lists.
 
 ### Packages
 
@@ -65,7 +65,7 @@ There are 3 serverless apps:
 
 - `sls-ocr`
 - `sls-backup`
-- `sls-check-membership`
+- `sls-membership`
 
 Please refer to the `./apps/sls-*/.env.example` files, and create a `.env.development.local` file for each app in the `./apps/sls-*` directory.
 
@@ -131,8 +131,8 @@ pnpm run deploy:sls-ocr
 # To deploy `sls-backup`
 pnpm run deploy:sls-backup
 
-# To deploy `sls-check-membership`
-pnpm run deploy:sls-check-membership
+# To deploy `sls-membership`
+pnpm run deploy:sls-membership
 ```
 
 ## Contribution

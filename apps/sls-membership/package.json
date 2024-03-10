@@ -1,5 +1,5 @@
 {
-  "name": "sls-check-membership",
+  "name": "sls-membership",
   "version": "0.0.1",
   "dependencies": {
     "@discordjs/rest": "^2.2.0",
