@@ -8,7 +8,7 @@ import {
   UserCollection,
   UserDoc,
 } from '@divine-bridge/common';
-import { defaultLocale, getTFunc, initI18n, t } from '@divine-bridge/i18n';
+import { TFunc, defaultLocale, initI18n, t } from '@divine-bridge/i18n';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -84,11 +84,12 @@ export const checkScreenshotMembership = async (
       continue;
     }
     const guildLocale = guildDoc.config.locale ?? defaultLocale;
+    const guild_t: TFunc = (key) => t(key, guildLocale);
     const guildName = guildDoc.profile.name;
 
     // Initialize log service and membership service
     const appEventLogService = await new AppEventLogService(
-      getTFunc(guildLocale),
+      guild_t,
       logger,
       discordBotApi,
       guildId,
@@ -102,6 +103,7 @@ export const checkScreenshotMembership = async (
       const userId = membershipDoc.user;
       const userDoc = userId in userDocRecord ? userDocRecord[userId] : null;
       const userLocale = userDoc?.preference.locale;
+      const user_t: TFunc = (key) => t(key, userLocale);
 
       if (endDate.isSame(currentDate, 'date')) {
         // When the end date is today, we remind the user to renew their membership
@@ -110,13 +112,13 @@ export const checkScreenshotMembership = async (
         try {
           await discordBotApi.createDMMessage(userId, {
             content:
-              t('membership.check_screenshot_membership_reminder', userLocale) +
+              user_t('membership.check_screenshot_membership_reminder') +
               ` **@${membershipRoleName}** ` +
-              t('membership.check_screenshot_membership_reminder_2', userLocale) +
+              user_t('membership.check_screenshot_membership_reminder_2') +
               '\n' +
-              t('membership.check_screenshot_renew_instruction_1', userLocale) +
+              user_t('membership.check_screenshot_renew_instruction_1') +
               ` \`/${membershipRoleDoc.config.aliasCommandName}\` ` +
-              t('membership.check_screenshot_renew_instruction_2', userLocale) +
+              user_t('membership.check_screenshot_renew_instruction_2') +
               ` \`${guildName}\``,
           });
         } catch (error) {
@@ -135,11 +137,11 @@ export const checkScreenshotMembership = async (
           membershipRoleDoc,
           membershipDoc,
           removeReason:
-            t('membership.check_screenshot_membership_failed_1', userLocale) +
+            user_t('membership.check_screenshot_membership_failed_1') +
             '\n' +
-            t('membership.check_screenshot_renew_instruction_1', userLocale) +
+            user_t('membership.check_screenshot_renew_instruction_1') +
             ` \`/${membershipRoleDoc.config.aliasCommandName}\` ` +
-            t('membership.check_screenshot_renew_instruction_2', userLocale) +
+            user_t('membership.check_screenshot_renew_instruction_2') +
             ` \`${guildName}\``,
           manual: false,
         });
@@ -155,13 +157,13 @@ export const checkScreenshotMembership = async (
     if (failedRoleRemovalUserIds.length > 0) {
       await appEventLogService.log({
         content:
-          t('membership.check_screenshot_membership', guildLocale) +
+          guild_t('membership.check_screenshot_membership') +
           '\n' +
-          t('membership.check_membership_failed_removal_guild_log_1', guildLocale) +
+          guild_t('membership.check_membership_failed_removal_guild_log_1') +
           ` <@&${membershipRoleId}>:\n` +
           failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
           '\n\n' +
-          t('membership.check_membership_failed_removal_guild_log_2', guildLocale),
+          guild_t('membership.check_membership_failed_removal_guild_log_2'),
       });
     }
   }

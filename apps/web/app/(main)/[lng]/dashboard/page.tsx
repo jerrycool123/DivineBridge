@@ -7,18 +7,22 @@ import Switch from 'antd/es/switch';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 import { useContext, useState } from 'react';
 
 import styles from '../../../../styles/Dashboard.module.css';
 
 import ApplyModal from '../../../../components/Modals/ApplyModal';
 import { MainContext } from '../../../../contexts/MainContext';
+import { useClientTranslation } from '../../../../libs/client/i18n';
 import { getDiscordBotInviteLink } from '../../../../libs/common/discord';
 import { GetGuildsActionData } from '../../../../types/server-actions';
 
 dayjs.extend(utc);
 
 export default function Dashboard() {
+  const { lng } = useParams();
+  const { t } = useClientTranslation(lng);
   const { guilds } = useContext(MainContext);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,7 +36,7 @@ export default function Dashboard() {
   if (guilds === null) {
     return (
       <div className="vh-100 d-flex flex-column justify-content-center align-items-center">
-        <div className="poppins mb-4 fs-5 fw-500 text-white">Loading...</div>
+        <div className="poppins mb-4 fs-5 fw-500 text-white">{t('web.Loading')}...</div>
         <Spin className="mb-5" indicator={<LoadingOutlined className="text-white fs-2" spin />} />
       </div>
     );
@@ -50,12 +54,12 @@ export default function Dashboard() {
         <div className={`container ${styles.container}`}>
           <div className="row pt-4 mb-2">
             <div className="fs-5 ms-2 poppins fw-700 text-white">
-              Membership Roles in your servers
+              {t('web.Membership Roles in your servers')}
             </div>
           </div>
           <div className="row mb-3">
             <div className="d-flex align-items-center">
-              <div className="mx-2 text-white fs-7">View acquired memberships only</div>
+              <div className="mx-2 text-white fs-7">{t('web.View acquired memberships only')}</div>
               <Switch
                 className="flex-shrink-0"
                 checked={viewAcquiredMembershipsOnly}
@@ -103,7 +107,7 @@ export default function Dashboard() {
                         </div>
                         <div
                           className={`flex-shrink-0 fw-600 ${styles.membershipRoleCount}`}
-                        >{`Membership Roles: ${guild.membershipRoles.length}`}</div>
+                        >{`${t('web.Membership Roles')} ${guild.membershipRoles.length}`}</div>
                       </div>
                       <div className={`pb-1 d-flex overflow-auto ${styles.cardBody}`}>
                         {guild.membershipRoles
@@ -153,7 +157,9 @@ export default function Dashboard() {
                                   </div>
                                 </div>
                                 <div className="flex-shrink-0 mb-1 d-flex align-items-center">
-                                  <span className={styles.fieldName}>Membership Role:</span>
+                                  <span className={styles.fieldName}>
+                                    {t('web.Membership Role')}
+                                  </span>
                                   <div
                                     className={`fw-500 ${styles.membershipRolePill}`}
                                     onMouseEnter={() => setHoveredRoleId(membershipRole.id)}
@@ -189,27 +195,30 @@ export default function Dashboard() {
                                         setIsModalOpen(true);
                                       }}
                                     >
-                                      Apply
+                                      {t('web.Apply')}
                                     </div>
                                   </div>
                                 ) : (
                                   <>
                                     <div className="flex-shrink-0 mb-1">
-                                      <span className={styles.fieldName}>Verification Mode:</span>
+                                      <span className={styles.fieldName}>
+                                        {t('web.Verification Mode')}
+                                      </span>
                                       <span className="text-white fw-500">
                                         {membershipRole.membership.type === 'auth'
-                                          ? 'Auth'
+                                          ? t('web.Auth Mode')
                                           : membershipRole.membership.type === 'manual' ||
                                               membershipRole.membership.type === 'screenshot'
-                                            ? 'Screenshot'
+                                            ? t('web.Screenshot Mode')
                                             : membershipRole.membership.type === 'live_chat'
-                                              ? 'Live Chat'
-                                              : 'Unknown'}{' '}
-                                        Mode
+                                              ? t('web.Live Chat Mode')
+                                              : t('web.Unknown Mode')}
                                       </span>
                                     </div>
                                     <div className="flex-shrink-0">
-                                      <span className={styles.fieldName}>Membership Duration:</span>
+                                      <span className={styles.fieldName}>
+                                        {t('web.Membership Duration')}
+                                      </span>
                                       <span className={`fw-500 ${styles.date}`}>
                                         {dayjs
                                           .utc(membershipRole.membership.begin)
@@ -249,7 +258,7 @@ export default function Dashboard() {
                 }}
               >
                 <div className="poppins fs-5 user-select-none">
-                  + Invite Divine Bridge bot to a new server
+                  + {t('web.Invite Divine Bridge bot to a new server')}
                 </div>
               </div>
             </div>

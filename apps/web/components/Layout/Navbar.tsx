@@ -8,14 +8,18 @@ import Spin from 'antd/es/spin';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { DiscordLoginButton } from 'react-social-login-buttons';
 
 import styles from './Navbar.module.css';
 
+import { useClientTranslation } from '../../libs/client/i18n';
 import SettingsModal from '../Modals/SettingsModal';
 
 export default function Navbar() {
+  const { lng } = useParams();
+  const { t } = useClientTranslation(lng);
   const { data: session, status } = useSession();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,7 +29,7 @@ export default function Navbar() {
       key: 'dashboard',
       label: (
         <Link className="text-decoration-none" href="/dashboard">
-          Dashboard
+          {t('web.Dashboard')}
         </Link>
       ),
     },
@@ -33,7 +37,7 @@ export default function Navbar() {
       key: 'settings',
       label: (
         <div role="button" onClick={() => setIsModalOpen(true)}>
-          Settings
+          {t('web.Settings')}
         </div>
       ),
     },
@@ -41,7 +45,7 @@ export default function Navbar() {
       key: 'sign-out',
       label: (
         <div role="button" className="text-danger" onClick={() => signOut({ callbackUrl: '/' })}>
-          Sign Out
+          {t('web.Sign Out')}
         </div>
       ),
     },
@@ -81,7 +85,7 @@ export default function Navbar() {
           ) : (
             <div>
               <DiscordLoginButton
-                text="Sign in"
+                text={t('web.Sign In')}
                 className={`${styles.signInButton} text-nowrap`}
                 onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
               />

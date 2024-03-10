@@ -19,7 +19,7 @@ export const authAction = createSafeActionClient({
     await dbConnect();
     const userDoc = await Database.upsertUser({ id, name, image, locale });
 
-    return { session, userDoc };
+    return { session, userDoc, locale };
   },
   handleReturnedServerError(e) {
     return e.message;

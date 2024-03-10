@@ -8,7 +8,7 @@ import {
   MembershipRoleDoc,
   MembershipService,
 } from '@divine-bridge/common';
-import { defaultLocale } from '@divine-bridge/i18n';
+import { TFunc, defaultLocale } from '@divine-bridge/i18n';
 import { z } from 'zod';
 
 import { authAction } from '.';
@@ -24,9 +24,9 @@ const deleteAccountActionInputSchema = z.object({});
 export const deleteAccountAction = authAction<
   typeof deleteAccountActionInputSchema,
   DeleteAccountActionData
->(deleteAccountActionInputSchema, async (_input, { userDoc }) => {
-  const userLocale = userDoc.preference.locale;
-  const { original_t: t } = await getServerTranslation(undefined);
+>(deleteAccountActionInputSchema, async (_input, { session, userDoc }) => {
+  const userLocale = session.user.locale;
+  const { original_t, t: user_t } = await getServerTranslation(userLocale);
 
   // Revoke YouTube refresh token if user has connected their YouTube account
   if (userDoc.youtube !== null) {
@@ -104,15 +104,16 @@ export const deleteAccountAction = authAction<
     if (membershipDocGroup.length === 0) continue;
 
     const guildLocale = membershipDocGroup[0].membershipRole.guild.config.locale ?? defaultLocale;
+    const guild_t: TFunc = (key) => original_t(key, guildLocale);
 
     // Initialize log service and membership service
     const appEventLogService = await new AppEventLogService(
-      (key) => t(key, guildLocale),
+      guild_t,
       logger,
       discordBotApi,
       guildId,
     ).init();
-    const membershipService = new MembershipService(t, discordBotApi, appEventLogService);
+    const membershipService = new MembershipService(original_t, discordBotApi, appEventLogService);
 
     // Remove membership
     const failedRoleRemovalIds: string[] = [];
@@ -123,7 +124,7 @@ export const deleteAccountAction = authAction<
         guildId,
         membershipRoleDoc: membershipDoc.membershipRole,
         membershipDoc,
-        removeReason: `you have deleted your account from Divine Bridge`,
+        removeReason: user_t(`web.you have deleted your account from Divine Bridge`),
         manual: false,
       });
       if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
@@ -135,10 +136,10 @@ export const deleteAccountAction = authAction<
     if (failedRoleRemovalIds.length > 0) {
       await appEventLogService.log({
         content:
-          `The user <@!${userDoc._id}> has deleted their account from Divine Bridge.\n` +
-          `However, I can't remove the following membership roles from the user:\n` +
+          `${guild_t('web.The user')} <@${userDoc._id}> ${guild_t('web.has deleted their account from Divine Bridge')}\n` +
+          `${guild_t('web.However I cant remove the following membership roles from the user')}\n` +
           failedRoleRemovalIds.map((id) => `<@&${id}>`).join('\n') +
-          `\n\nPlease manually remove the roles from the user, and check if the bot has correct permissions.`,
+          `\n\n${guild_t('web.Please manually remove the roles from the user and check if the bot has correct permissions')}`,
       });
     }
   }

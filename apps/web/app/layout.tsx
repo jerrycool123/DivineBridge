@@ -11,7 +11,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import '../styles/globals.css';
 
-import { MainProvider } from '../contexts/MainContext';
 import { publicEnv } from '../libs/common/public-env';
 
 export const metadata: Metadata = {
@@ -24,18 +23,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <SessionProvider>
-      <MainProvider>
-        <GoogleOAuthProvider clientId={publicEnv.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
-          <AntdRegistry>
-            <html lang="en">
-              <GoogleAnalytics trackingId={publicEnv.NEXT_PUBLIC_ANALYTICS_ID} />
-              <Analytics />
-              <SpeedInsights />
-              <body>{children}</body>
-            </html>
-          </AntdRegistry>
-        </GoogleOAuthProvider>
-      </MainProvider>
+      <GoogleOAuthProvider clientId={publicEnv.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+        <AntdRegistry>
+          <html lang="en">
+            <GoogleAnalytics trackingId={publicEnv.NEXT_PUBLIC_ANALYTICS_ID} />
+            <Analytics />
+            <SpeedInsights />
+            <body>{children}</body>
+          </html>
+        </AntdRegistry>
+      </GoogleOAuthProvider>
     </SessionProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { Database, MembershipRoleCollection } from '@divine-bridge/common';
-import { defaultLocale, getTFunc } from '@divine-bridge/i18n';
+import { defaultLocale, t } from '@divine-bridge/i18n';
 import { Events, Interaction, PermissionsBitField } from 'discord.js';
 
 import { VerifyCommand } from '../commands/verify.js';
@@ -31,7 +31,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
           const authorLocale = authorDoc.preference.locale;
           await autoCompleteCommand.autocomplete(interaction, {
             authorLocale,
-            author_t: getTFunc(authorLocale),
+            author_t: (key) => t(key, authorLocale),
           });
         } else if (guild !== null) {
           const [authorDoc, guildDoc] = await Promise.all([
@@ -52,9 +52,9 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
             guild,
             guildDoc,
             guildLocale,
-            guild_t: getTFunc(guildLocale),
+            guild_t: (key) => t(key, guildLocale),
             authorLocale,
-            author_t: getTFunc(authorLocale),
+            author_t: (key) => t(key, authorLocale),
           });
         }
         return;
@@ -90,9 +90,9 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
                   guild,
                   guildDoc,
                   guildLocale,
-                  guild_t: getTFunc(guildLocale),
+                  guild_t: (key) => t(key, guildLocale),
                   authorLocale,
-                  author_t: getTFunc(authorLocale),
+                  author_t: (key) => t(key, authorLocale),
                 },
               );
               return;
@@ -110,7 +110,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
           const authorLocale = authorDoc.preference.locale;
           await chatInputCommand.execute(interaction, {
             authorLocale,
-            author_t: getTFunc(authorLocale),
+            author_t: (key) => t(key, authorLocale),
           });
         } else if (guild !== null) {
           // Check bot permissions if in a guild
@@ -148,9 +148,9 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
             guild,
             guildDoc,
             guildLocale,
-            guild_t: getTFunc(guildLocale),
+            guild_t: (key) => t(key, guildLocale),
             authorLocale,
-            author_t: getTFunc(authorLocale),
+            author_t: (key) => t(key, authorLocale),
           });
         } else {
           await interaction.reply({
@@ -179,7 +179,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
           const authorLocale = authorDoc.preference.locale;
           await buttonCommand.execute(interaction, {
             authorLocale: authorDoc.preference.locale,
-            author_t: getTFunc(authorLocale),
+            author_t: (key) => t(key, authorLocale),
           });
           return;
         } else if (guild !== null) {
@@ -193,9 +193,9 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
             guild,
             guildDoc,
             guildLocale,
-            guild_t: getTFunc(guildLocale),
+            guild_t: (key) => t(key, guildLocale),
             authorLocale,
-            author_t: getTFunc(authorLocale),
+            author_t: (key) => t(key, authorLocale),
           });
         }
         return;

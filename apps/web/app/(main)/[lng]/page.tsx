@@ -7,7 +7,12 @@ import { DiscordLoginButton } from 'react-social-login-buttons';
 
 import styles from '../../../styles/Home.module.css';
 
-export default function Home() {
+import { useClientTranslation } from '../../../libs/client/i18n';
+import { WithI18nParams } from '../../../types/common';
+
+export default function Home({ params }: WithI18nParams) {
+  const { t } = useClientTranslation(params.lng);
+
   return (
     <main className="text-white">
       <section className={styles.heroSection}>
@@ -16,16 +21,19 @@ export default function Home() {
             <div className="col-xl-8 col-lg-9 h-100 d-flex flex-column justify-content-center">
               <h1 className={`mb-4 fw-700 poppins ${styles.heroText}`}>Divine Bridge</h1>
               <h2 className={`mb-4 fs-5 ${styles.subText}`}>
-                <span className="d-inline-block">A bridge between&nbsp;</span>
+                <span className="d-inline-block">{t('web.headline_1')}&nbsp;</span>
                 <span className={`d-inline-block fw-600 ${styles.youtube}`}>
-                  YouTube Channel Membership
+                  {t('web.YouTube Channel Membership')}
                 </span>
-                <span className="d-inline-block">&nbsp;and&nbsp;</span>
-                <span className={`d-inline-block fw-600 ${styles.discord}`}>Discord Role</span>.
+                <span className="d-inline-block">&nbsp;{t('web.and')}&nbsp;</span>
+                <span className={`d-inline-block fw-600 ${styles.discord}`}>
+                  {t('web.Discord Role')}
+                </span>
+                <span className="d-inline-block">&nbsp;{t('web.headline_2')}</span>
               </h2>
               <div>
                 <DiscordLoginButton
-                  text="Sign in with Discord"
+                  text={t('web.Sign in with Discord')}
                   className={`${styles.C2AButton} text-nowrap`}
                   onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
                 />
@@ -44,45 +52,49 @@ export default function Home() {
         <div className="container">
           <div className="row mb-3">
             <div>
-              <h2 className="text-center poppins">What is Divine Bridge</h2>
+              <h2 className="text-center poppins">{t('web.What is Divine Bridge')}</h2>
             </div>
           </div>
           <div className="row d-flex justify-content-center mb-5">
             <div className={`col-lg-8 ${styles.introduction}`}>
               <p className="mb-2 fs-5">
-                Divine Bridge is a Discord bot verifying YouTube channel memberships and link them
-                with Discord server roles. It currently supports{' '}
-                <span className="text-white fw-500">Screenshot Mode</span> and{' '}
-                <span className="text-white fw-500">Auth Mode</span>.
+                {t(
+                  'web.Divine Bridge is a Discord bot verifying YouTube channel memberships and link them with Discord server roles',
+                )}{' '}
+                {t('web.It currently supports')}{' '}
+                <span className="text-white fw-500">{t('web.Screenshot Mode')}</span> {t('web.and')}{' '}
+                <span className="text-white fw-500">{t('web.Auth Mode')}</span>.
               </p>
             </div>
           </div>
           <div className="row mb-5 d-flex justify-content-center">
             <div className="col-lg-5 d-flex flex-column align-items-center">
-              <h2 className="poppins mb-4">Screenshot Mode</h2>
+              <h2 className="poppins mb-4">{t('web.Screenshot Mode')}</h2>
               <div className={styles.modeIntro}>
                 <p className={`mb-2 ${styles.introduction}`}>
-                  You need to verify your membership every month.
+                  {t('web.You need to verify your membership every month')}
                 </p>
                 <p className={styles.introduction}>
-                  Provide a screenshot of your{' '}
+                  {t('web.Provide a screenshot of your')}{' '}
                   <Link
                     className="link fw-500"
                     href="https://www.youtube.com/paid_memberships"
                     target="_blank"
                   >
-                    Memberships
+                    {t('web.Memberships')}
                   </Link>{' '}
-                  page on YouTube. Divine Bridge use OCR(
+                  {t('web.page on YouTube')} {t('web.Divine Bridge use OCR')}
                   <Link
                     className="link fw-500"
                     href="https://wikipedia.org/wiki/Optical_character_recognition"
                     target="_blank"
                   >
-                    Optical Character Recognition
+                    {t('web.Optical Character Recognition')}
                   </Link>
-                  ) to recognize the next billing date, and send your screenshot with the recognized
-                  date to the server moderators to manually approve it.
+                  {t('web.to recognize the next billing date')}{' '}
+                  {t(
+                    'web.and send your screenshot with the recognized date to the server moderators to manually approve it',
+                  )}
                 </p>
               </div>
               <Image
@@ -94,14 +106,15 @@ export default function Home() {
               />
             </div>
             <div className="col-lg-5 d-flex flex-column align-items-center">
-              <h2 className="poppins mb-4">Auth Mode</h2>
+              <h2 className="poppins mb-4">{t('web.Auth Mode')}</h2>
               <div className={styles.modeIntro}>
                 <p className={`mb-2 ${styles.introduction}`}>
-                  You need to sign in with YouTube and verify your membership once.
+                  {t('web.You need to sign in with YouTube and verify your membership once')}
                 </p>
                 <p className={styles.introduction}>
-                  Divine Bridge will securely store your authorized OAuth credentials, and
-                  automatically check your membership via YouTube API periodically.
+                  {t(
+                    'web.Divine Bridge will securely store your authorized OAuth credentials and automatically check your membership via YouTube API periodically',
+                  )}
                 </p>
               </div>
               <Image
@@ -115,13 +128,15 @@ export default function Home() {
           </div>
           <div className="row mb-3">
             <div>
-              <h2 className="text-center poppins">Why Divine Bridge</h2>
+              <h2 className="text-center poppins">{t('web.Why Divine Bridge')}</h2>
             </div>
           </div>
           <div className="row d-flex justify-content-center">
             <div className={`col-lg-8 ${styles.introduction}`}>
               <p>
-                The idea of the <span className="text-white fw-500">Screenshot Mode</span> came from{' '}
+                {t('web.The idea of the')}{' '}
+                <span className="text-white fw-500">{t('web.Screenshot Mode')}</span>{' '}
+                {t('web.came from')}{' '}
                 <Link
                   className="link fw-500"
                   href="https://github.com/nonJerry/VeraBot"
@@ -132,7 +147,8 @@ export default function Home() {
                 .
               </p>
               <p>
-                The idea of the <span className="text-white fw-500">Auth Mode</span> came from{' '}
+                {t('web.The idea of the')}{' '}
+                <span className="text-white fw-500">{t('web.Auth Mode')}</span> {t('web.came from')}{' '}
                 <Link
                   className="link fw-500"
                   href="https://github.com/member-gentei/member-gentei"
@@ -142,69 +158,70 @@ export default function Home() {
                 </Link>
                 .
               </p>
-              <p>Both verification methods have pros and cons.</p>
+              <p>{t('web.Both verification methods have pros and cons')}</p>
               <p>
-                The <span className="text-white fw-500">Screenshot</span> one is not automated, and
-                you need to provide your proof every month. The screenshot might contains sensitive
-                information, like your personal information or your payment details. Besides, the
-                server moderators need to verify everyone&apos;s request, which could still be a
-                heavy burden in long-term point of view.
+                {t('web.The')} <span className="text-white fw-500">{t('web.Screenshot Mode')}</span>{' '}
+                {t('web.screenshot_mode_pros_and_cons')}
               </p>
               <p>
-                The <span className="text-white fw-500">Auth</span> one is automated, but it
-                requires you to authorize the App to{' '}
-                <span className="text-danger fw-500">
-                  See, edit, and permanently delete your YouTube videos, ratings, comments and
-                  captions
+                {t('web.The')} <span className="text-white fw-500">{t('web.Auth Mode')}</span>{' '}
+                {t('web.auth_mode_pros_and_cons_1')}{' '}
+                <span className="text-danger fw-bold">
+                  {t('web.google_oauth_youtube_force_ssl_permissions')}
                 </span>
-                . While the App just needs to check if you could read comments from a members-only
-                video on your behalf in order to verify your membership, it still needs to be
-                authorized with this permission since YouTube API does not provide any other
-                permission scope that is more flexible than this. That&apos;s why some users are
-                reluctant to use this method.
+                {t('web.auth_mode_pros_and_cons_2')}
               </p>
               <p>
-                Considering the issues above, Divine Bridge implements both modes. You can choose
-                the one you prefer.
+                {t(
+                  'web.Considering the issues above Divine Bridge implements both modes You can choose the one you prefer',
+                )}
               </p>
               <p>
-                When you use <span className="text-white fw-500">Screenshot Mode</span>, we do not
-                store or backup your screenshots you sent to the bot. We only sent them to the log
-                channel in your server.
+                {t('web.When you use')}{' '}
+                <span className="text-white fw-500">{t('web.Screenshot Mode')}</span>
+                {t(
+                  'web.we do not store or backup your screenshots you sent to the bot We only sent them to the channel in your server and let the moderators manually verify your membership',
+                )}
               </p>
               <p>
-                If you choose to use the <span className="text-white fw-500">Auth Mode</span>, we
-                will store your OAuth credentials in our database with proper encryption, and we
-                will never use them for any other purpose. You can also{' '}
-                <span className="text-warning fw-500">revoke your authorization</span> at any time
-                on our dashboard or your{' '}
+                {t('web.If you choose to use the')}{' '}
+                <span className="text-white fw-500">{t('web.Auth Mode')}</span>
+                {t(
+                  'web.we will store your OAuth credentials in our database with proper encryption and we will never use them for any other purpose',
+                )}{' '}
+                {t('web.You can also')}{' '}
+                <span className="text-warning fw-500">{t('web.revoke your authorization')}</span>{' '}
+                {t('web.at any time on our dashboard or your')}{' '}
                 <Link
                   className="link fw-500"
                   href="https://support.google.com/accounts/answer/13533235"
                   target="_blank"
                 >
-                  Google Account Settings page
+                  {t('web.Google Account Settings page')}
                 </Link>
-                .
+                {t('web.revoke_end_text')}
               </p>
               <p>
-                Divine Bridge is open-sourced and has MIT License. We also host a public Discord bot{' '}
+                {t(
+                  'web.Divine Bridge is open-sourced and has MIT License We also host a public Discord bot',
+                )}{' '}
                 <Link
                   className="link fw-500"
                   href="https://discord.com/api/oauth2/authorize?client_id=1203668745663287337&permissions=268435456&scope=bot"
                 >
                   Divine Bridge
                 </Link>
-                . Any bug reports and pull requests are welcome. If you have any questions or
-                suggestions, feel free to open an issue on our Github repository{' '}
+                {t(
+                  'web.Any bug reports and pull requests are welcome If you have any questions or suggestions feel free to open an issue on our Github repository',
+                )}{' '}
                 <Link className="link fw-500" href="https://github.com/jerrycool123/DivineBridge">
                   jerrycool123/DivineBridge
                 </Link>
-                , or join our{' '}
+                {t('web.or join our')}{' '}
                 <Link className="link fw-500" href="https://discord.gg/u4HXTH5wKV">
-                  Discord Support Server
-                </Link>
-                .
+                  {t('web.Discord Support Server')}
+                </Link>{' '}
+                {t('web.ask_for_help_end')}
               </p>
             </div>
           </div>

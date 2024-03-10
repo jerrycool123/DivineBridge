@@ -7,6 +7,7 @@ import { authAction } from '.';
 import type { ConnectYouTubeActionData } from '../../../types/server-actions';
 import { cryptoUtils } from '../crypto';
 import { googleOAuth } from '../google';
+import { getServerTranslation } from '../i18n';
 import { logger } from '../logger';
 
 const connectYouTubeActionInputSchema = z.object({
@@ -16,7 +17,9 @@ const connectYouTubeActionInputSchema = z.object({
 export const connectYouTubeAction = authAction<
   typeof connectYouTubeActionInputSchema,
   ConnectYouTubeActionData
->(connectYouTubeActionInputSchema, async ({ code }, { userDoc }) => {
+>(connectYouTubeActionInputSchema, async ({ code }, { session, userDoc }) => {
+  const { t } = await getServerTranslation(session.user.locale);
+
   // Get refresh token from authorization code
   const result = await googleOAuth.getToken(code, 'postmessage');
   if (!result.success) {
@@ -43,14 +46,16 @@ export const connectYouTubeAction = authAction<
 
   // Check channel in database
   if (userDoc.youtube !== null && userDoc.youtube.id !== youtubeChannelId) {
-    throw new Error('You have already connected to a different YouTube channel');
+    throw new Error(t('web.You have already connected to a different YouTube account'));
   } else {
     const otherUser = await UserCollection.findOne({
       '_id': { $ne: userDoc._id },
       'youtube.id': youtubeChannelId,
     });
     if (otherUser !== null) {
-      throw new Error('This YouTube channel has already been connected to another Discord account');
+      throw new Error(
+        t('web.This YouTube account has already been connected to another Discord account'),
+      );
     }
   }
 
@@ -58,7 +63,7 @@ export const connectYouTubeAction = authAction<
   const encryptResult = cryptoUtils.encrypt(refreshToken);
   if (!encryptResult.success) {
     logger.error(`Failed to encrypt YouTube refresh token for user <@${userDoc._id}>`);
-    throw new Error('Internal Server Error. Please contact the bot owner to fix this issue');
+    throw new Error(t('web.Internal Server Error Please contact the bot owner to fix this issue'));
   }
   const { cipher: encryptedRefreshToken } = encryptResult;
   userDoc.youtube = {

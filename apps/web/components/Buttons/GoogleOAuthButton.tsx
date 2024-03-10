@@ -1,4 +1,9 @@
+'use client';
+
+import { useParams } from 'next/navigation';
 import { HTMLAttributes } from 'react';
+
+import { useClientTranslation } from '../../libs/client/i18n';
 
 function GoogleIcon() {
   return (
@@ -95,6 +100,8 @@ export default function GoogleOAuthButton({
   style,
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
+  const { lng } = useParams();
+  const { t } = useClientTranslation(lng);
   return (
     <div
       role="button"
@@ -118,7 +125,7 @@ export default function GoogleOAuthButton({
         </div>
       </div>
       <div className="flex-grow-1 fs-7 d-flex justify-content-center align-items-center">
-        Sign in with Google
+        {t('web.Sign in with Google')}
       </div>
     </div>
   );

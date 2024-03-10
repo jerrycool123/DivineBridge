@@ -33,7 +33,10 @@ const verifyAuthMembershipActionInputSchema = z.object({
 export const verifyAuthMembershipAction = authAction<
   typeof verifyAuthMembershipActionInputSchema,
   VerifyAuthMembershipActionData
->(verifyAuthMembershipActionInputSchema, async ({ membershipRoleId }, { userDoc }) => {
+>(verifyAuthMembershipActionInputSchema, async ({ membershipRoleId }, { session, userDoc }) => {
+  const userLocale = session.user.locale;
+  const { original_t: t, t: user_t } = await getServerTranslation(session.user.locale);
+
   // Check if user has connected their YouTube account
   if (userDoc.youtube === null) {
     throw new Error('You have not connected your YouTube account');
@@ -44,30 +47,28 @@ export const verifyAuthMembershipAction = authAction<
     .populate<{ guild: GuildDoc | null }>('guild')
     .populate<{ youtube: YouTubeChannelDoc | null }>('youtube');
   if (membershipRoleDoc === null) {
-    throw new Error('Membership role not found');
+    throw new Error(user_t('web.Membership role not found'));
   } else if (membershipRoleDoc.guild === null) {
     logger.error(
-      `Cannot retrieve the server that owns the membership role <@&${membershipRoleDoc._id}? from the database.`,
+      `Cannot retrieve the server that owns the membership role <@&${membershipRoleDoc._id}> from the database.`,
     );
     throw new Error(
-      'Cannot retrieve the server that owns the membership role from the database.\n' +
-        'Please contact the bot owner to fix this issue.',
+      `${user_t('web.Cannot retrieve the server that owns the membership role from the database')}\n` +
+        user_t('web.Please contact the bot owner to fix this issue'),
     );
   } else if (membershipRoleDoc.youtube === null) {
     logger.error(
       `Cannot retrieve the corresponding YouTube channel of the membership role <@&${membershipRoleDoc._id}> from the database.`,
     );
     throw new Error(
-      'Cannot retrieve the corresponding YouTube channel of the membership role from the database.\n' +
-        'Please contact the bot owner to fix this issue.',
+      `${user_t('web.Cannot retrieve the corresponding YouTube channel of the membership role from the database')}\n` +
+        user_t('web.Please contact the bot owner to fix this issue'),
     );
   }
 
   // Get access token from cookie
   const cookieStore = cookies();
   const { access_token: accessToken } = await getJWTFromCookie(cookieStore);
-  const userLocale = userDoc.preference.locale;
-  const { original_t: t } = await getServerTranslation(userLocale);
 
   // Check if user is a member of the guild that owns the membership role
   const discordOAuthApi = new DiscordOAuthAPI(accessToken);
@@ -79,7 +80,7 @@ export const verifyAuthMembershipAction = authAction<
   ) {
     // ? In order to prevent users from using the website to access guilds that they are not a member of,
     // ? we will not return an error here. Instead, we will return a not found error.
-    throw new Error('Membership role not found');
+    throw new Error(user_t('web.Membership role not found'));
   }
   const guildDoc = membershipRoleDoc.guild;
   const guildLocale = guildDoc.config.locale ?? defaultLocale;
@@ -88,20 +89,22 @@ export const verifyAuthMembershipAction = authAction<
   const guildResult = await discordBotApi.fetchGuild(guildDoc._id);
   if (!guildResult.success) {
     throw new Error(
-      `The bot is not in the server '${guildDoc.profile.name}'.\n` +
-        'Please contact the server moderators to fix this issue.',
+      `${user_t('web.The bot is not in the server')} '${guildDoc.profile.name}'\n` +
+        user_t('web.Please contact the server moderators to fix this issue'),
     );
   }
   const memberResult = await discordBotApi.fetchGuildMember(guildDoc._id, userDoc._id);
   if (!memberResult.success) {
-    throw new Error('You are not a member of the server.');
+    throw new Error(user_t('web.You are not a member of the server'));
   }
 
   // Auth membership check
   const decryptResult = cryptoUtils.decrypt(userDoc.youtube.refreshToken);
   if (!decryptResult.success) {
     logger.error(`Failed to decrypt YouTube refresh token for user <@${userDoc._id}>`);
-    throw new Error('Internal server error. Please contact the bot owner to fix this issue.');
+    throw new Error(
+      user_t('web.Internal Server Error Please contact the bot owner to fix this issue'),
+    );
   }
   const { plain: refreshToken } = decryptResult;
   const randomVideoId =
@@ -115,9 +118,9 @@ export const verifyAuthMembershipAction = authAction<
       verifyResult.error === 'token_expired_or_revoked' ||
       verifyResult.error === 'invalid_grant'
     ) {
-      throw new Error('Your YouTube authorization token has been expired or revoked');
+      throw new Error(user_t('web.Your YouTube authorization token has been expired or revoked'));
     } else if (verifyResult.error === 'forbidden') {
-      throw new Error('You do not have the YouTube channel membership of this channel');
+      throw new Error(user_t('web.You do not have the YouTube channel membership of this channel'));
     } else if (
       verifyResult.error === 'comment_disabled' ||
       verifyResult.error === 'video_not_found'
@@ -128,8 +131,8 @@ export const verifyAuthMembershipAction = authAction<
           `Random video ID: ${randomVideoId}`,
       );
       throw new Error(
-        'Failed to retrieve the members-only video of the YouTube channel.\n' +
-          'Please try again. If the problem persists, please contact the bot owner.',
+        `${user_t('web.Failed to retrieve the members-only video of the YouTube channel')}\n` +
+          user_t('web.Please try again If the problem persists please contact the bot owner'),
       );
     } else if (verifyResult.error === 'unknown_error') {
       logger.error(
@@ -138,8 +141,8 @@ export const verifyAuthMembershipAction = authAction<
           `Random video ID: ${randomVideoId}`,
       );
       throw new Error(
-        'An unknown error occurred when trying to verify your YouTube membership.\n' +
-          'Please try again. If the problem persists, please contact the bot owner.',
+        `${user_t('web.An unknown error occurred when trying to verify your YouTube membership')}\n` +
+          user_t('web.Please try again If the problem persists please contact the bot owner'),
       );
     }
   }
@@ -173,8 +176,8 @@ export const verifyAuthMembershipAction = authAction<
   });
   if (!addMembershipResult.success) {
     throw new Error(
-      'Sorry, an error occurred while assigning the membership role to you.\n' +
-        'Please try again later.',
+      `${user_t('web.Sorry an error occurred while assigning the membership role to you')}\n` +
+        user_t('web.Please try again later'),
     );
   }
   const { updatedMembershipDoc } = addMembershipResult;

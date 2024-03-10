@@ -43,11 +43,6 @@ export type TFunc = {
   (key: TranslationKey): string;
 };
 
-export const getTFunc =
-  (locale: string | undefined): TFunc =>
-  (key) =>
-    i18next_t(key, { lng: locale });
-
 export type TLocaleFunc = {
   (key: TranslationKey, locale: string | undefined): string;
 };

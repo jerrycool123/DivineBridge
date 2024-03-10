@@ -1,9 +1,11 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import { MessageInstance } from 'antd/es/message/interface';
 import 'client-only';
+import { useParams } from 'next/navigation';
 import { Dispatch, SetStateAction, useContext } from 'react';
 
 import { MainContext } from '../contexts/MainContext';
+import { useClientTranslation } from '../libs/client/i18n';
 import { requiredAction } from '../libs/common/action';
 import { connectYouTubeAction } from '../libs/server/actions/connect-youtube';
 import { useErrorHandler } from './error-handler';
@@ -15,6 +17,8 @@ const useYouTubeAuthorize = ({
   setLinkingAccount: Dispatch<SetStateAction<boolean>>;
   messageApi: MessageInstance;
 }) => {
+  const { lng } = useParams();
+  const { t } = useClientTranslation(lng);
   const { setUser } = useContext(MainContext);
 
   const errorHandler = useErrorHandler(messageApi);
@@ -34,7 +38,7 @@ const useYouTubeAuthorize = ({
               }
             : null,
         );
-        void messageApi.success('Successfully linked your YouTube channel');
+        void messageApi.success(t('web.Successfully linked your YouTube account'));
       } catch (error) {
         errorHandler(error);
       } finally {
@@ -43,7 +47,9 @@ const useYouTubeAuthorize = ({
     },
     onError: ({ error, error_description }) => {
       console.error(error);
-      void messageApi.error(`${error ?? ''}: ${error_description ?? '[Unknown Error]'}`);
+      void messageApi.error(
+        `${error ?? ''}: ${error_description ?? `[${t('web.Unknown Error')}]`}`,
+      );
     },
     flow: 'auth-code',
     scope: 'https://www.googleapis.com/auth/youtube.force-ssl',

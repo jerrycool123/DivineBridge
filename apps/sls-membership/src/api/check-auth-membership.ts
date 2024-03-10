@@ -12,7 +12,7 @@ import {
   YouTubeChannelCollection,
   YouTubeOAuthAPI,
 } from '@divine-bridge/common';
-import { defaultLocale, getTFunc, initI18n, t } from '@divine-bridge/i18n';
+import { TFunc, defaultLocale, initI18n, t } from '@divine-bridge/i18n';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -88,6 +88,7 @@ export const checkAuthMembership = async (
       continue;
     }
     const guildLocale = guildDoc.config.locale ?? defaultLocale;
+    const guild_t: TFunc = (key) => t(key, guildLocale);
 
     // Get YouTube channel from DB
     const youtubeChannelId = membershipRoleDoc.youtube;
@@ -101,7 +102,7 @@ export const checkAuthMembership = async (
 
     // Initialize log service and membership service
     const appEventLogService = await new AppEventLogService(
-      getTFunc(guildLocale),
+      guild_t,
       logger,
       discordBotApi,
       guildId,
@@ -114,6 +115,7 @@ export const checkAuthMembership = async (
       const userId = membershipDoc.user;
       const userDoc = userId in userDocRecord ? userDocRecord[userId] : null;
       const userLocale = userDoc?.preference.locale;
+      const user_t: TFunc = (key) => t(key, userLocale);
 
       // Verify the user's membership via Google API
       const decryptResult =
@@ -180,9 +182,9 @@ export const checkAuthMembership = async (
           membershipDoc,
           membershipRoleDoc,
           removeReason:
-            t('membership.check_auth_membership_failed_1', userLocale) +
+            user_t('membership.check_auth_membership_failed_1') +
             '\n' +
-            t('membership.check_auth_membership_failed_2', userLocale),
+            user_t('membership.check_auth_membership_failed_2'),
           manual: false,
         });
         if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
@@ -197,13 +199,13 @@ export const checkAuthMembership = async (
     if (failedRoleRemovalUserIds.length > 0) {
       await appEventLogService.log({
         content:
-          t('membership.check_auth_membership', guildLocale) +
+          guild_t('membership.check_auth_membership') +
           '\n' +
-          t('membership.check_membership_failed_removal_guild_log_1', guildLocale) +
+          guild_t('membership.check_membership_failed_removal_guild_log_1') +
           ` <@&${membershipRoleId}>:\n` +
           failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
           '\n\n' +
-          t('membership.check_membership_failed_removal_guild_log_2', guildLocale),
+          guild_t('membership.check_membership_failed_removal_guild_log_2'),
       });
     }
   }

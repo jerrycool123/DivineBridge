@@ -4,6 +4,8 @@ import Link from 'next/link';
 import styles from '../../../../styles/Document.module.css';
 
 import { publicEnv } from '../../../../libs/common/public-env';
+import { getServerTranslation } from '../../../../libs/server/i18n';
+import { WithI18nParams } from '../../../../types/common';
 
 export const metadata: Metadata = {
   alternates: {
@@ -11,12 +13,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Privacy() {
+export default async function Privacy({ params }: WithI18nParams) {
+  const { t } = await getServerTranslation(params.lng);
+
   return (
     <div className={`my-5 container text-white ${styles.documentRoot}`}>
       <div>
-        <h1>Privacy Policy</h1>
-        <p>Last updated: Feb 12, 2024</p>
+        <h1>{t('web.Privacy Policy')}</h1>
+        <p>{t('web.Last updated')} Feb 12, 2024</p>
         <p>
           This Privacy Policy describes Our policies and procedures on the collection, use and
           disclosure of Your information when You use the Service and tells You about Your privacy
