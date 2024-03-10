@@ -1,6 +1,15 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 
 import styles from '../../../../styles/Document.module.css';
+
+import { publicEnv } from '../../../../libs/common/public-env';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: `${publicEnv.NEXT_PUBLIC_WEB_URL}/terms`,
+  },
+};
 
 export default function TermsOfUsePage() {
   return (
