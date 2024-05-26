@@ -1,0 +1,39 @@
+.menuWrapper {
+  display: none;
+}
+
+.menuDrawer {
+  display: unset;
+}
+
+.menu :global(.ant-menu-title-content) {
+  color: #c4c9ce;
+}
+
+.menu :global(.ant-menu-item-selected) {
+  background-color: #5865f2 !important;
+}
+
+.menuDrawer :global(.ant-drawer-header) {
+  background-color: #2b2d31;
+}
+
+.menuDrawer :global(.ant-drawer-close) {
+  color: white !important;
+}
+
+.menuDrawer :global(.ant-drawer-title) {
+  color: white !important;
+}
+
+@media (min-width: 768px) {
+  .menuWrapper {
+    display: unset;
+  }
+  .menuDrawer {
+    display: none;
+  }
+  .floatButton {
+    display: none !important;
+  }
+}

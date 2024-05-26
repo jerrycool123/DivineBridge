@@ -1,6 +1,5 @@
 import {
   ActionRows,
-  Database,
   DiscordUtils,
   Embeds,
   MembershipRoleCollection,
@@ -15,7 +14,6 @@ import {
 } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
-import { Utils } from '../utils/index.js';
 
 export class HelpCommand extends ChatInputCommand<false> {
   public readonly command = new SlashCommandBuilder()
@@ -30,8 +28,6 @@ export class HelpCommand extends ChatInputCommand<false> {
     { author_t }: ChatInputCommand.ExecuteContext<false>,
   ) {
     const { guild } = interaction;
-
-    const guildDoc = guild !== null ? await Database.upsertGuild(Utils.convertGuild(guild)) : null;
 
     let membershipRoleDocs:
       | (Omit<MembershipRoleDoc, 'youtube'> & {
@@ -99,7 +95,7 @@ export class HelpCommand extends ChatInputCommand<false> {
         });
       } else if (buttonInteraction.customId === DiscordUtils.help.moderatorTutorial) {
         await buttonInteraction.reply({
-          embeds: [Embeds.moderatorTutorial(author_t, guildDoc)],
+          embeds: [Embeds.moderatorTutorial(author_t)],
           ephemeral: true,
         });
       } else if (buttonInteraction.customId === DiscordUtils.help.commandList) {

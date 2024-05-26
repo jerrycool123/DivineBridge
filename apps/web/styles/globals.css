@@ -92,3 +92,20 @@ body {
   color: #81c9fc;
   text-decoration: underline;
 }
+
+.link-white {
+  color: white;
+  text-decoration: none;
+}
+
+.link-white:hover {
+  text-decoration: underline;
+}
+
+.ant-menu-item-active .ant-menu-title-content {
+  color: #ffffff !important;
+}
+
+.ant-menu-item-selected .ant-menu-title-content {
+  color: #ffffff !important;
+}

@@ -19,6 +19,7 @@ import SettingsModal from '../Modals/SettingsModal';
 
 export default function Navbar() {
   const { lng } = useParams();
+  const language = lng === undefined ? 'en-US' : Array.isArray(lng) ? lng[0] : lng;
   const { t } = useClientTranslation(lng);
   const { data: session, status } = useSession();
 
@@ -66,31 +67,35 @@ export default function Navbar() {
               Divine Bridge
             </Link>
           </div>
-
-          {status === 'loading' ? (
-            <Spin indicator={<LoadingOutlined className="text-white" />} />
-          ) : status === 'authenticated' ? (
-            <Dropdown menu={{ items }}>
-              <div
-                role="button"
-                className={`user-select-none d-flex align-items-center ${styles.user}`}
-              >
-                <div className={`${styles.avatar} position-relative me-2`}>
-                  <Image className="rounded-circle" src={session.user.image} alt="avatar" fill />
+          <div className="d-flex align-items-center">
+            <Link className="me-4 link-white" href={`/${language}/docs/user-tutorial`}>
+              {t('web.Docs')}
+            </Link>
+            {status === 'loading' ? (
+              <Spin indicator={<LoadingOutlined className="text-white" />} />
+            ) : status === 'authenticated' ? (
+              <Dropdown menu={{ items }}>
+                <div
+                  role="button"
+                  className={`user-select-none d-flex align-items-center ${styles.user}`}
+                >
+                  <div className={`${styles.avatar} position-relative me-2`}>
+                    <Image className="rounded-circle" src={session.user.image} alt="avatar" fill />
+                  </div>
+                  <div className={`fs-7 me-2 ${styles.username}`}>{session.user.name}</div>
+                  <CaretDownOutlined />
                 </div>
-                <div className={`fs-7 me-2 ${styles.username}`}>{session.user.name}</div>
-                <CaretDownOutlined />
+              </Dropdown>
+            ) : (
+              <div>
+                <DiscordLoginButton
+                  text={t('web.Sign In')}
+                  className={`${styles.signInButton} text-nowrap`}
+                  onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
+                />
               </div>
-            </Dropdown>
-          ) : (
-            <div>
-              <DiscordLoginButton
-                text={t('web.Sign In')}
-                className={`${styles.signInButton} text-nowrap`}
-                onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
-              />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </nav>
     </>

@@ -1,6 +1,5 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { DiscordLoginButton } from 'react-social-login-buttons';
@@ -8,6 +7,7 @@ import { DiscordLoginButton } from 'react-social-login-buttons';
 import styles from '../../../styles/Home.module.css';
 
 import { useClientTranslation } from '../../../libs/client/i18n';
+import { getDiscordBotInviteLink } from '../../../libs/common/discord';
 import { WithI18nParams } from '../../../types/common';
 
 export default function Home({ params }: WithI18nParams) {
@@ -33,9 +33,21 @@ export default function Home({ params }: WithI18nParams) {
               </h2>
               <div>
                 <DiscordLoginButton
-                  text={t('web.Sign in with Discord')}
+                  text={t('web.Invite Divine Bridge to your server')}
                   className={`${styles.C2AButton} text-nowrap`}
-                  onClick={() => signIn('discord', { callbackUrl: '/dashboard' })}
+                  onClick={() => {
+                    const popupWinWidth = 980,
+                      popupWinHeight = 700;
+                    const left = (screen.width - popupWinWidth) / 2;
+                    const top = (screen.height - popupWinHeight) / 4;
+                    setTimeout(() => {
+                      window.open(
+                        getDiscordBotInviteLink(),
+                        '_blank',
+                        `resizable=yes, width= ${popupWinWidth}, height=${popupWinHeight}, top=${top}, left=${left}`,
+                      );
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -207,10 +219,7 @@ export default function Home({ params }: WithI18nParams) {
                 {t(
                   'web.Divine Bridge is open-sourced and has MIT License We also host a public Discord bot',
                 )}{' '}
-                <Link
-                  className="link fw-500"
-                  href="https://discord.com/oauth2/authorize?client_id=1243444258820853783&permissions=268435456&scope=bot+applications.commands"
-                >
+                <Link className="link fw-500" href={getDiscordBotInviteLink()} target="_blank">
                   Divine Bridge
                 </Link>
                 {t(
