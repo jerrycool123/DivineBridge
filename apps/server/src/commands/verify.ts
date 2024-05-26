@@ -10,6 +10,7 @@ import {
 } from '@divine-bridge/common';
 import { TFunc, defaultLocale, supportedLocales, t } from '@divine-bridge/i18n';
 import { OCRService, supportedOCRLanguages } from '@divine-bridge/ocr-service';
+import dedent from 'dedent';
 import {
   Attachment,
   AutocompleteInteraction,
@@ -26,7 +27,7 @@ import { Validators } from '../utils/validators.js';
 
 export class VerifyCommand extends ChatInputCommand {
   public readonly command = this.commandFactory({ alias: false });
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = false;
 
@@ -255,11 +256,12 @@ export class VerifyCommand extends ChatInputCommand {
         activeInteraction,
         'verify-detected-oauth',
         {
-          content:
-            `${author_t('server.You already have a membership with this membership role which is periodically renewed with')} ${existingMembershipDoc.type === 'auth' ? author_t('server.your authorized YouTube channel credentials') : author_t('server.your message activity in the live chat room')}\n` +
-            author_t(
+          content: dedent`
+            ${author_t('server.You already have a membership with this membership role which is periodically renewed with')} ${existingMembershipDoc.type === 'auth' ? author_t('server.your authorized YouTube channel credentials') : author_t('server.your message activity in the live chat room')}
+            ${author_t(
               'server.If your screenshot request is accepted your current membership will be overwritten and no longer be renewed automatically Do you want to continue',
-            ),
+            )}
+          `,
         },
       );
       if (!confirmedResult.confirmed) return;

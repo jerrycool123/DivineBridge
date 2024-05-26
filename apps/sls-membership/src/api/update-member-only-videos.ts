@@ -2,6 +2,7 @@ import { YouTubeChannelCollection } from '@divine-bridge/common';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import dedent from 'dedent';
 
 import { checkAuth } from '../utils/auth.js';
 import { updateMemberOnlyVideosLogger as logger } from '../utils/logger.js';
@@ -82,11 +83,13 @@ export const updateMemberOnlyVideos = async (
   }
 
   logger.info(
-    `Finished updating member-only videos.\n` +
-      `Difference Ratios:\n` +
-      differenceRatios
+    dedent`
+      Finished updating member-only videos.
+      Difference Ratios:
+      ${differenceRatios
         .map((diff) => `- \`${diff.title} (${diff.id})\`: ${Math.round(diff.ratio * 100)}%`)
-        .join('\n'),
+        .join('\n')}
+    `,
   );
 
   // ? Wait for 1 second to ensure the log is sent

@@ -16,6 +16,7 @@ import { TFunc, defaultLocale, initI18n, t } from '@divine-bridge/i18n';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import dedent from 'dedent';
 
 import { checkAuth } from '../utils/auth.js';
 import { discordBotApi } from '../utils/discord.js';
@@ -181,10 +182,10 @@ export const checkAuthMembership = async (
           guildId,
           membershipDoc,
           membershipRoleDoc,
-          removeReason:
-            user_t('membership.check_auth_membership_failed_1') +
-            '\n' +
-            user_t('membership.check_auth_membership_failed_2'),
+          removeReason: dedent`
+            ${user_t('membership.check_auth_membership_failed_1')}
+            ${user_t('membership.check_auth_membership_failed_2')}
+          `,
           manual: false,
         });
         if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
@@ -198,21 +199,22 @@ export const checkAuthMembership = async (
     // Send log to the log channel if there are failed role removals
     if (failedRoleRemovalUserIds.length > 0) {
       await appEventLogService.log({
-        content:
-          guild_t('membership.check_auth_membership') +
-          '\n' +
-          guild_t('membership.check_membership_failed_removal_guild_log_1') +
-          ` <@&${membershipRoleId}>:\n` +
-          failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
-          '\n\n' +
-          guild_t('membership.check_membership_failed_removal_guild_log_2'),
+        content: dedent`
+          ${guild_t('membership.check_auth_membership')}
+          ${guild_t('membership.check_membership_failed_removal_guild_log_1')} <@&${membershipRoleId}>:
+          ${failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n')}
+          
+          ${guild_t('membership.check_membership_failed_removal_guild_log_2')}
+        `,
       });
     }
   }
 
   logger.info(
-    `Finished checking auth membership.\n` +
-      `Removed ${removalCount} memberships (${removalFailCount} failed).`,
+    dedent`
+      Finished checking auth membership.
+      Removed ${removalCount} memberships (${removalFailCount} failed).
+    `,
   );
 
   // ? Wait for 1 second to ensure the log is sent

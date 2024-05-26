@@ -30,7 +30,7 @@ export namespace ChatInputCommand {
 export abstract class ChatInputCommand<GuildOnly extends boolean = true> extends Core {
   public abstract readonly command: Partial<Omit<SlashCommandBuilder, 'name' | 'toJSON'>> &
     Required<Pick<SlashCommandBuilder, 'name' | 'toJSON'>>;
-  public abstract readonly global: boolean;
+  public abstract readonly devTeamOnly: boolean;
   public abstract readonly guildOnly: GuildOnly;
   public abstract readonly moderatorOnly: boolean;
   public readonly requiredClientPermissions: PermissionResolvable[] = [];

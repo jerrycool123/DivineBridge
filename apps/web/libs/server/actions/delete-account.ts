@@ -9,6 +9,7 @@ import {
   MembershipService,
 } from '@divine-bridge/common';
 import { TFunc, defaultLocale } from '@divine-bridge/i18n';
+import dedent from 'dedent';
 import { z } from 'zod';
 
 import { authAction } from '.';
@@ -135,11 +136,13 @@ export const deleteAccountAction = authAction<
     // Send log to the log channel if there are failed role removals
     if (failedRoleRemovalIds.length > 0) {
       await appEventLogService.log({
-        content:
-          `${guild_t('web.The user')} <@${userDoc._id}> ${guild_t('web.has deleted their account from Divine Bridge')}\n` +
-          `${guild_t('web.However I cant remove the following membership roles from the user')}\n` +
-          failedRoleRemovalIds.map((id) => `<@&${id}>`).join('\n') +
-          `\n\n${guild_t('web.Please manually remove the roles from the user and check if the bot has correct permissions')}`,
+        content: dedent`
+          ${guild_t('web.The user')} <@${userDoc._id}> ${guild_t('web.has deleted their account from Divine Bridge')}
+          ${guild_t('web.However I cant remove the following membership roles from the user')}
+          ${failedRoleRemovalIds.map((id) => `<@&${id}>`).join('\n')}
+          
+          ${guild_t('web.Please manually remove the roles from the user and check if the bot has correct permissions')}
+        `,
       });
     }
   }

@@ -15,7 +15,7 @@ export class SetLogChannelCommand extends ChatInputCommand {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
 

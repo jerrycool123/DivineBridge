@@ -12,6 +12,7 @@ import {
 import { defaultLocale } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import dedent from 'dedent';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 
@@ -53,16 +54,20 @@ export const verifyAuthMembershipAction = authAction<
       `Cannot retrieve the server that owns the membership role <@&${membershipRoleDoc._id}> from the database.`,
     );
     throw new Error(
-      `${user_t('web.Cannot retrieve the server that owns the membership role from the database')}\n` +
-        user_t('web.Please contact the bot owner to fix this issue'),
+      dedent`
+        ${user_t('web.Cannot retrieve the server that owns the membership role from the database')}
+        ${user_t('web.Please contact the bot owner to fix this issue')}
+      `,
     );
   } else if (membershipRoleDoc.youtube === null) {
     logger.error(
       `Cannot retrieve the corresponding YouTube channel of the membership role <@&${membershipRoleDoc._id}> from the database.`,
     );
     throw new Error(
-      `${user_t('web.Cannot retrieve the corresponding YouTube channel of the membership role from the database')}\n` +
-        user_t('web.Please contact the bot owner to fix this issue'),
+      dedent`
+        ${user_t('web.Cannot retrieve the corresponding YouTube channel of the membership role from the database')}
+        ${user_t('web.Please contact the bot owner to fix this issue')}
+      `,
     );
   }
 
@@ -89,8 +94,10 @@ export const verifyAuthMembershipAction = authAction<
   const guildResult = await discordBotApi.fetchGuild(guildDoc._id);
   if (!guildResult.success) {
     throw new Error(
-      `${user_t('web.The bot is not in the server')} '${guildDoc.profile.name}'\n` +
-        user_t('web.Please contact the server moderators to fix this issue'),
+      dedent`
+        ${user_t('web.The bot is not in the server')} '${guildDoc.profile.name}' +
+        ${user_t('web.Please contact the server moderators to fix this issue')}
+      `,
     );
   }
   const memberResult = await discordBotApi.fetchGuildMember(guildDoc._id, userDoc._id);
@@ -126,23 +133,31 @@ export const verifyAuthMembershipAction = authAction<
       verifyResult.error === 'video_not_found'
     ) {
       logger.error(
-        `Failed to retrieve the members-only video of the YouTube channel <@&${membershipRoleDoc._id}>.\n` +
-          `Error: ${verifyResult.error}\n` +
-          `Random video ID: ${randomVideoId}`,
+        dedent`
+          Failed to retrieve the members-only video of the YouTube channel <@&${membershipRoleDoc._id}>.
+          Error: ${verifyResult.error}
+          Random video ID: ${randomVideoId}
+        `,
       );
       throw new Error(
-        `${user_t('web.Failed to retrieve the members-only video of the YouTube channel')}\n` +
-          user_t('web.Please try again If the problem persists please contact the bot owner'),
+        dedent`
+          ${user_t('web.Failed to retrieve the members-only video of the YouTube channel')}
+          ${user_t('web.Please try again If the problem persists please contact the bot owner')}
+        `,
       );
     } else if (verifyResult.error === 'unknown_error') {
       logger.error(
-        `An unknown error occurred when trying to verify the YouTube membership of user <@${userDoc._id}>\n` +
-          `YouTube channel ID: ${membershipRoleDoc.youtube.id}\n` +
-          `Random video ID: ${randomVideoId}`,
+        dedent`
+          An unknown error occurred when trying to verify the YouTube membership of user <@${userDoc._id}>
+          YouTube channel ID: ${membershipRoleDoc.youtube.id}
+          Random video ID: ${randomVideoId}
+        `,
       );
       throw new Error(
-        `${user_t('web.An unknown error occurred when trying to verify your YouTube membership')}\n` +
-          user_t('web.Please try again If the problem persists please contact the bot owner'),
+        dedent`
+          ${user_t('web.An unknown error occurred when trying to verify your YouTube membership')}
+          ${user_t('web.Please try again If the problem persists please contact the bot owner')}
+        `,
       );
     }
   }
@@ -176,8 +191,10 @@ export const verifyAuthMembershipAction = authAction<
   });
   if (!addMembershipResult.success) {
     throw new Error(
-      `${user_t('web.Sorry an error occurred while assigning the membership role to you')}\n` +
-        user_t('web.Please try again later'),
+      dedent`
+        ${user_t('web.Sorry an error occurred while assigning the membership role to you')}
+        ${user_t('web.Please try again later')}
+      `,
     );
   }
   const { updatedMembershipDoc } = addMembershipResult;

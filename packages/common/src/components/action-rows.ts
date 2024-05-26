@@ -10,6 +10,23 @@ import { ButtonStyle, TextInputStyle } from 'discord-api-types/v10';
 import { DiscordUtils } from '../utils/discord.js';
 
 export namespace ActionRows {
+  export const help = (t: TFunc): ActionRowBuilder<ButtonBuilder> => {
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId(DiscordUtils.help.userTutorial)
+        .setStyle(ButtonStyle.Success)
+        .setLabel(t('common.User Tutorial')),
+      new ButtonBuilder()
+        .setCustomId(DiscordUtils.help.moderatorTutorial)
+        .setStyle(ButtonStyle.Danger)
+        .setLabel(t('common.Moderator Tutorial')),
+      new ButtonBuilder()
+        .setCustomId(DiscordUtils.help.commandList)
+        .setStyle(ButtonStyle.Primary)
+        .setLabel(t('common.Command List')),
+    );
+  };
+
   export const adminVerificationButton = (t: TFunc): ActionRowBuilder<ButtonBuilder> => {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()

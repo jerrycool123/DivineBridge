@@ -62,17 +62,17 @@ export default function Home({ params }: WithI18nParams) {
                   'web.Divine Bridge is a Discord bot verifying YouTube channel memberships and link them with Discord server roles',
                 )}{' '}
                 {t('web.It currently supports')}{' '}
-                <span className="text-white fw-500">{t('web.Screenshot Mode')}</span> {t('web.and')}{' '}
-                <span className="text-white fw-500">{t('web.Auth Mode')}</span>.
+                <span className="text-white fw-500">{t('common.Screenshot Mode')}</span>{' '}
+                {t('web.and')} <span className="text-white fw-500">{t('common.Auth Mode')}</span>.
               </p>
             </div>
           </div>
           <div className="row mb-5 d-flex justify-content-center">
             <div className="col-lg-5 d-flex flex-column align-items-center">
-              <h2 className="poppins mb-4">{t('web.Screenshot Mode')}</h2>
+              <h2 className="poppins mb-4">{t('common.Screenshot Mode')}</h2>
               <div className={styles.modeIntro}>
                 <p className={`mb-2 ${styles.introduction}`}>
-                  {t('web.You need to verify your membership every month')}
+                  {t('common.You need to verify your membership every month')}
                 </p>
                 <p className={styles.introduction}>
                   {t('web.Provide a screenshot of your')}{' '}
@@ -106,10 +106,10 @@ export default function Home({ params }: WithI18nParams) {
               />
             </div>
             <div className="col-lg-5 d-flex flex-column align-items-center">
-              <h2 className="poppins mb-4">{t('web.Auth Mode')}</h2>
+              <h2 className="poppins mb-4">{t('common.Auth Mode')}</h2>
               <div className={styles.modeIntro}>
                 <p className={`mb-2 ${styles.introduction}`}>
-                  {t('web.You need to sign in with YouTube and verify your membership once')}
+                  {t('common.You need to sign in with YouTube and verify your membership once')}
                 </p>
                 <p className={styles.introduction}>
                   {t(
@@ -135,7 +135,7 @@ export default function Home({ params }: WithI18nParams) {
             <div className={`col-lg-8 ${styles.introduction}`}>
               <p>
                 {t('web.The idea of the')}{' '}
-                <span className="text-white fw-500">{t('web.Screenshot Mode')}</span>{' '}
+                <span className="text-white fw-500">{t('common.Screenshot Mode')}</span>{' '}
                 {t('web.came from')}{' '}
                 <Link
                   className="link fw-500"
@@ -148,7 +148,8 @@ export default function Home({ params }: WithI18nParams) {
               </p>
               <p>
                 {t('web.The idea of the')}{' '}
-                <span className="text-white fw-500">{t('web.Auth Mode')}</span> {t('web.came from')}{' '}
+                <span className="text-white fw-500">{t('common.Auth Mode')}</span>{' '}
+                {t('web.came from')}{' '}
                 <Link
                   className="link fw-500"
                   href="https://github.com/member-gentei/member-gentei"
@@ -160,11 +161,12 @@ export default function Home({ params }: WithI18nParams) {
               </p>
               <p>{t('web.Both verification methods have pros and cons')}</p>
               <p>
-                {t('web.The')} <span className="text-white fw-500">{t('web.Screenshot Mode')}</span>{' '}
+                {t('web.The')}{' '}
+                <span className="text-white fw-500">{t('common.Screenshot Mode')}</span>{' '}
                 {t('web.screenshot_mode_pros_and_cons')}
               </p>
               <p>
-                {t('web.The')} <span className="text-white fw-500">{t('web.Auth Mode')}</span>{' '}
+                {t('web.The')} <span className="text-white fw-500">{t('common.Auth Mode')}</span>{' '}
                 {t('web.auth_mode_pros_and_cons_1')}{' '}
                 <span className="text-danger fw-bold">
                   {t('web.google_oauth_youtube_force_ssl_permissions')}
@@ -178,14 +180,14 @@ export default function Home({ params }: WithI18nParams) {
               </p>
               <p>
                 {t('web.When you use')}{' '}
-                <span className="text-white fw-500">{t('web.Screenshot Mode')}</span>
+                <span className="text-white fw-500">{t('common.Screenshot Mode')}</span>
                 {t(
                   'web.we do not store or backup your screenshots you sent to the bot We only sent them to the channel in your server and let the moderators manually verify your membership',
                 )}
               </p>
               <p>
                 {t('web.If you choose to use the')}{' '}
-                <span className="text-white fw-500">{t('web.Auth Mode')}</span>
+                <span className="text-white fw-500">{t('common.Auth Mode')}</span>
                 {t(
                   'web.we will store your OAuth credentials in our database with proper encryption and we will never use them for any other purpose',
                 )}{' '}
@@ -207,7 +209,7 @@ export default function Home({ params }: WithI18nParams) {
                 )}{' '}
                 <Link
                   className="link fw-500"
-                  href="https://discord.com/api/oauth2/authorize?client_id=1203668745663287337&permissions=268435456&scope=bot"
+                  href="https://discord.com/oauth2/authorize?client_id=1243444258820853783&permissions=268435456&scope=bot+applications.commands"
                 >
                   Divine Bridge
                 </Link>

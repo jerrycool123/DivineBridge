@@ -5,7 +5,7 @@
     </a>
   </p>
   <p>
-		<a href="https://discord.com/api/oauth2/authorize?client_id=1203668745663287337&permissions=268435456&scope=bot"><img src="https://img.shields.io/badge/Public_Bot-Invite_Link-%231da0f2" alt="Public Bot Invite Link" /></a>
+		<a href="https://discord.com/oauth2/authorize?client_id=1243444258820853783&permissions=268435456&scope=bot+applications.commands"><img src="https://img.shields.io/badge/Public_Bot-Invite_Link-%231da0f2" alt="Public Bot Invite Link" /></a>
     <a href="https://divine-bridge.jerrycool123.com"><img src="https://img.shields.io/website?url=https%3A%2F%2Fdivine-bridge.jerrycool123.com&color=%23ff9149" alt="Website Status" /></a>
     <img src="https://img.shields.io/github/checks-status/jerrycool123/DivineBridge/main" alt="GitHub Workflow Status" />
 	</p>
@@ -20,7 +20,7 @@ You can view more details on our [website](https://divine-bridge.jerrycool123.co
 
 ## Get Started
 
-- Discord Bot Invite Link: [Invite Link](https://discord.com/api/oauth2/authorize?client_id=1203668745663287337&permissions=268435456&scope=bot)
+- Discord Bot Invite Link: [Invite Link](https://discord.com/oauth2/authorize?client_id=1243444258820853783&permissions=268435456&scope=bot+applications.commands)
 - Sign in with Discord and start using the bot on our [website](https://divine-bridge.jerrycool123.com).
 
 ## Developer Guide

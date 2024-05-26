@@ -2,6 +2,7 @@ import { MembershipCollection } from '@divine-bridge/common';
 import { createObjectCsvStringifier } from 'csv-writer';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import dedent from 'dedent';
 import {
   AttachmentBuilder,
   ChatInputCommandInteraction,
@@ -26,7 +27,7 @@ export class ViewMembersCommand extends ChatInputCommand {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
 
@@ -65,22 +66,23 @@ export class ViewMembersCommand extends ChatInputCommand {
         { id: 'end_date', title: 'End Date' },
       ],
     });
-    const csvData =
-      writer.getHeaderString() +
-      '\n' +
-      writer.stringifyRecords(
+    const csvData = dedent`
+      ${writer.getHeaderString()}
+      ${writer.stringifyRecords(
         membershipDocs.map((membershipDoc) => ({
           member_id: membershipDoc.user,
           type: membershipDoc.type,
           begin_date: dayjs.utc(membershipDoc.begin).format('YYYY-MM-DD'),
           end_date: dayjs.utc(membershipDoc.end).format('YYYY-MM-DD'),
         })),
-      );
+      )}
+    `;
 
     await interaction.editReply({
-      content:
-        `${author_t('server.Here are the members with the')} <@&${membershipRoleDoc._id}> ${author_t('server.role in this server')}\n` +
-        `${author_t('server.You can use')} \`/${author_t('check_member_command.name')}\` ${author_t('server.to check a members membership status')}.`,
+      content: dedent`
+        ${author_t('server.Here are the members with the')} <@&${membershipRoleDoc._id}> ${author_t('server.role in this server')}
+        ${author_t('server.You can use')} \`/${author_t('check_member_command.name')}\` ${author_t('server.to check a members membership status')}
+      `,
       files: [
         new AttachmentBuilder(Buffer.from(csvData, 'utf-8'), {
           name: `${membershipRoleDoc.profile.name}_members.csv`,

@@ -206,10 +206,10 @@ export default function Dashboard() {
                                       </span>
                                       <span className="text-white fw-500">
                                         {membershipRole.membership.type === 'auth'
-                                          ? t('web.Auth Mode')
+                                          ? t('common.Auth Mode')
                                           : membershipRole.membership.type === 'manual' ||
                                               membershipRole.membership.type === 'screenshot'
-                                            ? t('web.Screenshot Mode')
+                                            ? t('common.Screenshot Mode')
                                             : membershipRole.membership.type === 'live_chat'
                                               ? t('web.Live Chat Mode')
                                               : t('web.Unknown Mode')}

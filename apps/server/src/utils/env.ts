@@ -7,6 +7,7 @@ export const Env = z
     PORT: z.string(),
     MONGO_URI: z.string(),
     DISCORD_BOT_TOKEN: z.string(),
+    DEV_TEAM_DISCORD_GUILD_ID: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     GOOGLE_API_KEY: z.string(),

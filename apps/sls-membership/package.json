@@ -6,6 +6,7 @@
     "@divine-bridge/common": "workspace:^",
     "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
     "dayjs": "^1.11.10",
+    "dedent": "^1.5.1",
     "discord-api-types": "^0.37.69",
     "discord.js": "^14.14.1",
     "esbuild": "^0.20.0",

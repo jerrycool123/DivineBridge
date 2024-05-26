@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { cryptoUtils } from '../utils/crypto.js';
 import { discordBotApi } from '../utils/discord.js';
+import { Env } from '../utils/env.js';
 import { Button } from './button.js';
 import { ChatInputCommand } from './chat-input-command.js';
 import { Core } from './core.js';
@@ -54,10 +55,15 @@ export class Bot extends Core {
 
   public async registerCommands(applicationId: string) {
     // Hash the commands and compare with the previous hash
-    const rawCommands = Object.values(this.chatInputCommandMap).map(({ command }) =>
-      command.toJSON(),
+    const globalCommands = Object.values(this.chatInputCommandMap)
+      .filter((chatInputCommand) => !chatInputCommand.devTeamOnly)
+      .map(({ command }) => command.toJSON());
+    const devTeamOnlyCommands = Object.values(this.chatInputCommandMap)
+      .filter((chatInputCommand) => chatInputCommand.devTeamOnly)
+      .map(({ command }) => command.toJSON());
+    const hashResult = cryptoUtils.hash(
+      JSON.stringify([...globalCommands, ...devTeamOnlyCommands]),
     );
-    const hashResult = cryptoUtils.hash(JSON.stringify(rawCommands));
     if (!hashResult.success) {
       throw new Error('Failed to hash the commands');
     }
@@ -85,7 +91,14 @@ export class Bot extends Core {
 
     if (cached === false) {
       this.context.logger.debug('Cache miss, overwriting global application commands');
-      await discordBotApi.overwriteGlobalApplicationCommands(applicationId, rawCommands);
+      await discordBotApi.overwriteGlobalApplicationCommands(applicationId, globalCommands);
+      for (const devTeamOnlyCommand of devTeamOnlyCommands) {
+        await discordBotApi.createGuildApplicationCommand(
+          applicationId,
+          Env.DEV_TEAM_DISCORD_GUILD_ID,
+          devTeamOnlyCommand,
+        );
+      }
     } else {
       this.context.logger.debug('Cache hit, skipping updating global application commands');
     }

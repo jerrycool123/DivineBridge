@@ -1,8 +1,10 @@
 import { EmbedBuilder } from '@discordjs/builders';
+import type { TranslationKey } from '@divine-bridge/i18n';
 import { TFunc } from '@divine-bridge/i18n';
 import type { RecognizedDate } from '@divine-bridge/ocr-service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import dedent from 'dedent';
 
 import { GuildDoc } from '../models/guild.js';
 import { MembershipRoleDoc } from '../models/membership-role.js';
@@ -245,11 +247,12 @@ export namespace Embeds {
     return baseUserEmbed(t, user)
       .setTitle(t('common.Screenshot Submitted'))
       .setDescription(
-        t(
-          'common.After I finished recognizing your screenshot it will be sent to the moderators of the server for further verification',
-        ) +
-          '\n' +
-          t('common.You will receive a DM when your membership is verified'),
+        dedent`
+          ${t(
+            'common.After I finished recognizing your screenshot it will be sent to the moderators of the server for further verification',
+          )}
+          ${t('common.You will receive a DM when your membership is verified')}
+        `,
       )
       .addFields([
         {
@@ -334,5 +337,169 @@ export namespace Embeds {
         },
       ])
       .setColor(CommonUtils.hex2int(DiscordUtils.colors.success));
+  };
+
+  export const userTutorial = (
+    t: TFunc,
+    membershipRoleDocs:
+      | (Omit<MembershipRoleDoc, 'youtube'> & {
+          youtube: YouTubeChannelDoc;
+        })[]
+      | null,
+  ): EmbedBuilder => {
+    return new EmbedBuilder().setTitle(t('common.User Tutorial')).setDescription(
+      dedent`
+        ${t('common.Welcome to use Divine Bridge Heres a quick tutorial to get you started')}
+
+        **__${t('common.Prerequisites')}__**
+        
+        ${t('common.The server moderators must have added a membership role in the server If you are a server moderator you can view the Moderator Tutorial to learn how to add a membership role')}
+
+        **__${t('common.Auth Mode')}__**
+
+        > ${t('common.You need to verify your membership every month')}
+
+        **1**. ${t('common.Go to Divine Bridges')}[${t('common.website')}](https://divine-bridge.jerrycool123.com/)${t('common.and click the Sign in button and sign in with your Discord account')}
+
+        **2**. ${t('common.Go to the')}[${t('common.dashboard')}](https://divine-bridge.jerrycool123.com/dashboard)${t('common.and click the Apply button of the membership role you would like to apply')}
+
+        **3**. ${t('common.Click the Sign in with Google button and link your YouTube account')}
+
+        **4**. ${t('common.Click the Verify button to verify your membership')}
+
+        📝 **${t('common.Important Note')}**
+        
+        ${t('common.Once you are verified')}__${t('common.you dont have to do this again every month')}__
+        ${t('common.Divine Bridge will automatically renew your membership duration')}
+
+        ${t('common.This mode involves some')} __${t('common.cyber security and privacy')}__ ${t('common.concern')}
+        **${t('common.You are strongly recommended to learn more about this in the Why Divine Bridge section on the')} [${t('common.website')}](https://divine-bridge.jerrycool123.com/)**.
+
+        **__${t('common.Screenshot Mode')}__**
+
+        > ${t('common.You need to sign in with YouTube and verify your membership once')}
+
+        **1**. ${t('common.Please use')} \`/${t('verify_command.name')}\` ${t('common.command in the server where you want to apply the membership role')}
+        
+        ⭐️ **[${t('common.Recommended')}]** ${t('common.Each membership role has a')}**${t('common.Alias Command')}**${t('common.when you use the alias command you dont have to specify the membership role you want to verify')}
+        ${
+          membershipRoleDocs !== null && membershipRoleDocs.length > 0
+            ? dedent`
+            ${t('common.Here are the alias commands in this server')}
+            ${membershipRoleDocs.map((membershipRoleDoc) => {
+              return `- \`/${membershipRoleDoc.config.aliasCommandName}\`: ${t('verify_command.description_1')} ${membershipRoleDoc.youtube.profile.title} ${t('verify_command.description_2')}`;
+            })}
+          `
+            : `${t('common.You can use')} \`/${t('help_command.name')}\` ${t('common.command and select')} \`${t('common.Command List')}\` ${t('common.to view the alias commands in a server')}`
+        }
+
+        **2**. ${t('common.Go to')}[**${t('common.Purchases and Memberships')}**](https://www.youtube.com/paid_memberships)${t('common.and take a screenshot')}
+
+        ${t('common.The screenshot should include the following information')}
+        - ${t('common.The YouTube channel name of the membership')}
+        - ${t('common.Your name')}
+        - ${t('common.The next billing date')}
+
+        **3**. ${t('common.Submit your verification request and wait for moderators approval')}
+        
+        ${t('common.Server moderators will receive your membership verification request Once approved Divine Bridge will assign the membership role to you and notify you')}
+
+        📝 **${t('common.Important Note')}**
+
+        ${t('common.Every month 1 day before the expiry of your membership Divine Bridge will notify you that you need to send a screenshot of your new billing date you have')} __${t('common.24 Hours')}__ ${t('common.to do so')}
+      `,
+    );
+  };
+
+  export const moderatorTutorial = (t: TFunc, guildDoc: GuildDoc | null): EmbedBuilder => {
+    return new EmbedBuilder().setTitle(t('common.Moderator Tutorial')).setDescription(
+      dedent`
+        ${t('common.Welcome to use Divine Bridge Heres a quick tutorial to get you started')}
+
+        **__${t('common.Prerequisites')}__**
+
+        ${t('common.You need to')} [**${t('common.invite Divine Bridge')}**](https://discord.com/oauth2/authorize?client_id=1243444258820853783&permissions=268435456&scope=bot+applications.commands) ${t('common.to your Discord server')}
+        ${t('common.You need to have the')}**${t('common.Manage Roles')}**${t('common.permission in the server')}
+
+        **__${t('common.Steps')}__**
+
+        **1**. ${t('common.Use')} \`/${t('set_log_channel_command.name')}\` ${t('common.command to set the log channel for Divine Bridge')}
+
+        ${t('common.Please make sure that the log channel is a private channel only accessible by server moderators')}
+
+        ${t('common.Note that the bot requires to view the log channel send messages and embed links')}
+
+        **2**. ${t('common.Use')} \`/${t('add_role_command.name')}\` ${t('common.command to add a YouTube membership role to the server')}
+
+        ${t('common.You need to create a Discord role first in the server')}${t('common.Besides the highest role of the bot must be')}**${t('common.higher')}**${t('common.than the membership role in the role hierarchy')}${t('common.in order to manage the membership role')}
+
+        ${t('common.You need to provide an')}**${t('common.alias command')}**${t('common.name for the membership role')}${t('common.This is a command name that users can use to verify their membership easier')}${t('common.When using the alias command the corresponding membership role will be automatically selected and the user will not need to select the membership role they want to verify again')}
+
+        **3**. ${t('common.Handle the membership verification requests in the log channel')}
+
+        ${t('common.When a user uses the')} **${t('common.Screenshot Mode')}** ${t('common.to verify their membership')}${t('common.the bot will send a message to the')}${guildDoc !== null && guildDoc.config.logChannel !== null ? `<#${guildDoc.config.logChannel}>` : t('common.log channel')}${t('common.period')}
+        
+        ${t('common.You can')} **${t('common.Approve')} ✅**${t('common.and_punctuation')}**${t('common.Reject')} ❌**${t('common.and_punctuation')}${t('common.or')} **${t('common.Modify')} 📝**${t('common.the verification request')}
+      `,
+    );
+  };
+
+  export const commandList = (
+    t: TFunc,
+    membershipRoleDocs:
+      | (Omit<MembershipRoleDoc, 'youtube'> & {
+          youtube: YouTubeChannelDoc;
+        })[]
+      | null,
+    chatInputCommandMap: Record<string, { moderatorOnly: boolean; devTeamOnly: boolean }>,
+  ): EmbedBuilder => {
+    return new EmbedBuilder().setTitle(t('common.Command List')).setDescription(
+      dedent`
+        ${t('common.Here are the commands you can use with Divine Bridge')}
+        ${
+          membershipRoleDocs !== null && membershipRoleDocs.length > 0
+            ? '\n' +
+              dedent`
+                **__${t('common.Server Alias Commands')}__**
+
+                ${membershipRoleDocs
+                  .map((membershipRoleDoc) => {
+                    return `- \`/${membershipRoleDoc.config.aliasCommandName}\`: ${t('verify_command.description_1')} ${membershipRoleDoc.youtube.profile.title} ${t('verify_command.description_2')}`;
+                  })
+                  .join('\n')}
+              ` +
+              '\n'
+            : ''
+        }
+        **__${t('common.User Commands')}__**
+
+        ${Object.entries(chatInputCommandMap)
+          .filter(
+            ([_name, command]) => command.moderatorOnly === false && command.devTeamOnly === false,
+          )
+          .map(([name]) => {
+            const originalName = name.replace(/-/g, '_');
+            const prefix = `- \`/${t(`${originalName}_command.name` as TranslationKey)}\`:`;
+            if (originalName === 'verify') {
+              return `${prefix} ${t('verify_command.description_1')} YouTube ${t('verify_command.description_2')}`;
+            }
+            return `${prefix} ${t(`${originalName}_command.description` as TranslationKey)}`;
+          })
+          .join('\n')}
+        
+        **__${t('common.Moderator Commands')}__**
+
+        ${Object.entries(chatInputCommandMap)
+          .filter(
+            ([_name, command]) => command.moderatorOnly === true && command.devTeamOnly === false,
+          )
+          .map(([name]) => {
+            const originalName = name.replace(/-/g, '_');
+            const prefix = `- \`/${t(`${originalName}_command.name` as TranslationKey)}\`:`;
+            return `${prefix} ${t(`${originalName}_command.description` as TranslationKey)}`;
+          })
+          .join('\n')}
+      `,
+    );
   };
 }

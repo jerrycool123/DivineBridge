@@ -7,6 +7,7 @@
     "@divine-bridge/i18n": "workspace:^",
     "@divine-bridge/ocr-service": "workspace:^",
     "dayjs": "^1.11.10",
+    "dedent": "^1.5.1",
     "discord-api-types": "^0.37.69",
     "gaxios": "^6.2.0",
     "google-auth-library": "^9.6.3",

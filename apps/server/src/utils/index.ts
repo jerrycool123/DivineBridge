@@ -15,6 +15,9 @@ import {
 dayjs.extend(utc);
 
 export namespace Utils {
+  export const sleep = async (ms: number): Promise<void> =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   export const convertUser = (user: User): UserPayload => ({
     id: user.id,
     name: user.username,

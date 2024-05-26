@@ -1,5 +1,6 @@
 import { Database, MembershipRoleCollection } from '@divine-bridge/common';
 import { defaultLocale, t } from '@divine-bridge/i18n';
+import dedent from 'dedent';
 import { Events, Interaction, PermissionsBitField } from 'discord.js';
 
 import { VerifyCommand } from '../commands/verify.js';
@@ -125,11 +126,12 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
             .missing(permissions);
           if (missingPermissions.length > 0) {
             await interaction.reply({
-              content:
-                'I need the following permission to run this command:\n' +
-                missingPermissions
+              content: dedent`
+                I need the following permission to run this command:
+                ${missingPermissions
                   .map((permission) => `- ${readablePermissionsMap[permission]}`)
-                  .join(', '),
+                  .join(', ')}
+              `,
               ephemeral: true,
             });
             return;

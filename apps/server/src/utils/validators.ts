@@ -6,6 +6,7 @@ import {
 } from '@divine-bridge/common';
 import { TFunc } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
+import dedent from 'dedent';
 import {
   Guild,
   GuildBasedChannel,
@@ -152,11 +153,12 @@ export namespace Validators {
     } else if (membershipRoleDoc.youtube === null) {
       return {
         success: false,
-        error:
-          `${t('server.The associated YouTube channel of the membership role')} <@&${roleId}> ${t('server.is not found in the database')}\n` +
-          t(
+        error: dedent`
+          ${t('server.The associated YouTube channel of the membership role')} <@&${roleId}> ${t('server.is not found in the database')}
+          ${t(
             'server.This is likely a database inconsistency Please contact the bot developer to fix this issue',
-          ),
+          )}
+        `,
       };
     }
     return {
@@ -204,9 +206,10 @@ export namespace Validators {
     } else if (botMember.roles.highest.comparePositionTo(roleId) <= 0) {
       return {
         success: false,
-        error:
-          `${t('server.Due to the role hierarchy the bot cannot manage the role')} <@&${roleId}>\n` +
-          `${t('server.The bot can only manage a role whose order is lower than that of its highest role')} <@&${botMember.roles.highest.id}>`,
+        error: dedent`
+          ${t('server.Due to the role hierarchy the bot cannot manage the role')} <@&${roleId}>
+          ${t('server.The bot can only manage a role whose order is lower than that of its highest role')} <@&${botMember.roles.highest.id}>
+        `,
       };
     }
     return { success: true };
@@ -237,13 +240,14 @@ export namespace Validators {
     } else if (targetDate.isAfter(timeLimit)) {
       return {
         success: false,
-        error:
-          `${t('server.The target date is too far in the future')}\n` +
-          `${t('server.The target date')} (\`${targetDate.format(
+        error: dedent`
+          ${t('server.The target date is too far in the future')}
+          ${t('server.The target date')} (\`${targetDate.format(
             'YYYY-MM-DD',
           )}\`) ${t('server.must not be more than')} ${limitDays} ${t('server.days after the base date')} (\`${baseDate.format(
             'YYYY-MM-DD',
-          )}\`)`,
+          )}\`)
+        `,
       };
     }
     return { success: true };
@@ -271,9 +275,10 @@ export namespace Validators {
     ) {
       return {
         success: false,
-        error:
-          `${t('server.The alias')} \`${alias}\` ${t('server.is not a valid command name')}\n` +
-          t('server.Please check the naming rules here'),
+        error: dedent`
+          ${t('server.The alias')} \`${alias}\` ${t('server.is not a valid command name')}
+          ${t('server.Please check the naming rules here')}
+        `,
       };
     }
 

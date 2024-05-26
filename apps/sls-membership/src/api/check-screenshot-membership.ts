@@ -12,6 +12,7 @@ import { TFunc, defaultLocale, initI18n, t } from '@divine-bridge/i18n';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import dedent from 'dedent';
 
 import { checkAuth } from '../utils/auth.js';
 import { discordBotApi } from '../utils/discord.js';
@@ -111,15 +112,10 @@ export const checkScreenshotMembership = async (
         // Remind user to renew membership
         try {
           await discordBotApi.createDMMessage(userId, {
-            content:
-              user_t('membership.check_screenshot_membership_reminder') +
-              ` **@${membershipRoleName}** ` +
-              user_t('membership.check_screenshot_membership_reminder_2') +
-              '\n' +
-              user_t('membership.check_screenshot_renew_instruction_1') +
-              ` \`/${membershipRoleDoc.config.aliasCommandName}\` ` +
-              user_t('membership.check_screenshot_renew_instruction_2') +
-              ` \`${guildName}\``,
+            content: dedent`
+              ${user_t('membership.check_screenshot_membership_reminder')} **@${membershipRoleName}** ${user_t('membership.check_screenshot_membership_reminder_2')}
+              ${user_t('membership.check_screenshot_renew_instruction_1')} \`/${membershipRoleDoc.config.aliasCommandName}\` ${user_t('membership.check_screenshot_renew_instruction_2')} \`${guildName}\`
+            `,
           });
         } catch (error) {
           // We cannot DM the user, so we just ignore it
@@ -136,13 +132,10 @@ export const checkScreenshotMembership = async (
           guildId,
           membershipRoleDoc,
           membershipDoc,
-          removeReason:
-            user_t('membership.check_screenshot_membership_failed_1') +
-            '\n' +
-            user_t('membership.check_screenshot_renew_instruction_1') +
-            ` \`/${membershipRoleDoc.config.aliasCommandName}\` ` +
-            user_t('membership.check_screenshot_renew_instruction_2') +
-            ` \`${guildName}\``,
+          removeReason: dedent`
+            ${user_t('membership.check_screenshot_membership_failed_1')}
+            ${user_t('membership.check_screenshot_renew_instruction_1')} \`/${membershipRoleDoc.config.aliasCommandName}\` ${user_t('membership.check_screenshot_renew_instruction_2')} \`${guildName}\`
+          `,
           manual: false,
         });
         if (!removeMembershipResult.success || !removeMembershipResult.roleRemoved) {
@@ -156,21 +149,22 @@ export const checkScreenshotMembership = async (
     // Send log to the log channel if there are failed role removals
     if (failedRoleRemovalUserIds.length > 0) {
       await appEventLogService.log({
-        content:
-          guild_t('membership.check_screenshot_membership') +
-          '\n' +
-          guild_t('membership.check_membership_failed_removal_guild_log_1') +
-          ` <@&${membershipRoleId}>:\n` +
-          failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n') +
-          '\n\n' +
-          guild_t('membership.check_membership_failed_removal_guild_log_2'),
+        content: dedent`
+          ${guild_t('membership.check_screenshot_membership')}
+          ${guild_t('membership.check_membership_failed_removal_guild_log_1')} <@&${membershipRoleId}>:
+          ${failedRoleRemovalUserIds.map((userId) => `<@${userId}>`).join('\n')}
+          
+          ${guild_t('membership.check_membership_failed_removal_guild_log_2')}
+        `,
       });
     }
   }
 
   logger.info(
-    `Finished checking screenshot membership.\n` +
-      `Removed ${removalCount} memberships (${removalFailCount} failed).`,
+    dedent`
+      Finished checking screenshot membership.
+      Removed ${removalCount} memberships (${removalFailCount} failed).
+    `,
   );
 
   // ? Wait for 1 second to ensure the log is sent

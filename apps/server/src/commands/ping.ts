@@ -6,7 +6,7 @@ export class PingCommand extends ChatInputCommand<false> {
   public readonly command = new SlashCommandBuilder()
     .setI18nName('ping_command.name')
     .setI18nDescription('ping_command.description');
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = false;
   public readonly moderatorOnly = false;
 

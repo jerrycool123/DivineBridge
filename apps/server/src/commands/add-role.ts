@@ -1,19 +1,18 @@
 import {
+  Database,
+  Embeds,
   MembershipRoleCollection,
   YouTubeChannelCollection,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
-import {
-  AutocompleteInteraction,
-  ChatInputCommandInteraction,
-  PermissionFlagsBits,
-  SlashCommandBuilder,
-} from 'discord.js';
+import dedent from 'dedent';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { discordBotApi } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
+import { youtubeApiKeyApi } from '../utils/youtube.js';
 import { VerifyCommand } from './verify.js';
 
 export class AddRoleCommand extends ChatInputCommand {
@@ -28,10 +27,9 @@ export class AddRoleCommand extends ChatInputCommand {
     )
     .addStringOption((option) =>
       option
-        .setI18nName('add_role_command.keyword_option_name')
-        .setI18nDescription('add_role_command.keyword_option_description')
-        .setRequired(true)
-        .setAutocomplete(true),
+        .setI18nName('add_role_command.id_option_name')
+        .setI18nDescription('add_role_command.id_option_description')
+        .setRequired(true),
     )
     .addStringOption((option) =>
       option
@@ -41,29 +39,9 @@ export class AddRoleCommand extends ChatInputCommand {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
-
-  public override async autocomplete(interaction: AutocompleteInteraction) {
-    const focusedOption = interaction.options.getFocused(true);
-    if (focusedOption.name === 'keyword') {
-      const keyword = focusedOption.value;
-      const youtubeChannelDocs = await YouTubeChannelCollection.find({
-        $or: [
-          { _id: { $regex: keyword, $options: 'i' } },
-          { 'profile.title': { $regex: keyword, $options: 'i' } },
-          { 'profile.customUrl': { $regex: keyword, $options: 'i' } },
-        ],
-      }).limit(25);
-      await interaction.respond(
-        youtubeChannelDocs.map((channel) => ({
-          name: `${channel.profile.title} (${channel.profile.customUrl})`,
-          value: channel._id,
-        })),
-      );
-    }
-  }
 
   public override async execute(
     interaction: ChatInputCommandInteraction,
@@ -82,13 +60,62 @@ export class AddRoleCommand extends ChatInputCommand {
       });
     }
 
-    // Get YouTube channel by selected channel ID
-    const keyword = options.getString('keyword', true);
-    const youtubeChannelDoc = await YouTubeChannelCollection.findById(keyword);
-    if (youtubeChannelDoc === null) {
-      return await interaction.editReply({
-        content: `${author_t('server.YouTube channel not found You can use the')} \`/${author_t('add_youtube_channel_command.name')}\` ${author_t('server.command to add a new channel to the bots supported list')}`,
-      });
+    // Search YouTube channel by ID via YouTube API
+    let youtubeChannelId: string;
+    const id = options.getString('id', true);
+    if (id.startsWith('UC') && id.length === 24) {
+      // Channel ID
+      youtubeChannelId = id;
+    } else {
+      // Video ID
+      const videoResult = await youtubeApiKeyApi.getVideo(id);
+      if (!videoResult.success) {
+        return await interaction.editReply({
+          content: dedent`
+            ${author_t('server.Could not find a YouTube chanel or video for the ID')} \`${id}\`
+            ${author_t('server.Please try again Here are some examples')}
+            - ${author_t('server.youtube_channel_id_description_1')} <https://www.youtube.com/channel/UCZlDXzGoo7d44bwdNObFacg> ${author_t('server.youtube_channel_id_description_2')} \`UCZlDXzGoo7d44bwdNObFacg\`${author_t('server.youtube_channel_id_description_3')}
+            - ${author_t('server.youtube_video_id_description_1')} <https://www.youtube.com/watch?v=Dji-ehIz5_k> ${author_t('server.youtube_video_id_description_2')} \`Dji-ehIz5_k\`.
+          `,
+        });
+      }
+      youtubeChannelId = videoResult.video.snippet.channelId;
+    }
+
+    // Get YouTube channel data
+    let youtubeChannelData: {
+      id: string;
+      title: string;
+      description: string;
+      customUrl: string;
+      thumbnail: string;
+    };
+    let youtubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
+    if (youtubeChannelDoc !== null) {
+      // Use the channel data from the database
+      youtubeChannelData = {
+        id: youtubeChannelDoc._id,
+        title: youtubeChannelDoc.profile.title,
+        description: youtubeChannelDoc.profile.description,
+        customUrl: youtubeChannelDoc.profile.customUrl,
+        thumbnail: youtubeChannelDoc.profile.thumbnail,
+      };
+    } else {
+      // Get channel info from YouTube API
+      const channelResult = await youtubeApiKeyApi.getChannel(youtubeChannelId);
+      if (!channelResult.success) {
+        return await interaction.editReply({
+          content: `${author_t('server.Could not find a YouTube channel for the channel ID')} \`${youtubeChannelId}\``,
+        });
+      }
+      const { channel: parsedChannel } = channelResult;
+      youtubeChannelData = {
+        id: parsedChannel.id,
+        title: parsedChannel.snippet.title,
+        description: parsedChannel.snippet.description,
+        customUrl: parsedChannel.snippet.customUrl,
+        thumbnail: parsedChannel.snippet.thumbnails.high.url,
+      };
     }
 
     // Check if the alias is available
@@ -103,7 +130,7 @@ export class AddRoleCommand extends ChatInputCommand {
     // Check if the role is already assigned to the channel
     const oldMembershipRoleDoc = await MembershipRoleCollection.findOne({
       guild: guild.id,
-      $or: [{ _id: role.id }, { youtube: youtubeChannelDoc._id }],
+      $or: [{ _id: role.id }, { youtube: youtubeChannelData.id }],
     }).populate<{
       youtube: YouTubeChannelDoc | null;
     }>('youtube');
@@ -115,13 +142,35 @@ export class AddRoleCommand extends ChatInputCommand {
 
     // Ask for confirmation
     const confirmResult = await Utils.awaitUserConfirm(author_t, interaction, 'add-role', {
-      content:
-        `${author_t('server.Are you sure you want to add the membership role')} <@&${role.id}> ${author_t('server.for the YouTube channel')} \`${youtubeChannelDoc.profile.title}\`?\n` +
-        `${author_t('server.Members in this server can use')} \`/${author_t('verify_command.name')}\` ${author_t('server.or')} \`/${aliasCommandName}\` ${author_t('server.to verify their YouTube membership')}`,
+      content: dedent`
+        ${author_t('server.Are you sure you want to add the membership role')} <@&${role.id}> ${author_t('server.for the YouTube channel')} \`${youtubeChannelData.title}\`?\
+        ${author_t('server.Members in this server can use')} \`/${author_t('verify_command.name')}\` ${author_t('server.or')} \`/${aliasCommandName}\` ${author_t('server.to verify their YouTube membership')}
+      `,
+      embeds: [Embeds.youtubeChannel(author_t, youtubeChannelData)],
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
     await confirmedInteraction.deferReply({ ephemeral: true });
+
+    // If the YouTube channel is not in the database, add it
+    if (youtubeChannelDoc === null) {
+      // Fetch member only video IDs
+      const itemsResult = await youtubeApiKeyApi.getMemberOnlyPlaylistItems(youtubeChannelData.id);
+      const memberOnlyVideoIds = (itemsResult.success ? itemsResult.items : []).map(
+        (item) => item.contentDetails.videoId,
+      );
+      if (memberOnlyVideoIds.length === 0) {
+        return await confirmedInteraction.editReply({
+          content: `${author_t('server.Could not find any member only videos for the YouTube channel')} \`${youtubeChannelData.title}\``,
+        });
+      }
+
+      // Add YouTube channel to database
+      youtubeChannelDoc = await Database.upsertYouTubeChannel(
+        youtubeChannelData,
+        memberOnlyVideoIds,
+      );
+    }
 
     // Create command alias in this guild
     const onFailToCreateAliasCommand = async () => {

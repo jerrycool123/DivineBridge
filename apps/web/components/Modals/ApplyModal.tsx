@@ -61,7 +61,7 @@ export default function ApplyModal({
       {selectedMembershipRole !== null && (
         <>
           <div className="mt-3 mb-4">
-            <div className="fs-6 mb-2 text-white fw-700 poppins">{t('web.Auth Mode')}</div>
+            <div className="fs-6 mb-2 text-white fw-700 poppins">{t('common.Auth Mode')}</div>
             <div className="mb-2">
               <div className="mb-1">
                 {t(
@@ -195,7 +195,7 @@ export default function ApplyModal({
           </div>
           <div>
             <div className={`fs-6 mb-2 text-white fw-700 ${styles.modalSubTitle}`}>
-              {t('web.Screenshot Mode')}
+              {t('common.Screenshot Mode')}
             </div>
             <div className="mb-2">
               <div className="mb-1">

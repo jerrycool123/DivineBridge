@@ -14,7 +14,7 @@ export class SetLanguageCommand extends ChatInputCommand {
         .addChoices(...supportedLocales.map((locale) => ({ name: locale, value: locale })))
         .setRequired(true),
     );
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
 

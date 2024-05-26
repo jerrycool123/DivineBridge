@@ -9,6 +9,7 @@ import { t } from '@divine-bridge/i18n';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import utc from 'dayjs/plugin/utc.js';
+import dedent from 'dedent';
 import {
   ChatInputCommandInteraction,
   PermissionFlagsBits,
@@ -48,7 +49,7 @@ export class AddMemberCommand extends ChatInputCommand {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
   public readonly requiredClientPermissions = [PermissionFlagsBits.ManageRoles];
@@ -143,9 +144,10 @@ export class AddMemberCommand extends ChatInputCommand {
 
     // Ask for confirmation
     const confirmResult = await Utils.awaitUserConfirm(author_t, activeInteraction, 'add-member', {
-      content:
-        `${author_t('server.Are you sure you want to assign the membership role')} <@&${role.id}> ${author_t('server.to')} <@${user.id}>?\n` +
-        `${author_t('server.Their membership will expire on')} \`${endDate.format('YYYY-MM-DD')}\``,
+      content: dedent`
+        ${author_t('server.Are you sure you want to assign the membership role')} <@&${role.id}> ${author_t('server.to')} <@${user.id}>?
+        ${author_t('server.Their membership will expire on')} \`${endDate.format('YYYY-MM-DD')}\`
+      `,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
@@ -180,9 +182,10 @@ export class AddMemberCommand extends ChatInputCommand {
     }
 
     await confirmedInteraction.editReply({
-      content: `${author_t('server.Successfully assigned the membership role')} <@&${role.id}> ${author_t('server.to')} <@${
-        user.id
-      }>\n${author_t('server.Their membership will expire on')} \`${endDate.format('YYYY-MM-DD')}\``,
+      content: dedent`
+        ${author_t('server.Successfully assigned the membership role')} <@&${role.id}> ${author_t('server.to')} <@${user.id}>
+        ${author_t('server.Their membership will expire on')} \`${endDate.format('YYYY-MM-DD')}\`
+      `,
     });
   }
 }

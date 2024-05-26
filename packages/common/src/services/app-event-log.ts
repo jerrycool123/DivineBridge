@@ -1,4 +1,5 @@
 import { TFunc } from '@divine-bridge/i18n';
+import dedent from 'dedent';
 import { RESTPostAPIChannelMessageJSONBody } from 'discord-api-types/v10';
 
 import { GuildCollection } from '../models/guild.js';
@@ -36,8 +37,11 @@ export class AppEventLogService {
     // Add warning if the log is not notified
     const modifiedPayload = { ...payload };
     if (!notified) {
-      modifiedPayload.content =
-        this.t('common.event_log_not_notified') + '\n\n' + (modifiedPayload.content ?? '');
+      modifiedPayload.content = dedent`
+        ${this.t('common.event_log_not_notified')}
+        
+        ${modifiedPayload.content ?? ''}
+      `;
     }
 
     // Try to send event log to the log channel
@@ -53,11 +57,12 @@ export class AppEventLogService {
 
     // If the log is failed to send, try to DM the guild owner about the removal
     if (this.guildOwnerId !== null) {
-      modifiedPayload.content =
-        `> ${this.t('common.event_log_failed_to_send')} \`${this.guildName}\`.\n` +
-        `> ${this.t('common.event_log_failed_to_send_2')} \`/${this.t('set_log_channel_command.name')}\`, ${this.t('common.event_log_failed_to_send_3')}` +
-        '\n\n' +
-        (modifiedPayload.content ?? '');
+      modifiedPayload.content = dedent`
+        > ${this.t('common.event_log_failed_to_send')} \`${this.guildName}\`.
+        > ${this.t('common.event_log_failed_to_send_2')} \`/${this.t('set_log_channel_command.name')}\`, ${this.t('common.event_log_failed_to_send_3')}
+        
+        ${modifiedPayload.content ?? ''}
+      `;
       const dmResult = await this.discordBotApi.createDMMessage(this.guildOwnerId, modifiedPayload);
       if (dmResult.success) {
         return true;

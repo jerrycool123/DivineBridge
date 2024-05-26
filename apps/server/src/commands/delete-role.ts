@@ -6,6 +6,7 @@ import {
   UserDoc,
 } from '@divine-bridge/common';
 import { t } from '@divine-bridge/i18n';
+import dedent from 'dedent';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
@@ -26,7 +27,7 @@ export class DeleteRoleCommand extends ChatInputCommand {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setDMPermission(false);
-  public readonly global = true;
+  public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
   public readonly requiredClientPermissions = [PermissionFlagsBits.ManageRoles];
@@ -69,12 +70,14 @@ export class DeleteRoleCommand extends ChatInputCommand {
 
     // Ask for confirmation
     const confirmResult = await Utils.awaitUserConfirm(author_t, interaction, 'delete-role', {
-      content:
-        `${author_t('server.delete_role_confirm_1')} <@&${membershipRoleDoc._id}> ${author_t('server.delete_role_confirm_2')} \`${membershipRoleDoc.youtube.profile.title}\` ${author_t('server.delete_role_confirm_3')} \n` +
-        `${author_t('server.delete_role_confirm_4')} ${membershipDocs.length} ${author_t('server.delete_role_confirm_5')}\n\n` +
-        author_t(
+      content: dedent`
+        ${author_t('server.delete_role_confirm_1')} <@&${membershipRoleDoc._id}> ${author_t('server.delete_role_confirm_2')} \`${membershipRoleDoc.youtube.profile.title}\` ${author_t('server.delete_role_confirm_3')}
+        ${author_t('server.delete_role_confirm_4')} ${membershipDocs.length} ${author_t('server.delete_role_confirm_5')}
+
+        ${author_t(
           'server.Note that we wont delete the role in Discord Instead we just delete the membership role in the database and remove the role from registered members',
-        ),
+        )}
+      `,
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;

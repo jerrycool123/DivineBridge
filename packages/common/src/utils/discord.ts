@@ -5,6 +5,12 @@ import { z } from 'zod';
 import { UserPayload } from '../index.js';
 
 export namespace DiscordUtils {
+  export const help = {
+    userTutorial: 'help-user-tutorial',
+    moderatorTutorial: 'help-moderator-tutorial',
+    commandList: 'help-command-list',
+  };
+
   export const membership = {
     accept: 'membership-accept',
     reject: 'membership-reject',

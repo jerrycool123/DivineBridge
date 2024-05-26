@@ -1,8 +1,9 @@
 export { AddMemberCommand } from './add-member.js';
 export { AddRoleCommand } from './add-role.js';
-export { AddYouTubeChannelCommand } from './add-youtube-channel.js';
+export { BroadcastCommand } from './broadcast.js';
 export { CheckMemberCommand } from './check-member.js';
 export { DeleteMemberCommand } from './delete-member.js';
+export { HelpCommand } from './help.js';
 export { DeleteRoleCommand } from './delete-role.js';
 export { PingCommand } from './ping.js';
 export { SetLanguageCommand } from './set-language.js';
