@@ -1,3 +1,5 @@
+import type { MembershipDoc } from '@divine-bridge/common';
+
 export interface GetUserActionData {
   id: string;
   profile: {

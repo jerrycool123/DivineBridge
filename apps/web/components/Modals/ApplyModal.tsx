@@ -39,6 +39,8 @@ export default function ApplyModal({
   const [linkingAccount, setLinkingAccount] = useState(false);
   const [verifyingMembership, setVerifyingMembership] = useState(false);
 
+  const isAuthMode = selectedMembershipRole?.membership?.type === 'auth';
+
   const errorHandler = useErrorHandler(messageApi);
 
   const authorize = useYouTubeAuthorize({
@@ -135,7 +137,7 @@ export default function ApplyModal({
                     <div
                       role="button"
                       className={`flex-shrink-0 ms-2 btn btn-success btn-sm ${
-                        verifyingMembership ? 'disabled' : ''
+                        verifyingMembership || isAuthMode ? 'disabled' : ''
                       }`}
                       onClick={async () => {
                         setVerifyingMembership(true);
@@ -186,7 +188,7 @@ export default function ApplyModal({
                         }
                       }}
                     >
-                      {t('web.Verify')}
+                      {isAuthMode ? t('web.Verified') : t('web.Verify')}
                     </div>
                   </div>
                 </div>

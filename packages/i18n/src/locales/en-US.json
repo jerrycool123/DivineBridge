@@ -162,7 +162,8 @@
     "Approve": "Approve",
     "and_punctuation": ", ",
     "or": "or ",
-    "the verification request": " the verification request."
+    "the verification request": " the verification request.",
+    "Select a language": "Select a language..."
   },
   "server": {
     "Failed to parse the request embed": "Failed to parse the request embed.",
@@ -276,7 +277,11 @@
     "Other unknown bot error": "Other unknown bot error",
     "If you believe this is an unexpected error please contact the bot owner to resolve this issue": "If you believe this is an unexpected error, please check if every settings is fine, or contact the bot owner to resolve this issue.",
     "Click to view a tutorial": "Click to view a tutorial:",
-    "Timed out": "Timed out."
+    "Timed out": "Timed out.",
+    "Welcome to Divine Bridge You have selected the": "Welcome to Divine Bridge! You have selected the",
+    "Please select the language in your screenshot for better recognition accuracy I will remember your preference for the next time If you want to change the language you can specify the": "Please select the language in your screenshot for better recognition accuracy. I will remember your preference for the next time. If you want to change the language, you can specify the",
+    "option the next time you use this command": "option the next time you use this command.",
+    "Use Auth Mode": "Use Auth Mode"
   },
   "add_member_command": {
     "name": "add-member",
@@ -485,7 +490,8 @@
     "Sorry an error occurred while assigning the membership role to you": "Sorry, an error occurred while assigning the membership role to you.",
     "Invite Divine Bridge to your server": "Invite Divine Bridge to your server",
     "Document List": "Document List",
-    "Docs": "Docs"
+    "Docs": "Docs",
+    "Verified": "Verified"
   },
   "help_command": {
     "name": "help",

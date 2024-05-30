@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import styles from '../../../../styles/Dashboard.module.css';
 
@@ -25,6 +25,7 @@ export default function Dashboard() {
   const { t } = useClientTranslation(lng);
   const { guilds } = useContext(MainContext);
 
+  const [redirectTriggered, setRedirectTriggered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMembershipRole, setSelectedMembershipRole] = useState<
     GetGuildsActionData[number]['membershipRoles'][number] | null
@@ -32,6 +33,25 @@ export default function Dashboard() {
 
   const [hoveredRoleId, setHoveredRoleId] = useState<string | null>(null);
   const [viewAcquiredMembershipsOnly, setViewAcquiredMembershipsOnly] = useState(false);
+
+  useEffect(() => {
+    if (guilds === null || redirectTriggered) return;
+
+    const url = new URL(window.location.href);
+    const roleId = url.searchParams.get('roleId');
+    if (roleId === null) return;
+
+    setRedirectTriggered(true);
+    for (const guild of guilds) {
+      for (const membershipRole of guild.membershipRoles) {
+        if (membershipRole.id === roleId) {
+          setSelectedMembershipRole(membershipRole);
+          setIsModalOpen(true);
+          break;
+        }
+      }
+    }
+  }, [guilds, redirectTriggered]);
 
   if (guilds === null) {
     return (

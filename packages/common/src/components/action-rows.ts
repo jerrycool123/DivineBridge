@@ -2,9 +2,11 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ModalActionRowComponentBuilder,
+  StringSelectMenuBuilder,
   TextInputBuilder,
 } from '@discordjs/builders';
 import { TFunc } from '@divine-bridge/i18n';
+import { supportedOCRLanguages } from '@divine-bridge/ocr-service';
 import { ButtonStyle, TextInputStyle } from 'discord-api-types/v10';
 
 import { DiscordUtils } from '../utils/discord.js';
@@ -24,6 +26,24 @@ export namespace ActionRows {
         .setCustomId(DiscordUtils.help.commandList)
         .setStyle(ButtonStyle.Primary)
         .setLabel(t('common.Command List')),
+    );
+  };
+
+  export const languageSelect = (
+    t: TFunc,
+    defaultLocale: string,
+  ): ActionRowBuilder<StringSelectMenuBuilder> => {
+    return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId('language-select')
+        .setPlaceholder(t('common.Select a language'))
+        .addOptions([
+          ...supportedOCRLanguages.map(({ language, code }) => ({
+            label: language,
+            value: code,
+            default: code === defaultLocale,
+          })),
+        ]),
     );
   };
 
@@ -78,6 +98,7 @@ export namespace ActionRows {
     t: TFunc,
     confirmCustomId: string,
     cancelCustomId: string,
+    additionalButtons: ButtonBuilder[] = [],
   ): ActionRowBuilder<ButtonBuilder> => {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -88,6 +109,7 @@ export namespace ActionRows {
         .setCustomId(cancelCustomId)
         .setLabel(t('common.Cancel'))
         .setStyle(ButtonStyle.Secondary),
+      ...additionalButtons,
     );
   };
 

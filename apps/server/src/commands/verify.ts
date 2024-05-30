@@ -14,15 +14,21 @@ import dedent from 'dedent';
 import {
   Attachment,
   AutocompleteInteraction,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
   ChatInputCommandInteraction,
+  ComponentType,
   Guild,
   RepliableInteraction,
   SlashCommandBuilder,
 } from 'discord.js';
 
+import { Constants } from '../constants.js';
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Env } from '../utils/env.js';
 import { Utils } from '../utils/index.js';
+import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
 
 export class VerifyCommand extends ChatInputCommand {
@@ -192,7 +198,8 @@ export class VerifyCommand extends ChatInputCommand {
     },
   ) {
     const { user } = interaction;
-    const { guild, guild_t, author_t, picture, membershipRoleId, langCode } = args;
+    const { guild, guild_t, author_t, picture, membershipRoleId } = args;
+    let langCode = args.langCode;
 
     await interaction.deferReply({ ephemeral: true });
 
@@ -228,6 +235,116 @@ export class VerifyCommand extends ChatInputCommand {
     }
     const logChannel = logChannelResult.data;
 
+    // Language tutorial
+    let activeInteraction: RepliableInteraction = interaction;
+    if (userDoc.flags.tutorial === false && langCode === null) {
+      // Ask user to select language and confirm
+      const languageActionRow = ActionRows.languageSelect(author_t, userDoc.preference.language);
+      const [confirmCustomId, cancelCustomId] = [
+        `language-tutorial-confirm-button`,
+        `language-tutorial-cancel-button`,
+      ];
+      const confirmActionRow = ActionRows.confirmButton(author_t, confirmCustomId, cancelCustomId, [
+        new ButtonBuilder()
+          .setLabel(author_t('server.Use Auth Mode'))
+          .setURL(
+            `${Constants.webUrl}/login?callbackUrl=${encodeURIComponent(`/dashboard?roleId=${membershipRoleId}`)}`,
+          )
+          .setStyle(ButtonStyle.Link),
+      ]);
+      const response = await activeInteraction.editReply({
+        content: `${author_t('server.Welcome to Divine Bridge You have selected the')} __${author_t('common.Screenshot Mode')}__${author_t('common.period')}${author_t('server.Please select the language in your screenshot for better recognition accuracy I will remember your preference for the next time If you want to change the language you can specify the')} \`${author_t('verify_command.language_option_name')}\` ${author_t('server.option the next time you use this command')}`,
+        components: [languageActionRow, confirmActionRow],
+      });
+
+      // Wait for user's language selection
+      const collector = response.createMessageComponentCollector({
+        componentType: ComponentType.StringSelect,
+        filter: (selectMenuInteraction) =>
+          activeInteraction.user.id === selectMenuInteraction.user.id &&
+          selectMenuInteraction.customId === 'language-select',
+        time: 60 * 1000,
+      });
+      const handleEndTutorial = async (content: 'timeout' | 'cancel' | 'ok') => {
+        try {
+          languageActionRow.components.forEach((component) => component.setDisabled(true));
+          confirmActionRow.components.forEach((component) => component.setDisabled(true));
+          if (!collector.ended) {
+            collector.stop();
+          }
+          await activeInteraction.editReply({
+            ...(content === 'timeout' && {
+              content: author_t('server.Timed out Please try again'),
+            }),
+            ...(content === 'cancel' && { content: author_t('server.Cancelled') }),
+            components: [languageActionRow, confirmActionRow],
+          });
+        } catch (error) {
+          logger.error(error);
+        }
+      };
+      let finished = false;
+      collector.on('collect', async (selectMenuInteraction) => {
+        try {
+          const selectedValue = selectMenuInteraction.values[0] ?? null;
+          if (selectedValue === null) return;
+
+          const selectedOption =
+            languageActionRow.components[0].options.find(
+              (option) => option.data.value === selectedValue,
+            ) ?? null;
+          if (selectedOption === null) return;
+
+          langCode = selectedValue;
+
+          languageActionRow.components[0].options.forEach((option) =>
+            option.setDefault(option.data.value === selectedOption.data.value),
+          );
+
+          await selectMenuInteraction.update({
+            components: [languageActionRow, confirmActionRow],
+          });
+        } catch (error) {
+          logger.error(error);
+        }
+      });
+      collector.on('end', async () => {
+        if (finished) return;
+        try {
+          await handleEndTutorial('timeout');
+        } catch (error) {
+          logger.error(error);
+        }
+      });
+
+      // Wait for user's confirmation
+      let buttonInteraction: ButtonInteraction;
+      try {
+        buttonInteraction = await response.awaitMessageComponent({
+          componentType: ComponentType.Button,
+          filter: (buttonInteraction) =>
+            buttonInteraction.user.id === activeInteraction.user.id &&
+            [confirmCustomId, cancelCustomId].includes(buttonInteraction.customId),
+          time: 60 * 1000,
+        });
+      } catch (error) {
+        // Timeout
+        await handleEndTutorial('timeout');
+        return;
+      }
+
+      // Handle user's confirmation
+      finished = true;
+      if (buttonInteraction.customId === confirmCustomId) {
+        await handleEndTutorial('ok');
+        activeInteraction = buttonInteraction;
+      } else {
+        await buttonInteraction.update({});
+        await handleEndTutorial('cancel');
+        return;
+      }
+    }
+
     // Get language
     let selectedLanguage: (typeof supportedOCRLanguages)[number];
     if (langCode === null) {
@@ -246,7 +363,6 @@ export class VerifyCommand extends ChatInputCommand {
       user: user.id,
       membershipRole: membershipRoleId,
     });
-    let activeInteraction: RepliableInteraction = interaction;
     if (
       existingMembershipDoc !== null &&
       (existingMembershipDoc.type === 'auth' || existingMembershipDoc.type === 'live_chat')
@@ -270,6 +386,7 @@ export class VerifyCommand extends ChatInputCommand {
     }
 
     // Save user config to DB
+    userDoc.flags.tutorial = true;
     userDoc.preference.language = selectedLanguage.code;
     await userDoc.save();
 

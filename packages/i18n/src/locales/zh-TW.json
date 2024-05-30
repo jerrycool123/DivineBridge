@@ -162,7 +162,8 @@
     "or": "或",
     "the verification request": "驗證請求。",
     "period": "。",
-    "and_punctuation": "、"
+    "and_punctuation": "、",
+    "Select a language": "選擇一個語言..."
   },
   "server": {
     "Failed to parse the request embed": "解析請求之嵌入式訊息時發生錯誤。",
@@ -278,7 +279,11 @@
     "Other unknown bot error": "其他未知的機器人錯誤",
     "If you believe this is an unexpected error please contact the bot owner to resolve this issue": "如果您認為這是一個非預期的錯誤，請確認機器人的設定是否正確，或者聯繫開發人員以解決這個問題。",
     "Click to view a tutorial": "點擊以檢視教學：",
-    "Timed out": "已逾時。"
+    "Timed out": "已逾時。",
+    "Welcome to Divine Bridge You have selected the": "歡迎使用 Divine Bridge！您已選擇",
+    "Please select the language in your screenshot for better recognition accuracy I will remember your preference for the next time If you want to change the language you can specify the": "請選擇您的截圖中使用的語言，以達到更好的辨識效果。我會記住您的選擇。如果您之後想要更改語言，您可以在下次使用本指令時指定",
+    "option the next time you use this command": "選項。",
+    "Use Auth Mode": "使用授權驗證模式"
   },
   "add_member_command": {
     "name": "手動新增會員",
@@ -490,7 +495,8 @@
     "Sorry an error occurred while assigning the membership role to you": "很抱歉，授予您會員身份組時發生錯誤。",
     "Invite Divine Bridge to your server": "邀請 Divine Bridge 到您的伺服器",
     "Document List": "說明文件列表",
-    "Docs": "說明文件"
+    "Docs": "說明文件",
+    "Verified": "已驗證"
   },
   "help_command": {
     "name": "說明",

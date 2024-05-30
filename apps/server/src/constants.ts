@@ -10,6 +10,8 @@ export namespace Constants {
 
   export const logLevel: LogLevel = Env.NODE_ENV === 'production' ? 'info' : 'debug';
 
+  export const webUrl = 'https://divine-bridge.jerrycool123.com';
+
   export const membership = {
     accept: 'membership-accept',
     reject: 'membership-reject',

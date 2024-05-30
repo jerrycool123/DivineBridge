@@ -21,6 +21,9 @@ export interface UserDoc extends UserAttrs, Document<string> {
     thumbnail: string;
     refreshToken: string;
   } | null;
+  flags: {
+    tutorial: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,6 +86,13 @@ const userSchema = new Schema<UserDoc>(
         },
       ),
       default: null,
+    },
+    flags: {
+      tutorial: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
     },
   },
   {
