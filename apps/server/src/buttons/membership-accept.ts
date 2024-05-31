@@ -150,7 +150,7 @@ export class MembershipAcceptButton extends Button {
     });
 
     await interaction.followUp({
-      content: `${author_t('server.The membership verification request of')} <@${userId}> ${author_t('server.has been accepted')}.`,
+      content: `${author_t('server.The membership verification request of')} <@${userId}> ${author_t('server.has been accepted')}`,
       ephemeral: true,
     });
   }

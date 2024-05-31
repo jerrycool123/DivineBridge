@@ -338,6 +338,7 @@ export class VerifyCommand extends ChatInputCommand {
       if (buttonInteraction.customId === confirmCustomId) {
         await handleEndTutorial('ok');
         activeInteraction = buttonInteraction;
+        await activeInteraction.deferReply({ ephemeral: true });
       } else {
         await buttonInteraction.update({});
         await handleEndTutorial('cancel');
