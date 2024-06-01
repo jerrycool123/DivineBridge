@@ -1,24 +1,51 @@
 import { DocsService } from '@divine-bridge/common';
-import { MenuItemType } from 'antd/es/menu/hooks/useItems';
+import { defaultLocale, supportedLocales } from '@divine-bridge/i18n';
+import { MenuItemType } from 'antd/es/menu/interface';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 import Markdown from '../../../../../components/Markdown';
 import DocsMenu from '../../../../../components/Menu/DocsMenu';
+import { publicEnv } from '../../../../../libs/common/public-env';
 import { WithI18nParams } from '../../../../../types/common';
 
 export default async function DocPage({ params }: WithI18nParams<{ params: { doc?: string[] } }>) {
   const { lng, doc = [] } = params;
-  const language = lng === undefined ? lng : Array.isArray(lng) ? lng[0] : lng;
+  const rawLanguage = lng === undefined ? defaultLocale : Array.isArray(lng) ? lng[0] : lng;
+  const language = supportedLocales.includes(rawLanguage as (typeof supportedLocales)[number])
+    ? rawLanguage
+    : defaultLocale;
   const slug = doc.join('/');
   const docs = DocsService.getDocs(language);
+
+  if (slug.length === 0) {
+    return redirect(`/${language}/docs/user-tutorial`);
+  }
 
   const items: MenuItemType[] = docs.map((doc) => ({
     key: doc.slug,
     label: <Link href={`/${language}/docs/${doc.slug}`}>{doc.title}</Link>,
   }));
   const targetDoc = docs.find((d) => d.slug === slug) ?? null;
-  const content =
-    targetDoc !== null ? `# ${targetDoc.title}\n\n${targetDoc.content}` : '# Document not found';
+  let content = '';
+
+  if (targetDoc !== null) {
+    if (targetDoc.slug === 'command-list') {
+      await fetch(`${publicEnv.NEXT_PUBLIC_WEB_URL}/api/commands/${language}`, {
+        next: { revalidate: 60 },
+      })
+        .then(async (res) => {
+          content = await res.text();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      content = `# ${targetDoc.title}\n\n${targetDoc.content}`;
+    }
+  } else {
+    content = '# Document not found';
+  }
 
   return (
     <div className="min-vh-100 d-flex">

@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+pnpm check-types
+
 pnpm syncpack list-mismatches
 pnpm syncpack format && git add .
 

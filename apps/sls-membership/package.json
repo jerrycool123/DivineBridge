@@ -2,34 +2,34 @@
   "name": "sls-membership",
   "version": "0.0.1",
   "dependencies": {
-    "@discordjs/rest": "^2.2.0",
+    "@discordjs/rest": "2.2.0",
     "@divine-bridge/common": "workspace:^",
     "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
-    "dayjs": "^1.11.10",
-    "dedent": "^1.5.1",
-    "discord-api-types": "^0.37.69",
-    "discord.js": "^14.14.1",
-    "esbuild": "^0.20.0",
-    "mongoose": "^8.1.1",
-    "serverless-offline": "^13.3.3",
-    "zod": "^3.22.4"
+    "dayjs": "^1.11.11",
+    "dedent": "^1.5.3",
+    "discord-api-types": "^0.37.86",
+    "esbuild": "^0.20.2",
+    "mongoose": "^8.4.1",
+    "serverless-offline": "^13.6.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
     "@divine-bridge/i18n": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
-    "@types/aws-lambda": "^8.10.133",
-    "eslint": "^8.56.0",
-    "eslint-plugin-import-esm": "^1.2.1",
+    "@types/aws-lambda": "^8.10.138",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import-esm": "^2.0.0",
     "prettier": "^3.2.5",
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
-    "serverless-esbuild": "^1.51.0",
-    "typescript": "^5.3.3"
+    "serverless-esbuild": "^1.52.1",
+    "typescript": "^5.4.5"
   },
   "main": "index.js",
   "scripts": {
     "build": "#noop",
+    "check-types": "tsc --noemit",
     "deploy": "serverless deploy --stage production",
     "dev": "serverless offline start --verbose",
     "package": "serverless package --stage production"

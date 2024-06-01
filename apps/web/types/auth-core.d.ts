@@ -41,12 +41,12 @@ declare module '@auth/core/types' {
 declare module '@auth/core/jwt' {
   /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
   interface JWT {
-    name: string;
     email: never;
-    picture: string;
-    locale: string;
     access_token: string;
     expires_at: number;
+    user: UserPayload & {
+      locale: string;
+    };
     sub: string;
     iat: number;
     exp: number;

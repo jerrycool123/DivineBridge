@@ -4,7 +4,7 @@ import MenuOutlined from '@ant-design/icons/MenuOutlined';
 import Drawer from 'antd/es/drawer';
 import FloatButton from 'antd/es/float-button';
 import Menu from 'antd/es/menu';
-import { MenuItemType } from 'antd/es/menu/hooks/useItems';
+import { MenuItemType } from 'antd/es/menu/interface';
 import { useState } from 'react';
 
 import styles from './DocsMenu.module.css';

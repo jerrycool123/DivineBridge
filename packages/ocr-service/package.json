@@ -2,26 +2,27 @@
   "name": "@divine-bridge/ocr-service",
   "version": "0.0.1",
   "dependencies": {
-    "tsup": "^8.0.1",
-    "zod": "^3.22.4"
+    "tsup": "^8.0.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
     "@jest/globals": "^29.7.0",
-    "dotenv": "^16.4.1",
-    "eslint": "^8.56.0",
-    "eslint-plugin-import-esm": "^1.2.1",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import-esm": "^2.0.0",
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   },
   "exports": "./dist/index.js",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsup --minify && pnpm run build:dts",
     "build:dts": "tsc -p ./dts-tsconfig.json --emitDeclarationOnly && echo \"\\033[1;35mDTS\\033[0m 🚀 Successfully Built\"",
+    "check-types": "tsc --noemit",
     "dev": "tsup --watch --onSuccess \"pnpm run build:dts\"",
     "format": "prettier --write .",
     "lint": "eslint .",

@@ -3,7 +3,7 @@ import {
   DiscordUtils,
   Embeds,
   MembershipRoleCollection,
-  MembershipRoleDoc,
+  MembershipRoleDocWithValidYouTubeChannel,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import {
@@ -29,23 +29,15 @@ export class HelpCommand extends ChatInputCommand<false> {
   ) {
     const { guild } = interaction;
 
-    let membershipRoleDocs:
-      | (Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        })[]
-      | null = null;
+    let membershipRoleDocs: MembershipRoleDocWithValidYouTubeChannel[] | null = null;
     if (guild !== null) {
       membershipRoleDocs = (
         await MembershipRoleCollection.find({ guild: guild.id }).populate<{
           youtube: YouTubeChannelDoc | null;
         }>('youtube')
       ).filter(
-        (
-          membershipRoleDoc,
-        ): membershipRoleDoc is Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        } => membershipRoleDoc.youtube !== null,
-      );
+        (membershipRoleDoc) => membershipRoleDoc.youtube !== null,
+      ) as MembershipRoleDocWithValidYouTubeChannel[];
     }
 
     // Let user select a document

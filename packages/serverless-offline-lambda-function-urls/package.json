@@ -1,10 +1,13 @@
 {
   "name": "@divine-bridge/serverless-offline-lambda-function-urls",
   "version": "0.0.1",
+  "dependencies": {
+    "eslint": "^8.57.0"
+  },
   "devDependencies": {
     "@divine-bridge/prettier-config-custom": "workspace:^",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   },
   "exports": "./index.mjs",
   "main": "./index.mjs",

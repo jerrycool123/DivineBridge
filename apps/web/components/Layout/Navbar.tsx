@@ -2,8 +2,9 @@
 
 import CaretDownOutlined from '@ant-design/icons/CaretDownOutlined';
 import LoadingOutlined from '@ant-design/icons/LoadingOutlined';
+import { defaultLocale } from '@divine-bridge/i18n';
 import Dropdown from 'antd/es/dropdown';
-import { ItemType } from 'antd/es/menu/hooks/useItems';
+import { ItemType } from 'antd/es/menu/interface';
 import Spin from 'antd/es/spin';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -19,7 +20,7 @@ import SettingsModal from '../Modals/SettingsModal';
 
 export default function Navbar() {
   const { lng } = useParams();
-  const language = lng === undefined ? 'en-US' : Array.isArray(lng) ? lng[0] : lng;
+  const language = lng === undefined ? defaultLocale : Array.isArray(lng) ? lng[0] : lng;
   const { t } = useClientTranslation(lng);
   const { data: session, status } = useSession();
 

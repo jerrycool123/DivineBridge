@@ -5,7 +5,7 @@ import {
   GuildDoc,
   MembershipCollection,
   MembershipRoleCollection,
-  MembershipRoleDoc,
+  MembershipRoleDocWithValidYouTubeChannel,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { TFunc, defaultLocale, supportedLocales, t } from '@divine-bridge/i18n';
@@ -49,7 +49,7 @@ export class VerifyCommand extends ChatInputCommand {
         },
   ) {
     const command = new SlashCommandBuilder().setName(
-      args.alias ? args.name : t('verify_command.name', 'en-US'),
+      args.alias ? args.name : t('verify_command.name', defaultLocale),
     );
     if (args.alias === false) {
       command.setNameLocalizations(
@@ -62,7 +62,7 @@ export class VerifyCommand extends ChatInputCommand {
     }
     command
       .setDescription(
-        `${t('verify_command.description_1', 'en-US')} ${args.alias ? args.youtubeChannelTitle : 'YouTube'} ${t('verify_command.description_2', 'en-US')}`,
+        `${t('verify_command.description_1', defaultLocale)} ${args.alias ? args.youtubeChannelTitle : 'YouTube'} ${t('verify_command.description_2', defaultLocale)}`,
       )
       .setDescriptionLocalizations(
         supportedLocales.reduce(
@@ -125,12 +125,8 @@ export class VerifyCommand extends ChatInputCommand {
           youtube: YouTubeChannelDoc | null;
         }>('youtube');
       const filteredMembershipRoleDocs = membershipRoleDocs.filter(
-        (
-          membershipRoleDoc,
-        ): membershipRoleDoc is Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        } => membershipRoleDoc.youtube !== null,
-      );
+        (membershipRoleDoc) => membershipRoleDoc.youtube !== null,
+      ) as MembershipRoleDocWithValidYouTubeChannel[];
 
       const searchedMembershipRoleDocs = filteredMembershipRoleDocs.filter((membershipRoleDoc) => {
         const { title, customUrl } = membershipRoleDoc.youtube.profile;

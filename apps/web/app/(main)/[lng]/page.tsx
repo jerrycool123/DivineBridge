@@ -229,7 +229,7 @@ export default function Home({ params }: WithI18nParams) {
                   jerrycool123/DivineBridge
                 </Link>
                 {t('web.or join our')}{' '}
-                <Link className="link fw-500" href="https://discord.gg/u4HXTH5wKV">
+                <Link className="link fw-500" href="https://discord.gg/ZSfxRnzFNy">
                   {t('web.Discord Support Server')}
                 </Link>{' '}
                 {t('web.ask_for_help_end')}

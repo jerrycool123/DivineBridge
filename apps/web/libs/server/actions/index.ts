@@ -4,6 +4,8 @@ import { createSafeActionClient } from 'next-safe-action';
 import { auth } from '../../../auth';
 import dbConnect from '../mongoose';
 
+export const publicAction = createSafeActionClient();
+
 export const authAction = createSafeActionClient({
   async middleware() {
     // Check if user has signed in

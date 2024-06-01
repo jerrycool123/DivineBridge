@@ -18,5 +18,10 @@ export namespace DocsService {
       slug: 'moderator-tutorial',
       content: t('docs.moderator-tutorial', locale),
     },
+    {
+      title: t('docs.title_command-list', locale),
+      slug: 'command-list',
+      content: '',
+    },
   ];
 }

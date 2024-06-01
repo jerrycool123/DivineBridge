@@ -29,6 +29,7 @@
     "test": {
       "dependsOn": ["^build"],
       "dotEnv": [".env.test"]
-    }
+    },
+    "check-types": {}
   }
 }

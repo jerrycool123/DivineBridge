@@ -6,8 +6,7 @@ import { Embeds } from '../components/embeds.js';
 import { UserDoc } from '../index.js';
 import { MembershipRoleDoc } from '../models/membership-role.js';
 import { MembershipCollection, MembershipDoc } from '../models/membership.js';
-import { YouTubeChannelDoc } from '../models/youtube-channel.js';
-import { UserPayload } from '../types/common.js';
+import { MembershipRoleDocWithValidYouTubeChannel, UserPayload } from '../types/common.js';
 import { Database } from '../utils/database.js';
 import { AppEventLogService } from './app-event-log.js';
 import { DiscordBotAPI } from './discord-bot-api.js';
@@ -110,9 +109,7 @@ export class MembershipService {
   public async reject(args: {
     userLocale: string | undefined;
     guildName: string;
-    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
-      youtube: YouTubeChannelDoc;
-    };
+    membershipRoleDoc: MembershipRoleDocWithValidYouTubeChannel;
     userId: string;
     reason: string;
   }): Promise<{ notified: boolean }> {
@@ -225,9 +222,7 @@ export class MembershipService {
   public async purgeRole(args: {
     guildLocale: string | undefined;
     guildId: string;
-    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
-      youtube: YouTubeChannelDoc;
-    };
+    membershipRoleDoc: MembershipRoleDocWithValidYouTubeChannel;
     membershipDocs: (Omit<MembershipDoc, 'user'> & {
       user: UserDoc | null;
     })[];

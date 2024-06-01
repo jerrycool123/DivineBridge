@@ -1,7 +1,7 @@
 import {
   GuildCollection,
   MembershipRoleCollection,
-  MembershipRoleDoc,
+  MembershipRoleDocWithValidYouTubeChannel,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { TFunc } from '@divine-bridge/i18n';
@@ -130,9 +130,7 @@ export namespace Validators {
   ): Promise<
     | {
         success: true;
-        data: Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        };
+        data: MembershipRoleDocWithValidYouTubeChannel;
       }
     | {
         success: false;
@@ -163,9 +161,7 @@ export namespace Validators {
     }
     return {
       success: true,
-      data: membershipRoleDoc as Omit<MembershipRoleDoc, 'youtube'> & {
-        youtube: YouTubeChannelDoc;
-      },
+      data: membershipRoleDoc as MembershipRoleDocWithValidYouTubeChannel,
     };
   };
 

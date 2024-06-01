@@ -5,6 +5,7 @@ import {
   GuildCollection,
   MembershipDoc,
   MembershipRoleDoc,
+  MembershipRoleDocWithValidYouTubeChannel,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { cookies } from 'next/headers';
@@ -63,11 +64,8 @@ export const getGuildsAction = authAction<typeof getGuildsActionInputSchema, Get
         },
         membershipRoles: guildDoc.membershipRoles
           .filter(
-            (
-              membershipRoleDoc,
-            ): membershipRoleDoc is Omit<MembershipRoleDoc, 'youtube'> & {
-              youtube: YouTubeChannelDoc;
-            } => membershipRoleDoc.youtube !== null,
+            (membershipRoleDoc): membershipRoleDoc is MembershipRoleDocWithValidYouTubeChannel =>
+              membershipRoleDoc.youtube !== null,
           )
           .map((membershipRoleDoc): GetGuildsActionData[number]['membershipRoles'][number] => {
             const membership =

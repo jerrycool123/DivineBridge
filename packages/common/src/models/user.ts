@@ -1,3 +1,4 @@
+import { defaultLocale } from '@divine-bridge/i18n';
 import mongoose, { Document, Model, Schema, model } from 'mongoose';
 
 export interface UserAttrs {
@@ -54,7 +55,7 @@ const userSchema = new Schema<UserDoc>(
       locale: {
         type: String,
         required: true,
-        default: 'en-US',
+        default: defaultLocale,
       },
     },
     youtube: {

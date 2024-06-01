@@ -10,7 +10,7 @@ import { GuildDoc } from '../models/guild.js';
 import { MembershipRoleDoc } from '../models/membership-role.js';
 import { MembershipDoc } from '../models/membership.js';
 import { YouTubeChannelDoc } from '../models/youtube-channel.js';
-import { UserPayload } from '../types/common.js';
+import { MembershipRoleDocWithValidYouTubeChannel, UserPayload } from '../types/common.js';
 import { CommonUtils } from '../utils/common.js';
 import { DiscordUtils } from '../utils/discord.js';
 
@@ -87,13 +87,12 @@ export namespace Embeds {
       thumbnail: string;
     },
   ): EmbedBuilder => {
-    return baseEmbed()
+    const embed = baseEmbed()
       .setAuthor({
         name: youtubeChannel.title,
         iconURL: `https://www.youtube.com/${youtubeChannel.customUrl}`,
       })
       .setTitle(youtubeChannel.title)
-      .setDescription(youtubeChannel.description)
       .setThumbnail(youtubeChannel.thumbnail)
       .addFields([
         {
@@ -107,6 +106,10 @@ export namespace Embeds {
           inline: true,
         },
       ]);
+    if (youtubeChannel.description.length > 0) {
+      embed.setDescription(youtubeChannel.description);
+    }
+    return embed;
   };
 
   export const membership = (t: TFunc, user: UserPayload, membership: MembershipDoc) => {
@@ -237,9 +240,7 @@ export namespace Embeds {
   export const screenshotSubmission = (
     t: TFunc,
     user: UserPayload,
-    membershipRoleDoc: Omit<MembershipRoleDoc, 'youtube'> & {
-      youtube: YouTubeChannelDoc;
-    },
+    membershipRoleDoc: MembershipRoleDocWithValidYouTubeChannel,
     languageName: string,
     guildName: string,
     imageUrl: string,
@@ -341,11 +342,7 @@ export namespace Embeds {
 
   export const userTutorial = (
     t: TFunc,
-    membershipRoleDocs:
-      | (Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        })[]
-      | null,
+    membershipRoleDocs: MembershipRoleDocWithValidYouTubeChannel[] | null,
   ): EmbedBuilder => {
     const description =
       t('docs.user-tutorial') +
@@ -374,11 +371,7 @@ export namespace Embeds {
 
   export const commandList = (
     t: TFunc,
-    membershipRoleDocs:
-      | (Omit<MembershipRoleDoc, 'youtube'> & {
-          youtube: YouTubeChannelDoc;
-        })[]
-      | null,
+    membershipRoleDocs: MembershipRoleDocWithValidYouTubeChannel[] | null,
     chatInputCommandMap: Record<string, { moderatorOnly: boolean; devTeamOnly: boolean }>,
   ): EmbedBuilder => {
     return new EmbedBuilder().setTitle(t('common.Command List')).setDescription(

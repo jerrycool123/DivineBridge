@@ -5,6 +5,8 @@ import {
   APIGuildMember,
   APIMessage,
   APIUser,
+  RESTGetAPIApplicationCommandsQuery,
+  RESTGetAPIApplicationCommandsResult,
   RESTGetAPIChannelResult,
   RESTGetAPIGuildMemberResult,
   RESTGetAPIGuildResult,
@@ -33,6 +35,31 @@ export class DiscordBotAPI {
 
   constructor(botToken: string) {
     this.rest.setToken(botToken);
+  }
+
+  public async fetchGlobalApplicationCommands(applicationId: string): Promise<
+    | {
+        success: true;
+        commands: RESTGetAPIApplicationCommandsResult;
+      }
+    | {
+        success: false;
+        error: string;
+      }
+  > {
+    try {
+      const query: RESTGetAPIApplicationCommandsQuery = {
+        with_localizations: true,
+      };
+      const commands = (await this.rest.get(Routes.applicationCommands(applicationId), {
+        query: new URLSearchParams(Object.entries(query)),
+      })) as RESTGetAPIApplicationCommandsResult;
+
+      return { success: true, commands };
+    } catch (error) {
+      const errorMessage = DiscordUtils.parseError(error);
+      return { success: false, error: errorMessage };
+    }
   }
 
   public async overwriteGlobalApplicationCommands(

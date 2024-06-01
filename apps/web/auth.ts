@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import NextAuth, { Session } from 'next-auth';
 import Discord from 'next-auth/providers/discord';
 
 export const {
@@ -19,17 +19,26 @@ export const {
           ...token,
           access_token,
           expires_at,
-          ...(profile !== undefined ? { locale: profile.locale as string } : {}),
+          ...(profile !== undefined
+            ? {
+                user: {
+                  id: profile.id as string,
+                  name: profile.username,
+                  image: profile.image_url,
+                  locale: profile.locale as string,
+                },
+              }
+            : {}),
         };
       } else if (Date.now() > token.expires_at * 1000) {
         return null;
       }
       return token;
     },
-    session: ({ session, ...args }) => {
+    session: ({ ...args }) => {
+      const session = args.session as unknown as Session;
       if ('token' in args) {
-        const { sub, name, picture, locale } = args.token;
-        session.user = { id: sub, name, image: picture, locale };
+        session.user = args.token.user;
       }
       return session;
     },

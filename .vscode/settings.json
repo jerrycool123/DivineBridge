@@ -4,10 +4,7 @@
     "**/.turbo": true,
     "**/.next": true
   },
-  "eslint.workingDirectories": [
-    { "pattern": "apps/*/" },
-    { "pattern": "packages/*/" }
-  ],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
   "javascript.validate.enable": false,
   "typescript.preferences.quoteStyle": "single",
   "i18n-ally.localesPaths": ["./packages/i18n/src/locales"],

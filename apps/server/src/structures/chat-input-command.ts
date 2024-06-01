@@ -6,7 +6,7 @@ import {
   ChatInputCommandInteraction,
   Guild,
   PermissionResolvable,
-  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
 
 import { Core } from './core.js';
@@ -28,8 +28,7 @@ export namespace ChatInputCommand {
 }
 
 export abstract class ChatInputCommand<GuildOnly extends boolean = true> extends Core {
-  public abstract readonly command: Partial<Omit<SlashCommandBuilder, 'name' | 'toJSON'>> &
-    Required<Pick<SlashCommandBuilder, 'name' | 'toJSON'>>;
+  public abstract readonly command: Omit<SlashCommandOptionsOnlyBuilder, '_sharedAddOptionMethod'>;
   public abstract readonly devTeamOnly: boolean;
   public abstract readonly guildOnly: GuildOnly;
   public abstract readonly moderatorOnly: boolean;
