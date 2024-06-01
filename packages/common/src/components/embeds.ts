@@ -90,7 +90,7 @@ export namespace Embeds {
     const embed = baseEmbed()
       .setAuthor({
         name: youtubeChannel.title,
-        iconURL: `https://www.youtube.com/${youtubeChannel.customUrl}`,
+        iconURL: youtubeChannel.thumbnail,
       })
       .setTitle(youtubeChannel.title)
       .setThumbnail(youtubeChannel.thumbnail)
