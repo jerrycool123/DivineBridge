@@ -22,6 +22,7 @@ export const initI18n = async (args?: { plugins?: ThirdPartyModule[]; debug?: bo
   }
   await instance.init({
     lng: defaultLocale,
+    load: 'currentOnly',
     fallbackLng: defaultLocale,
     supportedLngs: supportedLocales,
     debug: args?.debug,

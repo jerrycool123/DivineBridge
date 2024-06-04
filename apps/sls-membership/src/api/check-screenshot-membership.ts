@@ -38,6 +38,7 @@ export const checkScreenshotMembership = async (
 
   // Get expired screenshot memberships from DB
   const currentDate = dayjs.utc().startOf('day');
+  const lastDate = currentDate.subtract(1, 'day');
   const membershipDocs = await MembershipCollection.find({
     $or: [{ type: 'manual' }, { type: 'screenshot' }],
     end: { $lte: currentDate.toISOString() },
@@ -123,8 +124,9 @@ export const checkScreenshotMembership = async (
             `Failed to send DM to <@${userId}> for membership role <@&${membershipRoleId}>.`,
           );
         }
-      } else if (endDate.isBefore(currentDate, 'date')) {
-        // When the end date is before today, we remove the user's membership
+      } else if (endDate.isBefore(lastDate, 'date')) {
+        // When the end date is before yesterday, we remove the user's membership
+        // e.g. The billing date is at 5th, and today is 7th, we remove the membership
 
         const removeMembershipResult = await membershipService.remove({
           userLocale,
