@@ -5,10 +5,11 @@ export class FilBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'fil') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /Susunodnapetsangpagsingil:(Ene|Peb|Mar|Abr|Mayo|Hun|Hul|Ago|Set|Okt|Nob|Dis)(\d{1,2}),(\d{4})/;
+      /Susunodnapetsangpagsingil:(Ene|Peb|Mar|Abr|Mayo|Hun|Hul|Ago|Set|Okt|Nob|Dis)(\d{1,2})/;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {
+        const day = parseInt(match[2], 10);
         const abbreviatedMonth = match[1];
         const monthMap: Record<string, number> = {
           Ene: 1,
@@ -25,8 +26,7 @@ export class FilBillingDateParser implements BillingDateParser {
           Dis: 12,
         };
         const month = monthMap[abbreviatedMonth];
-        const [day, year] = match.slice(2, 4).map((s) => parseInt(s, 10));
-        return { year, month, day };
+        return { month, day };
       }
     }
     return BillingDateParser.emptyDate;

@@ -25,48 +25,48 @@ const testMap: Record<
   { url: string; date: RecognizedDate }
 > = {
   eng: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/eng.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/eng_240703.png',
+    date: { month: 7, day: 6 },
   },
   chi_sim: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/chi_sim.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/chi_sim_240703.png',
+    date: { month: 7, day: 6 },
   },
   chi_tra: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/chi_tra.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/chi_tra_240703.png',
+    date: { month: 7, day: 6 },
   },
   deu: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/deu.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/deu_240703.png',
+    date: { month: 7, day: 6 },
   },
   fil: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/fil.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/fil_240703.png',
+    date: { month: 7, day: 6 },
   },
   ind: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/ind.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/ind_240703.png',
+    date: { month: 7, day: 6 },
   },
   jpn: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/jpn.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/jpn_240703.png',
+    date: { month: 7, day: 6 },
   },
   kor: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/kor.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/kor_240703.png',
+    date: { month: 7, day: 6 },
   },
   msa: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/msa.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/msa_240703.png',
+    date: { month: 7, day: 6 },
   },
   tha: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/tha.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/tha_240703.png',
+    date: { month: 7, day: 6 },
   },
   vie: {
-    url: 'https://divine-bridge-cdn.jerrycool123.com/vie.png',
-    date: { year: 2024, month: 3, day: 6 },
+    url: 'https://divine-bridge-cdn.jerrycool123.com/vie_240703.png',
+    date: { month: 7, day: 6 },
   },
 };
 

@@ -4,11 +4,11 @@ import { BillingDateParser } from '../definitions.js';
 export class EngBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'eng') {}
   parse(lines: string[]): RecognizedDate {
-    const regex =
-      /Nextbillingdate:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\d{1,2}),(\d{4})/;
+    const regex = /Nextbillingdate:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\d{1,2})/;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {
+        const day = parseInt(match[2], 10);
         const abbreviatedMonth = match[1];
         const monthMap: Record<string, number> = {
           Jan: 1,
@@ -25,8 +25,7 @@ export class EngBillingDateParser implements BillingDateParser {
           Dec: 12,
         };
         const month = monthMap[abbreviatedMonth];
-        const [day, year] = match.slice(2, 4).map((s) => parseInt(s, 10));
-        return { year, month, day };
+        return { month, day };
       }
     }
     return BillingDateParser.emptyDate;

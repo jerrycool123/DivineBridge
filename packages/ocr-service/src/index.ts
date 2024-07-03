@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { RecognizedDate } from './definitions.js';
+import { BillingDateParser, RecognizedDate, recognizedDateSchema } from './definitions.js';
 import { type TSupportedLangCode, billingDateParsers } from './parsers.js';
 
 export { supportedOCRLanguages } from './parsers.js';
@@ -107,7 +107,9 @@ export class OCRService {
         error: 'Unsupported language',
       };
     }
-    const date = parser.parse(lines);
+    const rawDate = parser.parse(lines);
+    const parsedDate = recognizedDateSchema.safeParse(rawDate);
+    const date = parsedDate.success ? parsedDate.data : BillingDateParser.emptyDate;
 
     return { success: true, date };
   }

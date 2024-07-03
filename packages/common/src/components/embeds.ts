@@ -279,7 +279,7 @@ export namespace Embeds {
   export const membershipVerificationRequest = (
     t: TFunc,
     user: UserPayload,
-    date: RecognizedDate,
+    date: RecognizedDate & { year: number | null },
     roleId: string,
     languageName: string,
     imageUrl: string,

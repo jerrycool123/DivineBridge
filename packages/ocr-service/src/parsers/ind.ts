@@ -5,10 +5,11 @@ export class IndBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'ind') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /Tanggalpenagihanberikutnya:(\d{1,2})(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)(\d{4})/;
+      /Tanggalpenagihanberikutnya:(\d{1,2})(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)/;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {
+        const day = parseInt(match[1], 10);
         const abbreviatedMonth = match[2];
         const monthMap: Record<string, number> = {
           Jan: 1,
@@ -25,8 +26,7 @@ export class IndBillingDateParser implements BillingDateParser {
           Des: 12,
         };
         const month = monthMap[abbreviatedMonth];
-        const [day, , year] = match.slice(1, 4).map((s) => parseInt(s, 10));
-        return { year, month, day };
+        return { month, day };
       }
     }
     return BillingDateParser.emptyDate;

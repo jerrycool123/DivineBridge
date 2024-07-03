@@ -9,7 +9,9 @@ import {
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { TFunc, defaultLocale, supportedLocales, t } from '@divine-bridge/i18n';
-import { OCRService, supportedOCRLanguages } from '@divine-bridge/ocr-service';
+import { OCRService, RecognizedDate, supportedOCRLanguages } from '@divine-bridge/ocr-service';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
 import dedent from 'dedent';
 import {
   Attachment,
@@ -30,6 +32,8 @@ import { Env } from '../utils/env.js';
 import { Utils } from '../utils/index.js';
 import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
+
+dayjs.extend(utc);
 
 export class VerifyCommand extends ChatInputCommand {
   public readonly command = this.commandFactory({ alias: false });
@@ -410,9 +414,28 @@ export class VerifyCommand extends ChatInputCommand {
     if (!recognizedResult.success) {
       this.context.logger.error(recognizedResult.error);
     }
-    const recognizedDate = recognizedResult.success
+
+    let recognizedDate: RecognizedDate & { year: number | null } = {
+      year: null,
+      month: null,
+      day: null,
+    };
+
+    const { month, day } = recognizedResult.success
       ? recognizedResult.date
-      : { year: null, month: null, day: null };
+      : { month: null, day: null };
+    if (month !== null && day !== null) {
+      const currentDate = dayjs.utc().startOf('day');
+      const currentYear = currentDate.year();
+      const recognizedDateWithYear = dayjs
+        .utc()
+        .set('year', currentYear)
+        .set('month', month - 1)
+        .set('date', day)
+        .startOf('day');
+      const year = recognizedDateWithYear.isBefore(currentDate) ? currentYear + 1 : currentYear;
+      recognizedDate = { year, month, day };
+    }
 
     const adminActionRow = ActionRows.adminVerificationButton(guild_t);
     const membershipVerificationRequestEmbed = Embeds.membershipVerificationRequest(

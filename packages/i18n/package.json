@@ -9,7 +9,7 @@
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
-    "@types/node": "^20.13.0",
+    "@types/node": "^20.14.9",
     "eslint": "^8.57.0",
     "eslint-plugin-import-esm": "^2.0.0",
     "prettier": "^3.2.5",

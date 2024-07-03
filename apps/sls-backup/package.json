@@ -16,7 +16,7 @@
     "@divine-bridge/prettier-config-custom": "workspace:^",
     "@types/adm-zip": "^0.5.5",
     "@types/aws-lambda": "^8.10.138",
-    "@types/node": "^20.13.0",
+    "@types/node": "^20.14.9",
     "@types/tar": "^6.1.13",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
@@ -26,7 +26,7 @@
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-esbuild": "^1.52.1",
     "tar": "^6.2.1",
-    "tsx": "^4.11.0",
+    "tsx": "^4.11.2",
     "typescript": "^5.4.5"
   },
   "main": "index.js",
