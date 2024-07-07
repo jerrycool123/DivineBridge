@@ -6,7 +6,6 @@ import { Events, Interaction, PermissionsBitField } from 'discord.js';
 import { VerifyCommand } from '../commands/verify.js';
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { EventHandler } from '../structures/event-handler.js';
-import { readablePermissionsMap } from '../utils/discord.js';
 import { Utils } from '../utils/index.js';
 
 export class InteractionCreateEventHandler extends EventHandler<Events.InteractionCreate> {
@@ -129,7 +128,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
               content: dedent`
                 I need the following permission to run this command:
                 ${missingPermissions
-                  .map((permission) => `- ${readablePermissionsMap[permission]}`)
+                  .map((permission) => `- ${permission.replace(/([a-z])([A-Z])/g, '$1 $2')}`)
                   .join(', ')}
               `,
               ephemeral: true,
