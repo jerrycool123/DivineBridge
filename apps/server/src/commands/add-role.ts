@@ -6,7 +6,13 @@ import {
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import dedent from 'dedent';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { discordBotApi } from '../utils/discord.js';
@@ -38,7 +44,7 @@ export class AddRoleCommand extends ChatInputCommand {
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
   public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
@@ -49,7 +55,7 @@ export class AddRoleCommand extends ChatInputCommand {
   ) {
     const { options, client } = interaction;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Check if the role is manageable
     const role = options.getRole('role', true);
@@ -90,7 +96,8 @@ export class AddRoleCommand extends ChatInputCommand {
       customUrl: string;
       thumbnail: string;
     };
-    let youtubeChannelDoc = await YouTubeChannelCollection.findById(youtubeChannelId);
+    let youtubeChannelDoc =
+      await YouTubeChannelCollection.findById<YouTubeChannelDoc>(youtubeChannelId);
     if (youtubeChannelDoc !== null) {
       // Use the channel data from the database
       youtubeChannelData = {
@@ -134,7 +141,7 @@ export class AddRoleCommand extends ChatInputCommand {
     }).populate<{
       youtube: YouTubeChannelDoc | null;
     }>('youtube');
-    if (oldMembershipRoleDoc !== null && oldMembershipRoleDoc.youtube !== null) {
+    if (oldMembershipRoleDoc?.youtube !== null && oldMembershipRoleDoc?.youtube !== undefined) {
       return await interaction.editReply({
         content: `${author_t('server.The membership role')} <@&${oldMembershipRoleDoc._id}> ${author_t('server.is already assigned to the YouTube channel')} \`${oldMembershipRoleDoc.youtube.profile.title}\``,
       });
@@ -150,7 +157,7 @@ export class AddRoleCommand extends ChatInputCommand {
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
-    await confirmedInteraction.deferReply({ ephemeral: true });
+    await confirmedInteraction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // If the YouTube channel is not in the database, add it
     if (youtubeChannelDoc === null) {
@@ -179,8 +186,11 @@ export class AddRoleCommand extends ChatInputCommand {
       });
     };
 
-    const verifyCommand = this.context.bot.chatInputCommandMap['verify'] ?? null;
-    if (verifyCommand !== null && verifyCommand instanceof VerifyCommand === false) {
+    const verifyCommand =
+      'verify' in this.context.bot.chatInputCommandMap
+        ? this.context.bot.chatInputCommandMap.verify
+        : null;
+    if (verifyCommand === null || !(verifyCommand instanceof VerifyCommand)) {
       return await onFailToCreateAliasCommand();
     }
     const aliasCommand = verifyCommand.commandFactory({

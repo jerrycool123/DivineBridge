@@ -1,8 +1,9 @@
 import i18next, { ThirdPartyModule, t as i18next_t } from 'i18next';
 
 import { defaultLocale, supportedLocales } from './constants.js';
-import en_US from './locales/en-US.json';
-import zh_TW from './locales/zh-TW.json';
+import en_US from './locales/en-US.json' with { type: "json" };
+import zh_TW from './locales/zh-TW.json' with { type: "json" };
+
 
 export * from './constants.js';
 
@@ -40,12 +41,8 @@ type Extractor<T> = {
 
 export type TranslationKey = Extractor<(typeof resources)[typeof defaultLocale]['translation']>;
 
-export type TFunc = {
-  (key: TranslationKey): string;
-};
+export type TFunc = (key: TranslationKey) => string;
 
-export type TLocaleFunc = {
-  (key: TranslationKey, locale: string | undefined): string;
-};
+export type TLocaleFunc = (key: TranslationKey, locale: string | undefined) => string;
 
 export const t: TLocaleFunc = (key, locale) => i18next_t(key, { lng: locale });

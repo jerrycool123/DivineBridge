@@ -22,6 +22,8 @@ import {
   ChatInputCommandInteraction,
   ComponentType,
   Guild,
+  InteractionContextType,
+  MessageFlags,
   RepliableInteraction,
   SlashCommandBuilder,
 } from 'discord.js';
@@ -55,7 +57,7 @@ export class VerifyCommand extends ChatInputCommand {
     const command = new SlashCommandBuilder().setName(
       args.alias ? args.name : t('verify_command.name', defaultLocale),
     );
-    if (args.alias === false) {
+    if (!args.alias) {
       command.setNameLocalizations(
         supportedLocales.reduce(
           (acc, locale) =>
@@ -98,7 +100,7 @@ export class VerifyCommand extends ChatInputCommand {
             .setRequired(true)
             .setAutocomplete(true),
         )
-        .setDMPermission(false);
+        .setContexts(InteractionContextType.Guild);
     }
     command.addStringOption((option) =>
       option
@@ -201,7 +203,7 @@ export class VerifyCommand extends ChatInputCommand {
     const { guild, guild_t, author_t, picture, membershipRoleId } = args;
     let langCode = args.langCode;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Get user attachment
     if (!(picture.contentType?.startsWith('image/') ?? false)) {
@@ -237,7 +239,7 @@ export class VerifyCommand extends ChatInputCommand {
 
     // Language tutorial
     let activeInteraction: RepliableInteraction = interaction;
-    if (userDoc.flags.tutorial === false && langCode === null) {
+    if (!userDoc.flags.tutorial && langCode === null) {
       // Ask user to select language and confirm
       const languageActionRow = ActionRows.languageSelect(author_t, userDoc.preference.language);
       const [confirmCustomId, cancelCustomId] = [
@@ -286,7 +288,7 @@ export class VerifyCommand extends ChatInputCommand {
       let finished = false;
       collector.on('collect', async (selectMenuInteraction) => {
         try {
-          const selectedValue = selectMenuInteraction.values[0] ?? null;
+          const selectedValue = (selectMenuInteraction.values[0] ?? null) as string | null;
           if (selectedValue === null) return;
 
           const selectedOption =
@@ -327,7 +329,7 @@ export class VerifyCommand extends ChatInputCommand {
             [confirmCustomId, cancelCustomId].includes(buttonInteraction.customId),
           time: 60 * 1000,
         });
-      } catch (error) {
+      } catch (_error) {
         // Timeout
         await handleEndTutorial('timeout');
         return;
@@ -338,7 +340,7 @@ export class VerifyCommand extends ChatInputCommand {
       if (buttonInteraction.customId === confirmCustomId) {
         await handleEndTutorial('ok');
         activeInteraction = buttonInteraction;
-        await activeInteraction.deferReply({ ephemeral: true });
+        await activeInteraction.deferReply({ flags: [MessageFlags.Ephemeral] });
       } else {
         await buttonInteraction.update({});
         await handleEndTutorial('cancel');
@@ -383,7 +385,7 @@ export class VerifyCommand extends ChatInputCommand {
       );
       if (!confirmedResult.confirmed) return;
       activeInteraction = confirmedResult.interaction;
-      await activeInteraction.deferReply({ ephemeral: true });
+      await activeInteraction.deferReply({ flags: [MessageFlags.Ephemeral] });
     }
 
     // Save user config to DB
@@ -424,7 +426,7 @@ export class VerifyCommand extends ChatInputCommand {
     const { month, day } = recognizedResult.success
       ? recognizedResult.date
       : { month: null, day: null };
-    if (month !== null && day !== null) {
+    if (month !== null) {
       const currentDate = dayjs.utc().startOf('day');
       const currentYear = currentDate.year();
       const recognizedDateWithYear = dayjs

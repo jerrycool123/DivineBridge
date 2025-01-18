@@ -7,7 +7,13 @@ import {
 } from '@divine-bridge/common';
 import { t } from '@divine-bridge/i18n';
 import dedent from 'dedent';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { discordBotApi } from '../utils/discord.js';
@@ -26,7 +32,7 @@ export class DeleteRoleCommand extends ChatInputCommand {
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
   public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
@@ -38,7 +44,7 @@ export class DeleteRoleCommand extends ChatInputCommand {
   ) {
     const { options, client } = interaction;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Get log channel and membership role, check if the role is manageable, and upsert guild
     const role = options.getRole('role', true);
@@ -81,7 +87,7 @@ export class DeleteRoleCommand extends ChatInputCommand {
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
-    await confirmedInteraction.deferReply({ ephemeral: true });
+    await confirmedInteraction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Remove command alias in this guild
     const deleteResult = await discordBotApi.deleteGuildApplicationCommand(

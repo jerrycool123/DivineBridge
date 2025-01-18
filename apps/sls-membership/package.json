@@ -2,29 +2,29 @@
   "name": "sls-membership",
   "version": "0.0.1",
   "dependencies": {
-    "@discordjs/rest": "^2.3.0",
+    "@discordjs/rest": "^2.4.0",
     "@divine-bridge/common": "workspace:^",
     "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
-    "dayjs": "^1.11.11",
+    "dayjs": "^1.11.13",
     "dedent": "^1.5.3",
-    "discord-api-types": "0.37.83",
+    "discord-api-types": "0.37.116",
     "esbuild": "^0.20.2",
-    "mongoose": "^8.4.1",
+    "mongoose": "^8.9.5",
     "serverless-offline": "^13.6.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
     "@divine-bridge/i18n": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
     "@types/aws-lambda": "^8.10.138",
-    "eslint": "^8.57.0",
+    "eslint": "^9.18.0",
     "eslint-plugin-import-esm": "^2.0.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.4.2",
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-esbuild": "^1.52.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   },
   "main": "index.js",
   "scripts": {

@@ -13,11 +13,8 @@ import { EventHandler } from './event-handler.js';
 
 export namespace Bot {
   export type EventHandlers = EventHandler<keyof ClientEvents>[];
-  export type ChatInputCommandsMap = Record<
-    string,
-    ChatInputCommand<true> | ChatInputCommand<false>
-  >;
-  export type ButtonsMap = Record<string, Button<true> | Button<false>>;
+  export type ChatInputCommandsMap = Record<string, ChatInputCommand | ChatInputCommand<false>>;
+  export type ButtonsMap = Record<string, Button | Button<false>>;
   export type EventHandlersClass = EventHandler<keyof ClientEvents>;
   export type ChatInputCommandClass = ChatInputCommand<boolean>;
   export type ButtonClass = Button<boolean>;
@@ -89,7 +86,7 @@ export class Bot extends Core {
     // Write the new hash to './.commands-hash.json'
     fs.writeFileSync(hashFile, JSON.stringify({ hash }), 'utf-8');
 
-    if (cached === false) {
+    if (!cached) {
       this.context.logger.debug('Cache miss, overwriting global application commands');
       await discordBotApi.overwriteGlobalApplicationCommands(applicationId, globalCommands);
       for (const devTeamOnlyCommand of devTeamOnlyCommands) {

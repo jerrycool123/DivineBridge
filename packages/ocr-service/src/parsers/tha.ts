@@ -5,7 +5,7 @@ export class ThaBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'tha') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /เรียกเก็บเงินครั้งถัดไปในวันที่(\d{1,2})(ม.ค.|ก.พ.|มี.ค.|เม.ย.|พ.ค.|มิ.ย.|ก.ค.|ส.ค.|ก.ย.|ต.ค.|พ.ย.|ธ.ค.)/;
+      /เรียกเก็บเงินครั้งถัดไปในวันที่(\d{1,2})(ม.ค.|ก.พ.|มี.ค.|เม.ย.|พ.ค.|มิ.ย.|ก.ค.|ส.ค.|ก.ย.|ต.ค.|พ.ย.|ธ.ค.)/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

@@ -24,7 +24,7 @@ export abstract class Button<GuildOnly extends boolean = true> extends Core {
   public abstract readonly guildOnly: GuildOnly;
   public abstract readonly sameClientOnly: boolean;
 
-  public isGuildOnly(): this is Button<true> {
+  public isGuildOnly(): this is Button {
     return this.guildOnly === true;
   }
 

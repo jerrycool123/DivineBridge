@@ -7,9 +7,9 @@ import { GetUserActionData } from '../../../types/server-actions';
 
 const getUserActionInputSchema = z.object({});
 
-export const getUserAction = authAction<typeof getUserActionInputSchema, GetUserActionData>(
-  getUserActionInputSchema,
-  async (_input, { userDoc }) => {
+export const getUserAction = authAction
+  .schema(getUserActionInputSchema)
+  .action<GetUserActionData>(async ({ ctx: { userDoc } }) => {
     return {
       id: userDoc._id,
       profile: {
@@ -28,5 +28,4 @@ export const getUserAction = authAction<typeof getUserActionInputSchema, GetUser
       createdAt: userDoc.createdAt.toISOString(),
       updatedAt: userDoc.updatedAt.toISOString(),
     };
-  },
-);
+  });

@@ -4,7 +4,7 @@ import { BillingDateParser } from '../definitions.js';
 export class KorBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'kor') {}
   parse(lines: string[]): RecognizedDate {
-    const regex = /다음결제일:(\d{1,2})월(\d{1,2})일/;
+    const regex = /다음결제일:(\d{1,2})월(\d{1,2})일/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

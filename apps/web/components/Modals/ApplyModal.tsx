@@ -94,10 +94,15 @@ export default function ApplyModal({
                 <div className={`flex-grow-1 d-flex justify-content-center ${styles.loadingBox}`}>
                   <Spin indicator={<LoadingOutlined className="text-white fs-4" spin />} />
                 </div>
-              ) : user === null || user.youtube === null ? (
+              ) : user?.youtube === undefined || user.youtube === null ? (
                 <div className="flex-grow-1">
                   <div className="w-100 mb-2 d-flex justify-content-center">
-                    <GoogleOAuthButton className="flex-grow-1" onClick={() => authorize()} />
+                    <GoogleOAuthButton
+                      className="flex-grow-1"
+                      onClick={() => {
+                        authorize();
+                      }}
+                    />
                   </div>
                   <div className={`flex-grow-1 position-relative ${styles.youtubeBranding}`}>
                     <Image
@@ -216,7 +221,7 @@ export default function ApplyModal({
             </div>
             <div className="d-flex justify-content-center">
               <DiscordLoginButton
-                className={`${styles.modalGotoServer}`}
+                className={styles.modalGotoServer}
                 text={t('web.Go to Discord Server')}
                 onClick={() =>
                   window.open(

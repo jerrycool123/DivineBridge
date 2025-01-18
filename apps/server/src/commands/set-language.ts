@@ -1,5 +1,5 @@
 import { supportedLocales } from '@divine-bridge/i18n';
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 
@@ -24,7 +24,7 @@ export class SetLanguageCommand extends ChatInputCommand {
   ) {
     const { options } = interaction;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const language = options.getString('language', true);
     guildDoc.config.locale = language;

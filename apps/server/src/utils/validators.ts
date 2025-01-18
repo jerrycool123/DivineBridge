@@ -37,7 +37,7 @@ export namespace Validators {
     try {
       botMember = await guild.members.fetchMe();
       logChannel = await guild.channels.fetch(logChannelId);
-    } catch (error) {
+    } catch (_error) {
       // The bot can't find the log channel, ignore the error
     }
     if (botMember === null) {
@@ -57,9 +57,7 @@ export namespace Validators {
         success: false,
         error: t(`server.The log channel is not a valid text channel`),
       };
-    } else if (
-      !(logChannel.permissionsFor(botMember).has(PermissionFlagsBits.ViewChannel) ?? false)
-    ) {
+    } else if (!logChannel.permissionsFor(botMember).has(PermissionFlagsBits.ViewChannel)) {
       return {
         success: false,
         error: t(`server.The bot doesnt have enough permission to view the log channel`),
@@ -181,7 +179,7 @@ export namespace Validators {
     let botMember: GuildMember | null = null;
     try {
       botMember = await guild.members.fetchMe();
-    } catch (error) {
+    } catch (_error) {
       // ignore the error
     }
     if (botMember === null) {

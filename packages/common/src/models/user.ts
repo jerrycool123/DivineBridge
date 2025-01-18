@@ -116,5 +116,5 @@ const userSchema = new Schema<UserDoc>(
 );
 
 export const UserCollection =
-  (mongoose.models.User as unknown as UserModel) ??
+  (mongoose.models.User as unknown as UserModel | undefined) ??
   model<UserDoc, UserModel>('User', userSchema, 'User');

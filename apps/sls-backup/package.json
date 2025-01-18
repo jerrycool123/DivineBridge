@@ -6,28 +6,28 @@
     "@divine-bridge/ocr-service": "workspace:^",
     "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
     "adm-zip": "^0.5.13",
-    "discord.js": "^14.15.3",
+    "discord.js": "^14.17.3",
     "esbuild": "^0.20.2",
     "serverless-offline": "^13.6.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@divine-bridge/eslint-config-custom": "workspace:^",
     "@divine-bridge/prettier-config-custom": "workspace:^",
     "@types/adm-zip": "^0.5.5",
     "@types/aws-lambda": "^8.10.138",
-    "@types/node": "^20.14.9",
+    "@types/node": "^22.10.7",
     "@types/tar": "^6.1.13",
-    "dotenv": "^16.4.5",
-    "eslint": "^8.57.0",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.18.0",
     "eslint-plugin-import-esm": "^2.0.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.4.2",
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-esbuild": "^1.52.1",
     "tar": "^6.2.1",
     "tsx": "^4.11.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.7.3"
   },
   "main": "index.js",
   "scripts": {

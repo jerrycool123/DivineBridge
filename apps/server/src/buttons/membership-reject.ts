@@ -6,7 +6,12 @@ import {
   UserCollection,
 } from '@divine-bridge/common';
 import { t } from '@divine-bridge/i18n';
-import { type ButtonInteraction, EmbedBuilder, ModalSubmitInteraction } from 'discord.js';
+import {
+  type ButtonInteraction,
+  EmbedBuilder,
+  MessageFlags,
+  ModalSubmitInteraction,
+} from 'discord.js';
 
 import { Constants } from '../constants.js';
 import { Button } from '../structures/button.js';
@@ -82,7 +87,7 @@ export class MembershipRejectButton extends Button {
         time: 5 * 60 * 1000,
       });
       await modalSubmitInteraction.deferUpdate();
-    } catch (error) {
+    } catch (_error) {
       // Timeout
       return;
     }
@@ -131,7 +136,7 @@ export class MembershipRejectButton extends Button {
 
     await interaction.followUp({
       content: `${author_t('server.The membership verification request of')} <@${userId}> ${author_t('server.has been rejected')}`,
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
   }
 }

@@ -6,7 +6,7 @@ import {
   MembershipService,
 } from '@divine-bridge/common';
 import { t } from '@divine-bridge/i18n';
-import { ButtonInteraction, EmbedBuilder } from 'discord.js';
+import { ButtonInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
 
 import { Constants } from '../constants.js';
 import { Button } from '../structures/button.js';
@@ -64,14 +64,14 @@ export class MembershipAcceptButton extends Button {
         content: author_t(
           'server.Failed to recognize the end date of the membership Please click the Modify button to set the correct date manually',
         ),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
     }
     const validDateResult = Validators.isValidDateInterval(author_t, endDate, beginDate);
     if (!validDateResult.success) {
       return await interaction.followUp({
         content: validDateResult.error,
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
     }
 
@@ -151,7 +151,7 @@ export class MembershipAcceptButton extends Button {
 
     await interaction.followUp({
       content: `${author_t('server.The membership verification request of')} <@${userId}> ${author_t('server.has been accepted')}`,
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
   }
 }

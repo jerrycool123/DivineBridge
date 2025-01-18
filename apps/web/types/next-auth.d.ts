@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { JWT } from '@auth/core/jwt';
 import { Account, Profile, Session, User } from '@auth/core/types';
 import { UserPayload } from '@divine-bridge/common';
+import { JWT } from 'next-auth/jwt';
 
-declare module '@auth/core/types' {
+declare module 'next-auth' {
   /**
    * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
@@ -38,7 +38,7 @@ declare module '@auth/core/types' {
   }
 }
 
-declare module '@auth/core/jwt' {
+declare module 'next-auth/jwt' {
   /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
   interface JWT {
     email: never;

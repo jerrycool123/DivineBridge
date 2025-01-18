@@ -55,5 +55,5 @@ const membershipSchema = new Schema<MembershipDoc>(
 );
 
 export const MembershipCollection =
-  (mongoose.models.Membership as unknown as MembershipModel) ??
+  (mongoose.models.Membership as unknown as MembershipModel | undefined) ??
   model<MembershipDoc, MembershipModel>('Membership', membershipSchema, 'Membership');

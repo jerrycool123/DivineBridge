@@ -5,7 +5,7 @@ export class FilBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'fil') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /Susunodnapetsangpagsingil:(Ene|Peb|Mar|Abr|Mayo|Hun|Hul|Ago|Set|Okt|Nob|Dis)(\d{1,2})/;
+      /Susunodnapetsangpagsingil:(Ene|Peb|Mar|Abr|Mayo|Hun|Hul|Ago|Set|Okt|Nob|Dis)(\d{1,2})/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

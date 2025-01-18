@@ -10,7 +10,9 @@ httpServer.on('request', (req, res) => {
 });
 
 httpServer.on('listening', () => {
-  logger.debug(`Server is listening on port ${(httpServer.address() as AddressInfo).port}`);
+  logger.debug(
+    `Server is listening on port ${(httpServer.address() as AddressInfo).port.toString()}`,
+  );
 });
 
 httpServer.on('close', () => {

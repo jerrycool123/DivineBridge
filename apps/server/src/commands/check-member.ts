@@ -4,7 +4,13 @@ import {
   MembershipDoc,
   MembershipRoleDoc,
 } from '@divine-bridge/common';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Utils } from '../utils/index.js';
@@ -20,7 +26,7 @@ export class CheckMemberCommand extends ChatInputCommand {
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
   public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
@@ -31,7 +37,7 @@ export class CheckMemberCommand extends ChatInputCommand {
   ) {
     const { options } = interaction;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Get membership status from database
     const user = options.getUser('member', true);

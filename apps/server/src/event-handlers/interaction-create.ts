@@ -1,7 +1,7 @@
 import { Database, MembershipRoleCollection } from '@divine-bridge/common';
 import { defaultLocale, t } from '@divine-bridge/i18n';
 import dedent from 'dedent';
-import { Events, Interaction, PermissionsBitField } from 'discord.js';
+import { Events, Interaction, MessageFlags, PermissionsBitField } from 'discord.js';
 
 import { VerifyCommand } from '../commands/verify.js';
 import { ChatInputCommand } from '../structures/chat-input-command.js';
@@ -19,7 +19,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
       // Auto complete
       if (interaction.isAutocomplete()) {
         const { commandId, commandName } = interaction;
-        if (commandName in this.context.bot.chatInputCommandMap === false) {
+        if (!(commandName in this.context.bot.chatInputCommandMap)) {
           this.context.logger.error(
             `Autocomplete command not found: ${commandName} (${commandId})`,
           );
@@ -63,7 +63,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
       // Chat input command
       if (interaction.isChatInputCommand()) {
         const { commandId, commandName } = interaction;
-        let chatInputCommand: ChatInputCommand<true> | ChatInputCommand<false> | null = null;
+        let chatInputCommand: ChatInputCommand | ChatInputCommand<false> | null = null;
         if (commandName in this.context.bot.chatInputCommandMap) {
           chatInputCommand = this.context.bot.chatInputCommandMap[commandName];
         }
@@ -81,7 +81,10 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
           const guildLocale = guildDoc.config.locale ?? defaultLocale;
           const authorLocale = authorDoc.preference.locale;
           if (membershipRoleDoc !== null) {
-            const verifyCommand = this.context.bot.chatInputCommandMap['verify'] ?? null;
+            const verifyCommand =
+              'verify' in this.context.bot.chatInputCommandMap
+                ? this.context.bot.chatInputCommandMap.verify
+                : null;
             if (verifyCommand !== null && verifyCommand instanceof VerifyCommand) {
               await verifyCommand.executeAlias(
                 interaction,
@@ -131,7 +134,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
                   .map((permission) => `- ${permission.replace(/([a-z])([A-Z])/g, '$1 $2')}`)
                   .join(', ')}
               `,
-              ephemeral: true,
+              flags: [MessageFlags.Ephemeral],
             });
             return;
           }
@@ -156,7 +159,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
         } else {
           await interaction.reply({
             content: 'This command is only available in a server.',
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
           });
         }
         return;
@@ -165,7 +168,7 @@ export class InteractionCreateEventHandler extends EventHandler<Events.Interacti
       // Button
       if (interaction.isButton()) {
         const { customId } = interaction;
-        if (customId in this.context.bot.buttonMap === false) {
+        if (!(customId in this.context.bot.buttonMap)) {
           return;
         }
         const buttonCommand = this.context.bot.buttonMap[customId];

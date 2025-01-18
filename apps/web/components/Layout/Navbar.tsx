@@ -38,7 +38,12 @@ export default function Navbar() {
     {
       key: 'settings',
       label: (
-        <div role="button" onClick={() => setIsModalOpen(true)}>
+        <div
+          role="button"
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+        >
           {t('web.Settings')}
         </div>
       ),

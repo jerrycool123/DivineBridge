@@ -1,5 +1,7 @@
-export type WithI18nParams<T = unknown> = T & {
-  params: {
-    lng?: string | string[];
-  };
+export type WithI18nParams<P = Record<string, never>, T = unknown> = T & {
+  params: Promise<
+    P & {
+      lng?: string | string[];
+    }
+  >;
 };

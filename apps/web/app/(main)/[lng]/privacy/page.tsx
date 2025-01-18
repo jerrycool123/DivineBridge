@@ -13,7 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Privacy({ params }: WithI18nParams) {
+export default async function Privacy(props: WithI18nParams) {
+  const params = await props.params;
   const { t } = await getServerTranslation(params.lng);
 
   return (

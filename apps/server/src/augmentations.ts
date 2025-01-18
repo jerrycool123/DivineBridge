@@ -19,6 +19,7 @@ declare module 'discord.js' {
     setI18nDescription(key: TranslationKey): this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface SharedNameAndDescription extends I18nHelper {}
 }
 

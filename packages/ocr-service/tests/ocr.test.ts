@@ -11,8 +11,6 @@ let ocrService: OCRService;
 
 const TIMEOUT = 30 * 1000;
 
-export interface A {}
-
 beforeAll(() => {
   if (process.env.OCR_API_ENDPOINT === undefined || process.env.OCR_API_KEY === undefined) {
     throw new Error('Please provide OCR_API_ENDPOINT and OCR_API_KEY in .env.test');
@@ -74,8 +72,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'eng (English)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['eng'].url, 'eng');
-      expect(result).toStrictEqual({ success: true, date: testMap['eng'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.eng.url, 'eng');
+      expect(result).toStrictEqual({ success: true, date: testMap.eng.date });
     },
     TIMEOUT,
   );
@@ -83,8 +81,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'chi_sim (Chinese Simplified)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['chi_sim'].url, 'chi_sim');
-      expect(result).toStrictEqual({ success: true, date: testMap['chi_sim'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.chi_sim.url, 'chi_sim');
+      expect(result).toStrictEqual({ success: true, date: testMap.chi_sim.date });
     },
     TIMEOUT,
   );
@@ -92,8 +90,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'chi_tra (Chinese Traditional)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['chi_tra'].url, 'chi_tra');
-      expect(result).toStrictEqual({ success: true, date: testMap['chi_tra'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.chi_tra.url, 'chi_tra');
+      expect(result).toStrictEqual({ success: true, date: testMap.chi_tra.date });
     },
     TIMEOUT,
   );
@@ -101,8 +99,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'deu (German)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['deu'].url, 'deu');
-      expect(result).toStrictEqual({ success: true, date: testMap['deu'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.deu.url, 'deu');
+      expect(result).toStrictEqual({ success: true, date: testMap.deu.date });
     },
     TIMEOUT,
   );
@@ -110,8 +108,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'fil (Filipino)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['fil'].url, 'fil');
-      expect(result).toStrictEqual({ success: true, date: testMap['fil'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.fil.url, 'fil');
+      expect(result).toStrictEqual({ success: true, date: testMap.fil.date });
     },
     TIMEOUT,
   );
@@ -119,8 +117,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'ind (Indonesian)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['ind'].url, 'ind');
-      expect(result).toStrictEqual({ success: true, date: testMap['ind'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.ind.url, 'ind');
+      expect(result).toStrictEqual({ success: true, date: testMap.ind.date });
     },
     TIMEOUT,
   );
@@ -128,8 +126,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'jpn (Japanese)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['jpn'].url, 'jpn');
-      expect(result).toStrictEqual({ success: true, date: testMap['jpn'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.jpn.url, 'jpn');
+      expect(result).toStrictEqual({ success: true, date: testMap.jpn.date });
     },
     TIMEOUT,
   );
@@ -137,8 +135,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'kor (Korean)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['kor'].url, 'kor');
-      expect(result).toStrictEqual({ success: true, date: testMap['kor'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.kor.url, 'kor');
+      expect(result).toStrictEqual({ success: true, date: testMap.kor.date });
     },
     TIMEOUT,
   );
@@ -146,8 +144,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'msa (Malay)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['msa'].url, 'msa');
-      expect(result).toStrictEqual({ success: true, date: testMap['msa'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.msa.url, 'msa');
+      expect(result).toStrictEqual({ success: true, date: testMap.msa.date });
     },
     TIMEOUT,
   );
@@ -155,8 +153,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'tha (Thai)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['tha'].url, 'tha');
-      expect(result).toStrictEqual({ success: true, date: testMap['tha'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.tha.url, 'tha');
+      expect(result).toStrictEqual({ success: true, date: testMap.tha.date });
     },
     TIMEOUT,
   );
@@ -164,8 +162,8 @@ describe('Test Membership screenshot OCR with different languages', () => {
   it(
     'vie (Vietnamese)',
     async () => {
-      const result = await ocrService.recognizeBillingDate(testMap['vie'].url, 'vie');
-      expect(result).toStrictEqual({ success: true, date: testMap['vie'].date });
+      const result = await ocrService.recognizeBillingDate(testMap.vie.url, 'vie');
+      expect(result).toStrictEqual({ success: true, date: testMap.vie.date });
     },
     TIMEOUT,
   );

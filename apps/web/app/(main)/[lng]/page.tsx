@@ -1,17 +1,16 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
-import { DiscordLoginButton } from 'react-social-login-buttons';
 
-import styles from '../../../styles/Home.module.css';
+import styles from './Home.module.css';
 
-import { useClientTranslation } from '../../../libs/client/i18n';
+import DiscordLoginButton from '../../../components/Buttons/DiscordLoginButton';
 import { getDiscordBotInviteLink } from '../../../libs/common/discord';
+import { getServerTranslation } from '../../../libs/server/i18n';
 import { WithI18nParams } from '../../../types/common';
 
-export default function Home({ params }: WithI18nParams) {
-  const { t } = useClientTranslation(params.lng);
+export default async function HomePage(props: WithI18nParams) {
+  const params = await props.params;
+  const { t } = await getServerTranslation(params.lng);
 
   return (
     <main className="text-white">
@@ -32,23 +31,7 @@ export default function Home({ params }: WithI18nParams) {
                 <span className="d-inline-block">&nbsp;{t('web.headline_2')}</span>
               </h2>
               <div>
-                <DiscordLoginButton
-                  text={t('web.Invite Divine Bridge to your server')}
-                  className={`${styles.C2AButton} text-nowrap`}
-                  onClick={() => {
-                    const popupWinWidth = 980,
-                      popupWinHeight = 700;
-                    const left = (screen.width - popupWinWidth) / 2;
-                    const top = (screen.height - popupWinHeight) / 4;
-                    setTimeout(() => {
-                      window.open(
-                        getDiscordBotInviteLink(),
-                        '_blank',
-                        `resizable=yes, width= ${popupWinWidth}, height=${popupWinHeight}, top=${top}, left=${left}`,
-                      );
-                    });
-                  }}
-                />
+                <DiscordLoginButton lng={params.lng} />
               </div>
             </div>
             <div

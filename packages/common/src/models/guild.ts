@@ -81,5 +81,5 @@ const guildSchema = new Schema<GuildDoc>(
 );
 
 export const GuildCollection =
-  (mongoose.models.Guild as unknown as GuildModel) ??
+  (mongoose.models.Guild as unknown as GuildModel | undefined) ??
   model<GuildDoc, GuildModel>('Guild', guildSchema, 'Guild');

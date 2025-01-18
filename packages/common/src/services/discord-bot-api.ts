@@ -175,9 +175,6 @@ export class DiscordBotAPI {
       const member = (await this.rest.get(
         Routes.guildMember(guildId, userId),
       )) as RESTGetAPIGuildMemberResult;
-      if (member.user === undefined) {
-        throw new Error('User not found');
-      }
       return { success: true, member: { ...member, user: member.user } };
     } catch (error) {
       const errorMessage = DiscordUtils.parseError(error);

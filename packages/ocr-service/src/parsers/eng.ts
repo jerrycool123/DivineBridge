@@ -4,7 +4,7 @@ import { BillingDateParser } from '../definitions.js';
 export class EngBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'eng') {}
   parse(lines: string[]): RecognizedDate {
-    const regex = /Nextbillingdate:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\d{1,2})/;
+    const regex = /Nextbillingdate:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\d{1,2})/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

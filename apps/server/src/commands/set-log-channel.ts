@@ -1,4 +1,10 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Validators } from '../utils/validators.js';
@@ -14,7 +20,7 @@ export class SetLogChannelCommand extends ChatInputCommand {
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
   public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
@@ -25,7 +31,7 @@ export class SetLogChannelCommand extends ChatInputCommand {
   ) {
     const { options } = interaction;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Get log channel
     const channel = options.getChannel('channel', true);

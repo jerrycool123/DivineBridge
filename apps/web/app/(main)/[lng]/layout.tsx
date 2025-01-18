@@ -7,7 +7,8 @@ import { MainProvider } from '../../../contexts/MainContext';
 import { getServerTranslation } from '../../../libs/server/i18n';
 import { WithI18nParams } from '../../../types/common';
 
-export async function generateMetadata({ params }: WithI18nParams): Promise<Metadata> {
+export async function generateMetadata(props: WithI18nParams): Promise<Metadata> {
+  const params = await props.params;
   const { t } = await getServerTranslation(params.lng);
 
   return {

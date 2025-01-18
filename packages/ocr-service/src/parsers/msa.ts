@@ -5,7 +5,7 @@ export class MsaBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'msa') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /Tarikhpengebilanseterusnya:(\d{1,2})(Jan|Feb|Mac|Apr|Mei|Jun|Jul|Ogos|Sep|Okt|Nov|Dis)/;
+      /Tarikhpengebilanseterusnya:(\d{1,2})(Jan|Feb|Mac|Apr|Mei|Jun|Jul|Ogos|Sep|Okt|Nov|Dis)/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

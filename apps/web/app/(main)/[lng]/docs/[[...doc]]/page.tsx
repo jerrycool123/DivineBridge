@@ -9,7 +9,8 @@ import DocsMenu from '../../../../../components/Menu/DocsMenu';
 import { publicEnv } from '../../../../../libs/common/public-env';
 import { WithI18nParams } from '../../../../../types/common';
 
-export default async function DocPage({ params }: WithI18nParams<{ params: { doc?: string[] } }>) {
+export default async function DocPage(props: WithI18nParams<{ doc?: string[] }>) {
+  const params = await props.params;
   const { lng, doc = [] } = params;
   const rawLanguage = lng === undefined ? defaultLocale : Array.isArray(lng) ? lng[0] : lng;
   const language = supportedLocales.includes(rawLanguage as (typeof supportedLocales)[number])
@@ -37,7 +38,7 @@ export default async function DocPage({ params }: WithI18nParams<{ params: { doc
         .then(async (res) => {
           content = await res.text();
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           console.error(error);
         });
     } else {

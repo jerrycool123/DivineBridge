@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 
@@ -11,10 +11,16 @@ export class PingCommand extends ChatInputCommand<false> {
   public readonly moderatorOnly = false;
 
   public override async execute(interaction: ChatInputCommandInteraction) {
-    const msg = await interaction.reply({ content: `Ping?`, ephemeral: true, fetchReply: true });
+    const res = await interaction.reply({
+      content: `Ping?`,
+      flags: [MessageFlags.Ephemeral],
+      withResponse: true,
+    });
 
-    const diff = msg.createdTimestamp - interaction.createdTimestamp;
+    const diff = res.interaction.createdTimestamp - interaction.createdTimestamp;
     const ping = Math.round(this.context.client.ws.ping);
-    return interaction.editReply(`Pong 🏓! (Round trip took: ${diff}ms. Heartbeat: ${ping}ms.)`);
+    return interaction.editReply(
+      `Pong 🏓! (Round trip took: ${diff.toString()}ms. Heartbeat: ${ping.toString()}ms.)`,
+    );
   }
 }

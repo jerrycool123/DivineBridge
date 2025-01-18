@@ -45,7 +45,9 @@ export default function DocsMenu({
       <FloatButton
         rootClassName={styles.floatButton}
         icon={<MenuOutlined />}
-        onClick={() => setOpenDrawer(true)}
+        onClick={() => {
+          setOpenDrawer(true);
+        }}
       />
       <Drawer
         className={styles.menuDrawer}
@@ -53,7 +55,9 @@ export default function DocsMenu({
         width="16rem"
         title={t('web.Document List')}
         open={openDrawer}
-        onClose={() => setOpenDrawer(false)}
+        onClose={() => {
+          setOpenDrawer(false);
+        }}
         placement="left"
       >
         <InnerDocsMenu items={items} slug={slug} />

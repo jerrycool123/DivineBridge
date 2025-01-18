@@ -4,7 +4,7 @@ import { BillingDateParser } from '../definitions.js';
 export class ChiTraBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'chi_tra') {}
   parse(lines: string[]): RecognizedDate {
-    const regex = /帳單日期:(\d{1,2})月(\d{1,2})日/;
+    const regex = /帳單日期:(\d{1,2})月(\d{1,2})日/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

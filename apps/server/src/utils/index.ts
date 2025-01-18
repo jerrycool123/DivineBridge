@@ -8,6 +8,7 @@ import {
   Embed,
   Guild,
   InteractionEditReplyOptions,
+  MessageFlags,
   RepliableInteraction,
   User,
 } from 'discord.js';
@@ -47,7 +48,7 @@ export namespace Utils {
       }
   > => {
     if (!originalInteraction.replied && !originalInteraction.deferred) {
-      await originalInteraction.deferReply({ ephemeral: true });
+      await originalInteraction.deferReply({ flags: [MessageFlags.Ephemeral] });
     }
 
     // Ask for confirmation
@@ -74,7 +75,7 @@ export namespace Utils {
           [confirmCustomId, cancelCustomId].includes(buttonInteraction.customId),
         time: timeout,
       });
-    } catch (error) {
+    } catch (_error) {
       // Timeout
       await originalInteraction.editReply({
         content: t('server.Timed out Please try again'),
@@ -97,7 +98,7 @@ export namespace Utils {
     });
     await buttonInteraction.reply({
       content: t('server.Cancelled'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     return { confirmed: false, reason: 'cancelled' };
   };
@@ -142,7 +143,7 @@ export namespace Utils {
 
     const beginDateString = embed.timestamp;
     const beginDate = beginDateString !== null ? dayjs.utc(beginDateString).startOf('date') : null;
-    if (beginDate === null || !beginDate.isValid()) {
+    if (beginDate?.isValid() !== true) {
       return await returnError(t(`server.The embed timestamp does not contain a valid date`));
     }
 
@@ -153,11 +154,11 @@ export namespace Utils {
     const endDateString = endDateIndex !== -1 ? embed.fields[endDateIndex].value : null;
     const rawEndDate =
       endDateString !== null ? dayjs.utc(endDateString, 'YYYY-MM-DD', true).startOf('date') : null;
-    const endDate = rawEndDate?.isValid() ?? false ? rawEndDate : null;
+    const endDate = (rawEndDate?.isValid() ?? false) ? rawEndDate : null;
 
     const roleRegex = /<@&(\d+)>/;
     const roleId =
-      embed.fields.find(({ name }) => name.startsWith('⭐️'))?.value?.match(roleRegex)?.[1] ?? null;
+      embed.fields.find(({ name }) => name.startsWith('⭐️'))?.value.match(roleRegex)?.[1] ?? null;
     if (roleId === null) {
       return await returnError(t('server.The embed does not contain a valid membership role ID'));
     }

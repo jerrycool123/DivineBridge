@@ -1,25 +1,29 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "dev": {
       "dependsOn": [
         "@divine-bridge/i18n#build",
         "@divine-bridge/ocr-service#build",
         "@divine-bridge/common#build"
       ],
-      "dotEnv": [".env.development.local", ".env"],
-      "cache": false
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env.development.local", ".env"]
     },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "build/**", "dist/**"],
-      "dotEnv": [".env.production.local", ".env"],
-      "cache": false
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env.production.local", ".env"]
     },
     "deploy": {
       "dependsOn": ["^build"],
-      "dotEnv": [".env.production.local", ".env"],
-      "inputs": ["$TURBO_DEFAULT$", "mongodump"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "mongodump",
+        ".env.production.local",
+        ".env"
+      ]
     },
     "start": {
       "dependsOn": ["^build"]
@@ -28,7 +32,7 @@
     "format": {},
     "test": {
       "dependsOn": ["^build"],
-      "dotEnv": [".env.test"]
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"]
     },
     "check-types": {}
   }

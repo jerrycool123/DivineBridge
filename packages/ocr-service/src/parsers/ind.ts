@@ -5,7 +5,7 @@ export class IndBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'ind') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /Tanggalpenagihanberikutnya:(\d{1,2})(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)/;
+      /Tanggalpenagihanberikutnya:(\d{1,2})(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)/g;
     for (const line of lines) {
       const match = line.match(regex);
       if (match !== null) {

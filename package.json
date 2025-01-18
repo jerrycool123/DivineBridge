@@ -2,26 +2,21 @@
   "name": "divine-bridge",
   "version": "0.0.1",
   "devDependencies": {
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.5",
-    "syncpack": "^12.3.2",
-    "turbo": "^1.13.4"
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "syncpack": "^13.0.0",
+    "turbo": "^2.3.3"
   },
   "license": "MIT",
   "lint-staged": {
     "*.{mjs,cjs,js,ts,tsx,jsx}": [
-      "eslint"
+      "eslint --flag unstable_config_lookup_from_file ./packages/eslint-config-custom/eslint.config.js"
     ],
     "*.{json,md,html,mjs,cjs,js,jsx,ts,tsx}": [
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.4.0",
-  "pnpm": {
-    "overrides": {
-      "undici": "5.28.4"
-    }
-  },
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "turbo run build",
     "build:server": "turbo run build --filter server",
@@ -52,5 +47,6 @@
       "prod",
       "resolutions"
     ]
-  }
+  },
+  "type": "module"
 }

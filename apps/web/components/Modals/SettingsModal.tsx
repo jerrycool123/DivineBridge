@@ -77,7 +77,9 @@ export default function SettingsModal({
         open={isModalOpen}
         footer={null}
         centered
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false);
+        }}
       >
         <div className="fs-6 mt-3 mb-2 text-white fw-700 poppins">{t('web.Discord Account')}</div>
         {user !== null && (
@@ -112,13 +114,18 @@ export default function SettingsModal({
           </div>
         ) : (
           <>
-            {user === null || user.youtube === null ? (
+            {user?.youtube === undefined || user.youtube === null ? (
               <>
                 <div className="mb-2 fw-500">
                   {t('web.You have not linked your YouTube account yet')}
                 </div>
                 <div className="my-3 d-flex justify-content-center">
-                  <GoogleOAuthButton className="flex-grow-1" onClick={() => authorize()} />
+                  <GoogleOAuthButton
+                    className="flex-grow-1"
+                    onClick={() => {
+                      authorize();
+                    }}
+                  />
                 </div>
                 <div className={`position-relative ${styles.youtubeBranding}`}>
                   <Image
@@ -157,7 +164,7 @@ export default function SettingsModal({
             )}
             <Collapse bordered={false} className={styles.collapse}>
               <Collapse.Panel header={t('web.Advanced')} key="advanced">
-                {user !== null && user.youtube !== null && (
+                {user?.youtube !== undefined && user.youtube !== null && (
                   <>
                     <div className="mb-2">
                       {t('web.If you dont want to use Auth Mode anymore you can')}{' '}
@@ -217,7 +224,9 @@ export default function SettingsModal({
         classNames={{
           body: 'fw-700 fs-6',
         }}
-        onCancel={() => setIsConfirmModalOpen(false)}
+        onCancel={() => {
+          setIsConfirmModalOpen(false);
+        }}
       >
         <div>
           {t('web.Are your sure you want to')}{' '}

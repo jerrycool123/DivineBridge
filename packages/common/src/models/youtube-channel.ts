@@ -70,7 +70,7 @@ const youtubeChannelSchema = new Schema<YouTubeChannelDoc>(
 );
 
 export const YouTubeChannelCollection =
-  (mongoose.models.YouTubeChannel as unknown as YouTubeChannelModel) ??
+  (mongoose.models.YouTubeChannel as unknown as YouTubeChannelModel | undefined) ??
   model<YouTubeChannelDoc, YouTubeChannelModel>(
     'YouTubeChannel',
     youtubeChannelSchema,

@@ -297,8 +297,8 @@ export namespace Embeds {
         {
           name: `📅 ${t('common.Recognized Date')}`,
           value:
-            year !== null && month !== null && day !== null
-              ? `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
+            year !== null && month !== null
+              ? `${year.toString()}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
               : `**${t('common.Not Recognized')}**`,
           inline: true,
         },
@@ -395,9 +395,7 @@ export namespace Embeds {
         **__${t('common.User Commands')}__**
 
         ${Object.entries(chatInputCommandMap)
-          .filter(
-            ([_name, command]) => command.moderatorOnly === false && command.devTeamOnly === false,
-          )
+          .filter(([_name, command]) => !command.moderatorOnly && !command.devTeamOnly)
           .map(([name]) => {
             const originalName = name.replace(/-/g, '_');
             const prefix = `- \`/${t(`${originalName}_command.name` as TranslationKey)}\`:`;
@@ -411,9 +409,7 @@ export namespace Embeds {
         **__${t('common.Moderator Commands')}__**
 
         ${Object.entries(chatInputCommandMap)
-          .filter(
-            ([_name, command]) => command.moderatorOnly === true && command.devTeamOnly === false,
-          )
+          .filter(([_name, command]) => command.moderatorOnly && !command.devTeamOnly)
           .map(([name]) => {
             const originalName = name.replace(/-/g, '_');
             const prefix = `- \`/${t(`${originalName}_command.name` as TranslationKey)}\`:`;

@@ -6,6 +6,8 @@ import dedent from 'dedent';
 import {
   AttachmentBuilder,
   ChatInputCommandInteraction,
+  InteractionContextType,
+  MessageFlags,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from 'discord.js';
@@ -26,7 +28,7 @@ export class ViewMembersCommand extends ChatInputCommand {
         .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
   public readonly devTeamOnly = false;
   public readonly guildOnly = true;
   public readonly moderatorOnly = true;
@@ -37,7 +39,7 @@ export class ViewMembersCommand extends ChatInputCommand {
   ) {
     const { options } = interaction;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     // Get membership role
     const role = options.getRole('role', true);

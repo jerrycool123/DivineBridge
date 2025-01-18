@@ -69,7 +69,7 @@ const membershipRoleSchema = new Schema<MembershipRoleDoc>(
 );
 
 export const MembershipRoleCollection =
-  (mongoose.models.MembershipRole as unknown as MembershipRoleModel) ??
+  (mongoose.models.MembershipRole as unknown as MembershipRoleModel | undefined) ??
   model<MembershipRoleDoc, MembershipRoleModel>(
     'MembershipRole',
     membershipRoleSchema,

@@ -1,13 +1,19 @@
 import { GuildCollection } from '@divine-bridge/common';
 import dedent from 'dedent';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 import { ChatInputCommand } from '../structures/chat-input-command.js';
 import { Env } from '../utils/env.js';
 import { Utils } from '../utils/index.js';
 import { Validators } from '../utils/validators.js';
 
-export class BroadcastCommand extends ChatInputCommand<true> {
+export class BroadcastCommand extends ChatInputCommand {
   public readonly command = new SlashCommandBuilder()
     .setName('broadcast')
     .setDescription('[Owner Only] Broadcast a message to all guilds.')
@@ -15,7 +21,7 @@ export class BroadcastCommand extends ChatInputCommand<true> {
       option.setName('message').setDescription('The message to broadcast.').setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
   public readonly devTeamOnly = true;
   public readonly guildOnly = true;
   public readonly moderatorOnly = false;
@@ -30,14 +36,14 @@ export class BroadcastCommand extends ChatInputCommand<true> {
     if (guild.id !== Env.DEV_TEAM_DISCORD_GUILD_ID) {
       return await interaction.reply({
         content: 'This command is only available to the development team.',
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
     }
 
     const message = options.getString('message', true);
 
-    await interaction.reply({ content: 'Loading...', ephemeral: true });
-    await interaction.followUp({ content: message, ephemeral: true });
+    await interaction.reply({ content: 'Loading...', flags: [MessageFlags.Ephemeral] });
+    await interaction.followUp({ content: message, flags: [MessageFlags.Ephemeral] });
 
     const guildDocs = await GuildCollection.find({ 'config.logChannel': { $ne: null } });
     const guildCount = guildDocs.length;
@@ -52,13 +58,13 @@ export class BroadcastCommand extends ChatInputCommand<true> {
     });
     if (!confirmResult.confirmed) return;
     const confirmedInteraction = confirmResult.interaction;
-    await confirmedInteraction.deferReply({ ephemeral: true });
+    await confirmedInteraction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     let successCount = 0;
     for (const guildDoc of guildDocs) {
       try {
         if (guildDoc.config.logChannel === null) {
-          throw new Error(`Guild ${guildDoc.id} does not have a log channel.`);
+          throw new Error(`Guild ${guildDoc._id} does not have a log channel.`);
         }
         const guild = await client.guilds.fetch(guildDoc._id);
         const logChannelResult = await Validators.isGuildHasLogChannel(author_t, guild);
@@ -73,7 +79,7 @@ export class BroadcastCommand extends ChatInputCommand<true> {
       await Utils.sleep(1000);
     }
     await confirmedInteraction.editReply({
-      content: `Broadcasted message to guilds, (Success: ${successCount}/${guildCount}).`,
+      content: `Broadcasted message to guilds, (Success: ${successCount.toString()}/${guildCount.toString()}).`,
     });
   }
 }

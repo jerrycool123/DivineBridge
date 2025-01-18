@@ -5,7 +5,8 @@ import { discordBotApi } from '../../../../libs/server/discord';
 import { getServerTranslation } from '../../../../libs/server/i18n';
 import { privateEnv } from '../../../../libs/server/private-env';
 
-export const GET = async (_req: NextRequest, { params }: { params: { language: string } }) => {
+export const GET = async (_req: NextRequest, props: { params: Promise<{ language: string }> }) => {
+  const params = await props.params;
   const { language = defaultLocale } = params;
   const { t } = await getServerTranslation(language);
   const result = await discordBotApi.fetchGlobalApplicationCommands(privateEnv.AUTH_DISCORD_ID);

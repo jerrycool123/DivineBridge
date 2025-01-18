@@ -5,6 +5,7 @@ import {
   APIEmbedField,
   type ButtonInteraction,
   EmbedBuilder,
+  MessageFlags,
   ModalSubmitInteraction,
 } from 'discord.js';
 
@@ -56,7 +57,7 @@ export class MembershipModifyButton extends Button {
         time: 60 * 1000,
       });
       await modalSubmitInteraction.deferUpdate();
-    } catch (error) {
+    } catch (_error) {
       // Timeout
       return;
     }
@@ -69,7 +70,7 @@ export class MembershipModifyButton extends Button {
         content: author_t(
           'server.Invalid date The date must be in YYYY-MM-DD format Please try again',
         ),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
     }
 
@@ -78,13 +79,13 @@ export class MembershipModifyButton extends Button {
     if (!validDateResult.success) {
       return await interaction.followUp({
         content: validDateResult.error,
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
     }
 
     // Edit the recognized date field
     const fields = [...(embed.data.fields ?? [])];
-    const recognizedDateFieldIndex = fields.findIndex(({ name }) => name.startsWith('📅')) ?? -1;
+    const recognizedDateFieldIndex = fields.findIndex(({ name }) => name.startsWith('📅'));
     const newRecognizedDateField: APIEmbedField = {
       name: `📅 ${guild_t('common.Recognized Date')}`,
       value: newEndDate.format('YYYY-MM-DD'),
@@ -97,7 +98,7 @@ export class MembershipModifyButton extends Button {
     }
 
     // Edit the modified by field
-    const modifiedByFieldIndex = fields.findIndex(({ name }) => name.startsWith('📝')) ?? -1;
+    const modifiedByFieldIndex = fields.findIndex(({ name }) => name.startsWith('📝'));
     const newModifiedByField: APIEmbedField = {
       name: `📝 ${guild_t('common.Modified By')}`,
       value: `<@${moderator.id}>`,
@@ -116,7 +117,7 @@ export class MembershipModifyButton extends Button {
 
     await modalSubmitInteraction.followUp({
       content: `${author_t('server.The recognized date has been modified to')} \`${newEndDate.format('YYYY-MM-DD')}\`.`,
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
   }
 }

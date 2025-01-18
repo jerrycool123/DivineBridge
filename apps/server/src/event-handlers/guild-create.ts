@@ -1,6 +1,5 @@
 import { Database, MembershipRoleCollection, YouTubeChannelDoc } from '@divine-bridge/common';
-import { Events, GuildFeature } from 'discord.js';
-import { Guild } from 'discord.js';
+import { Events, Guild, GuildFeature } from 'discord.js';
 
 import { VerifyCommand } from '../commands/verify.js';
 import { EventHandler } from '../structures/event-handler.js';
@@ -27,8 +26,11 @@ export class GuildCreateEventHandler extends EventHandler<Events.GuildCreate> {
     await Database.upsertGuild({ ...Utils.convertGuild(guild), locale });
 
     // Register the alias command for each membership role
-    const verifyCommand = this.context.bot.chatInputCommandMap['verify'] ?? null;
-    if (verifyCommand !== null && verifyCommand instanceof VerifyCommand === false) {
+    const verifyCommand =
+      'verify' in this.context.bot.chatInputCommandMap
+        ? this.context.bot.chatInputCommandMap.verify
+        : null;
+    if (verifyCommand === null || !(verifyCommand instanceof VerifyCommand)) {
       logger.error('Verify command not found');
       return;
     }

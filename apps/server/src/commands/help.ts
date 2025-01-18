@@ -10,6 +10,7 @@ import {
   ButtonInteraction,
   ChatInputCommandInteraction,
   ComponentType,
+  MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js';
 
@@ -44,12 +45,13 @@ export class HelpCommand extends ChatInputCommand<false> {
     const helpActionRow = ActionRows.help(author_t);
     const response = await interaction.reply({
       content: author_t('server.Click to view a tutorial'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       components: [helpActionRow],
     });
 
     let timeout = false;
-    while (timeout === false) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (!timeout) {
       // Wait for user's confirmation
       let buttonInteraction: ButtonInteraction;
       try {
@@ -64,7 +66,7 @@ export class HelpCommand extends ChatInputCommand<false> {
             ].includes(buttonInteraction.customId),
           time: 60 * 1000,
         });
-      } catch (error) {
+      } catch (_error) {
         // Timeout
         timeout = true;
 
@@ -83,19 +85,19 @@ export class HelpCommand extends ChatInputCommand<false> {
       if (buttonInteraction.customId === DiscordUtils.help.userTutorial) {
         await buttonInteraction.reply({
           embeds: [Embeds.userTutorial(author_t, membershipRoleDocs)],
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       } else if (buttonInteraction.customId === DiscordUtils.help.moderatorTutorial) {
         await buttonInteraction.reply({
           embeds: [Embeds.moderatorTutorial(author_t)],
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       } else if (buttonInteraction.customId === DiscordUtils.help.commandList) {
         await buttonInteraction.reply({
           embeds: [
             Embeds.commandList(author_t, membershipRoleDocs, this.context.bot.chatInputCommandMap),
           ],
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
     }

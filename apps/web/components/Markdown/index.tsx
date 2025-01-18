@@ -12,9 +12,9 @@ export default function Markdown({ content }: { content: string }) {
             {children}
           </h1>
         ),
-        a: ({ node: _node, ref: _ref, href, ...props }) => (
+        a: ({ node: _node, ref: _ref, href, children, ...props }) => (
           <Link className="link" {...props} href={href ?? '/'} target="_blank">
-            {props.children}
+            {children}
           </Link>
         ),
         code: ({ node: _node, children, ...props }) => (

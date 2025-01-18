@@ -1,10 +1,8 @@
 import NextAuth, { Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
 import Discord from 'next-auth/providers/discord';
 
-export const {
-  handlers: { GET, POST },
-  auth,
-} = NextAuth({
+export const { handlers, auth } = NextAuth({
   providers: [
     Discord({
       authorization:
@@ -13,7 +11,7 @@ export const {
   ],
   callbacks: {
     jwt({ token, account = null, profile }) {
-      if (account !== null && account.expires_at !== undefined) {
+      if (account?.expires_at !== undefined) {
         const { access_token, expires_at } = account;
         return {
           ...token,
@@ -22,21 +20,21 @@ export const {
           ...(profile !== undefined
             ? {
                 user: {
-                  id: profile.id as string,
+                  id: profile.id,
                   name: profile.username,
                   image: profile.image_url,
-                  locale: profile.locale as string,
+                  locale: profile.locale,
                 },
               }
             : {}),
-        };
+        } as JWT;
       } else if (Date.now() > token.expires_at * 1000) {
         return null;
       }
       return token;
     },
     session: ({ ...args }) => {
-      const session = args.session as unknown as Session;
+      const session = args.session as Session;
       if ('token' in args) {
         session.user = args.token.user;
       }

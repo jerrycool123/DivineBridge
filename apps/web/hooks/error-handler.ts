@@ -17,9 +17,9 @@ export const useErrorHandler = (messageApi: MessageInstance) => {
     (error: unknown) => {
       console.error(error);
       if (error instanceof Error) {
-        void messageApi?.error(`[${error.name}]: ${error.message}`);
+        void messageApi.error(`[${error.name}]: ${error.message}`);
       } else {
-        void messageApi?.error(unknown_error);
+        void messageApi.error(unknown_error);
       }
     },
     [messageApi, unknown_error],

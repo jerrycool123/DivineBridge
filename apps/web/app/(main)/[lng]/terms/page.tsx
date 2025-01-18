@@ -13,7 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function TermsOfUsePage({ params }: WithI18nParams) {
+export default async function TermsOfUsePage(props: WithI18nParams) {
+  const params = await props.params;
   const { t } = await getServerTranslation(params.lng);
   return (
     <div className={`my-5 container text-white ${styles.documentRoot}`}>

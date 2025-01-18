@@ -12,10 +12,10 @@ import {
 import { Core } from './core.js';
 
 export namespace ChatInputCommand {
-  export type CommonExecuteContext = {
+  export interface CommonExecuteContext {
     authorLocale: string;
     author_t: TFunc;
-  };
+  }
 
   export type ExecuteContext<GuildOnly extends boolean = true> = GuildOnly extends true
     ? {
@@ -34,7 +34,7 @@ export abstract class ChatInputCommand<GuildOnly extends boolean = true> extends
   public abstract readonly moderatorOnly: boolean;
   public readonly requiredClientPermissions: PermissionResolvable[] = [];
 
-  public isGuildOnly(): this is ChatInputCommand<true> {
+  public isGuildOnly(): this is ChatInputCommand {
     return this.guildOnly === true;
   }
 
