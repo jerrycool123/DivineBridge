@@ -1,29 +1,29 @@
 import type { RecognizedDate } from '../definitions.js';
 import { BillingDateParser } from '../definitions.js';
 
-export class IndBillingDateParser implements BillingDateParser {
-  constructor(public readonly code: 'ind') {}
+export class MsaBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'msa') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /Tanggalpenagihanberikutnya:(\d{1,2})(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)/g;
+      /Tarikhpengebilanseterusnya:(\d{1,2})(Jan|Feb|Mac|Apr|Mei|Jun|Jul|Ogos|Sep|Okt|Nov|Dis)/;
     for (const line of lines) {
-      const match = line.match(regex);
+      const match = regex.exec(line);
       if (match !== null) {
         const day = parseInt(match[1], 10);
         const abbreviatedMonth = match[2];
         const monthMap: Record<string, number> = {
           Jan: 1,
           Feb: 2,
-          Mar: 3,
+          Mac: 3,
           Apr: 4,
           Mei: 5,
           Jun: 6,
           Jul: 7,
-          Agu: 8,
+          Ogos: 8,
           Sep: 9,
           Okt: 10,
           Nov: 11,
-          Des: 12,
+          Dis: 12,
         };
         const month = monthMap[abbreviatedMonth];
         return { month, day };

@@ -17,6 +17,9 @@
     ]
   },
   "packageManager": "pnpm@9.15.4",
+  "resolutions": {
+    "tsup": "8.3.0"
+  },
   "scripts": {
     "build": "turbo run build",
     "build:server": "turbo run build --filter server",
@@ -25,7 +28,6 @@
     "config:aws": "./scripts/aws-config.sh",
     "deploy:sls-backup": "turbo run deploy --filter sls-backup",
     "deploy:sls-membership": "turbo run deploy --filter sls-membership",
-    "deploy:sls-ocr": "turbo run deploy --filter sls-ocr",
     "deploy:web": "vercel --prod deploy",
     "dev": "turbo run dev",
     "dev:web": "turbo run dev --filter web --filter @divine-bridge/common --filter @divine-bridge/i18n",

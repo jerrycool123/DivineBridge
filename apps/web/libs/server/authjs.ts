@@ -1,5 +1,5 @@
 import { decode } from '@auth/core/jwt';
-import { type ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
+import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies';
 import 'server-only';
 import { z } from 'zod';
 

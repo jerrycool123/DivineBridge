@@ -1,21 +1,17 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
-import { beforeAll } from '@jest/globals';
-import { describe, expect, it } from '@jest/globals';
-import { config } from 'dotenv';
+import { beforeAll, describe, expect, it } from '@jest/globals';
 
-import { OCRService, type RecognizedDate, supportedOCRLanguages } from '../src/index.js';
-
-config({ path: '.env.test.local' });
+import {
+  OCRService,
+  type RecognizedDate,
+  supportedOCRLanguages,
+} from '../src/services/ocr/index.js';
 
 let ocrService: OCRService;
 
 const TIMEOUT = 30 * 1000;
 
 beforeAll(() => {
-  if (process.env.OCR_API_ENDPOINT === undefined || process.env.OCR_API_KEY === undefined) {
-    throw new Error('Please provide OCR_API_ENDPOINT and OCR_API_KEY in .env.test');
-  }
-  ocrService = new OCRService(process.env.OCR_API_ENDPOINT, process.env.OCR_API_KEY);
+  ocrService = new OCRService();
 });
 
 const testMap: Record<

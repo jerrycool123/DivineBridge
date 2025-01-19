@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import path from 'node:path';
+import { createWorker } from 'tesseract.js';
 
 import { BillingDateParser, RecognizedDate, recognizedDateSchema } from './definitions.js';
 import { type TSupportedLangCode, billingDateParsers } from './parsers.js';
@@ -7,15 +8,6 @@ export { supportedOCRLanguages } from './parsers.js';
 export type { RecognizedDate } from './definitions.js';
 
 export class OCRService {
-  private readonly apiResponseSchema = z.object({
-    message: z.string(),
-  });
-
-  constructor(
-    private readonly apiEndpoint: string,
-    private readonly apiKey: string,
-  ) {}
-
   public async recognizeBillingDate(
     imageUrl: string,
     langCode: TSupportedLangCode,
@@ -27,34 +19,23 @@ export class OCRService {
       }
   > {
     try {
-      const response = await fetch(this.apiEndpoint, {
-        method: 'POST',
-        body: JSON.stringify({
-          image: imageUrl,
-          language: langCode,
-        }),
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-        },
+      const worker = await createWorker(langCode, 1, {
+        workerPath: path.join(
+          process.cwd(),
+          './node_modules/tesseract.js/src/worker-script/node/index.js',
+        ),
+        cachePath: '/tmp',
+        corePath: path.join(process.cwd(), './node_modules/tesseract.js-core'),
       });
-      const data = (await response.json()) as unknown;
+      const ret = await worker.recognize(imageUrl);
+      await worker.terminate();
 
-      if (!response.ok) {
-        return {
-          success: false,
-          error: JSON.stringify(data),
-        };
-      }
-
-      const parsedData = this.apiResponseSchema.safeParse(data);
-      if (parsedData.success) {
-        const { message: rawText } = parsedData.data;
-        const parsedDateResult = this.parseDate(rawText, langCode);
-        return parsedDateResult.success
-          ? parsedDateResult
-          : { success: false, error: parsedDateResult.error };
-      }
+      const parsedDateResult = this.parseDate(ret.data.text, langCode);
+      return parsedDateResult.success
+        ? parsedDateResult
+        : { success: false, error: parsedDateResult.error };
     } catch (error) {
+      console.error(error);
       if (error instanceof Error) {
         return {
           success: false,

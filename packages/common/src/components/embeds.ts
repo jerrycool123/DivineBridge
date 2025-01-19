@@ -1,7 +1,6 @@
 import { EmbedBuilder } from '@discordjs/builders';
 import type { TranslationKey } from '@divine-bridge/i18n';
 import { TFunc } from '@divine-bridge/i18n';
-import type { RecognizedDate } from '@divine-bridge/ocr-service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import dedent from 'dedent';
@@ -11,6 +10,7 @@ import { MembershipRoleDoc } from '../models/membership-role.js';
 import { MembershipDoc } from '../models/membership.js';
 import { YouTubeChannelDoc } from '../models/youtube-channel.js';
 import { MembershipRoleDocWithValidYouTubeChannel, UserPayload } from '../types/common.js';
+import type { RecognizedDate } from '../types/ocr.js';
 import { CommonUtils } from '../utils/common.js';
 import { DiscordUtils } from '../utils/discord.js';
 

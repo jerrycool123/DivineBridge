@@ -6,10 +6,10 @@ import {
   MembershipCollection,
   MembershipRoleCollection,
   MembershipRoleDocWithValidYouTubeChannel,
+  type RecognizedDate,
   YouTubeChannelDoc,
 } from '@divine-bridge/common';
 import { TFunc, defaultLocale, supportedLocales, t } from '@divine-bridge/i18n';
-import { OCRService, RecognizedDate, supportedOCRLanguages } from '@divine-bridge/ocr-service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import dedent from 'dedent';
@@ -29,8 +29,8 @@ import {
 } from 'discord.js';
 
 import { Constants } from '../constants.js';
+import { OCRService, supportedOCRLanguages } from '../services/ocr/index.js';
 import { ChatInputCommand } from '../structures/chat-input-command.js';
-import { Env } from '../utils/env.js';
 import { Utils } from '../utils/index.js';
 import { logger } from '../utils/logger.js';
 import { Validators } from '../utils/validators.js';
@@ -241,7 +241,11 @@ export class VerifyCommand extends ChatInputCommand {
     let activeInteraction: RepliableInteraction = interaction;
     if (!userDoc.flags.tutorial && langCode === null) {
       // Ask user to select language and confirm
-      const languageActionRow = ActionRows.languageSelect(author_t, userDoc.preference.language);
+      const languageActionRow = ActionRows.languageSelect(
+        author_t,
+        userDoc.preference.language,
+        supportedOCRLanguages,
+      );
       const [confirmCustomId, cancelCustomId] = [
         `language-tutorial-confirm-button`,
         `language-tutorial-cancel-button`,
@@ -408,7 +412,7 @@ export class VerifyCommand extends ChatInputCommand {
 
     // Send picture to membership service for OCR
     // ? Do not send error to user if OCR failed due to errors that are not related to the user
-    const ocrService = new OCRService(Env.OCR_API_ENDPOINT, Env.OCR_API_KEY);
+    const ocrService = new OCRService();
     const recognizedResult = await ocrService.recognizeBillingDate(
       picture.url,
       selectedLanguage.code,

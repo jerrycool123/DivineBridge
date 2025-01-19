@@ -13,7 +13,6 @@ Applications are located in the `./apps` directory.
 
 - `web`: The web interface of Divine Bridge.
 - `server`: The server that runs the Discord bot.
-- `sls-ocr`: A serverless app that utilizes [tesseract](https://github.com/tesseract-ocr/tesseract) to perform OCR.
 - `sls-backup`: A serverless app that backs up the database.
 - `sls-membership`: A serverless app that removes expired memberships and update YouTube membership video lists.
 
@@ -24,7 +23,6 @@ Packages are located in the `./packages` directory.
 - `@divine-bridge/eslint-config-custom`: Shared ESLint configuration of this project.
 - `@divine-bridge/prettier-config-custom`: Shared Prettier configuration of this project.
 - `@divine-bridge/common`: Shared components and utilities between applications.
-- `@divine-bridge/ocr-service`: An OCR API wrapper specifically for recognizing and parsing the billing date of the screenshot of the YouTube membership page.
 - `@divine-bridge/i18n`: Shared internationalization files between applications.
 - `@divine-bridge/serverless-offline-lambda-function-urls`: A modified version of [serverless-offline-lambda-function-urls](https://www.npmjs.com/package/serverless-offline-lambda-function-urls) to support function URLs and hot-reloading in serverless-offline.
 
@@ -61,19 +59,14 @@ Please refer to the `./apps/server/.env.example` file, and create a `.env` file 
 
 #### Serverless Apps
 
-There are 3 serverless apps:
+There are 2 serverless apps:
 
-- `sls-ocr`
 - `sls-backup`
 - `sls-membership`
 
 Please refer to the `./apps/sls-*/.env.example` files, and create a `.env.development.local` file for each app in the `./apps/sls-*` directory.
 
 More information about the environment variables can be found in the [serverless-dotenv-plugin guide](https://github.com/neverendingqs/serverless-dotenv-plugin).
-
-### OCR Service
-
-In order to run the OCR tests, please refer to the `./packages/ocr-service/.env.test.example` file, and create a `.env.test.local` file in the `./packages/ocr-service` directory.
 
 ### Start the apps in development mode
 
@@ -125,9 +118,6 @@ To deploy the serverless apps on AWS, make sure you have set up the AWS CLI in t
 Run the following command to deploy the serverless apps:
 
 ```bash
-# To deploy `sls-ocr`
-pnpm run deploy:sls-ocr
-
 # To deploy `sls-backup`
 pnpm run deploy:sls-backup
 
@@ -175,7 +165,7 @@ If you want to add a new language support, please refer to [Languages/Scripts su
 
 And then, please modify the following files:
 
-- Add a new file exporting a date parser `class`, which `implements` the `BillingDateParser`, in `./packages/ocr-service/src/parsers/[lang_code].ts`. Please make sure it correctly parses the billing date of the screenshot of the YouTube membership page.
-- Export the class in `./packages/ocr-service/src/parsers/index.ts`.
-- Import the class in `./packages/ocr-service/src/parsers.ts` and add it to the `billingDateParsers` object.
-- Add testing image and script to `./packages/ocr-service/tests/ocr.test.ts`. Don't forget to run the tests to make sure the new parser works correctly.
+- Add a new file exporting a date parser `class`, which `implements` the `BillingDateParser`, in `./apps/server/src/services/ocr/parsers/[lang_code].ts`. Please make sure it correctly parses the billing date of the screenshot of the YouTube membership page.
+- Export the class in `./apps/server/src/services/ocr/parsers/index.ts`.
+- Import the class in `./apps/server/src/services/ocr/parsers.ts` and add it to the `billingDateParsers` object.
+- Add testing image and script to `./apps/server/tests/ocr.test.ts`. Don't forget to run the tests to make sure the new parser works correctly.

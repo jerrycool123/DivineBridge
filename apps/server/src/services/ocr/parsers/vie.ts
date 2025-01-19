@@ -1,14 +1,14 @@
 import type { RecognizedDate } from '../definitions.js';
 import { BillingDateParser } from '../definitions.js';
 
-export class ChiTraBillingDateParser implements BillingDateParser {
-  constructor(public readonly code: 'chi_tra') {}
+export class VieBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'vie') {}
   parse(lines: string[]): RecognizedDate {
-    const regex = /帳單日期:(\d{1,2})月(\d{1,2})日/g;
+    const regex = /Ngàythanhtoántiếptheo:(\d{1,2})thg(\d{1,2})/;
     for (const line of lines) {
-      const match = line.match(regex);
+      const match = regex.exec(line);
       if (match !== null) {
-        const [month, day] = match.slice(1, 3).map((s) => parseInt(s, 10));
+        const [day, month] = match.slice(1, 3).map((s) => parseInt(s, 10));
         return { month, day };
       }
     }

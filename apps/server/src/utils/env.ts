@@ -11,8 +11,6 @@ export const Env = z
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     GOOGLE_API_KEY: z.string(),
-    OCR_API_ENDPOINT: z.string(),
-    OCR_API_KEY: z.string(),
     DATA_ENCRYPTION_KEY: z.string(),
     LOGGER_URI: z.string(),
   })

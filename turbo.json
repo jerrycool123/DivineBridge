@@ -2,11 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "dev": {
-      "dependsOn": [
-        "@divine-bridge/i18n#build",
-        "@divine-bridge/ocr-service#build",
-        "@divine-bridge/common#build"
-      ],
+      "dependsOn": ["@divine-bridge/i18n#build", "@divine-bridge/common#build"],
       "cache": false,
       "inputs": ["$TURBO_DEFAULT$", ".env.development.local", ".env"]
     },

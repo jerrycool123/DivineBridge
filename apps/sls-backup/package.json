@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "dependencies": {
     "@divine-bridge/common": "workspace:^",
-    "@divine-bridge/ocr-service": "workspace:^",
     "@divine-bridge/serverless-offline-lambda-function-urls": "workspace:^",
     "adm-zip": "^0.5.13",
     "discord.js": "^14.17.3",

@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "noEmit": true,
-    "checkJs": true,
-    "allowJs": true
-  },
-  "extends": "../../tsconfig.json",
-  "exclude": ["dist"]
-}

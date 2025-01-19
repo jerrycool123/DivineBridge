@@ -6,7 +6,6 @@ import {
   TextInputBuilder,
 } from '@discordjs/builders';
 import { TFunc } from '@divine-bridge/i18n';
-import { supportedOCRLanguages } from '@divine-bridge/ocr-service';
 import { ButtonStyle, TextInputStyle } from 'discord-api-types/v10';
 
 import { DiscordUtils } from '../utils/discord.js';
@@ -32,6 +31,7 @@ export namespace ActionRows {
   export const languageSelect = (
     t: TFunc,
     defaultLocale: string,
+    supportedOCRLanguages: { language: string; code: string }[],
   ): ActionRowBuilder<StringSelectMenuBuilder> => {
     return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
       new StringSelectMenuBuilder()

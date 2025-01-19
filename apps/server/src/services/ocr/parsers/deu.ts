@@ -5,9 +5,9 @@ export class DeuBillingDateParser implements BillingDateParser {
   constructor(public readonly code: 'deu') {}
   parse(lines: string[]): RecognizedDate {
     const regex =
-      /NächstesAbrechnungsdatum:(\d{1,2})\.(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)/g;
+      /NächstesAbrechnungsdatum:(\d{1,2})\.(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)/;
     for (const line of lines) {
-      const match = line.match(regex);
+      const match = regex.exec(line);
       if (match !== null) {
         const day = parseInt(match[1], 10);
         const fullMonth = match[2];

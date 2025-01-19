@@ -1,3 +1,0 @@
-{
-  "extends": ["@divine-bridge/eslint-config-custom", "plugin:import-esm/recommended"]
-}

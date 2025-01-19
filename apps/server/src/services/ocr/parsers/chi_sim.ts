@@ -1,12 +1,12 @@
 import type { RecognizedDate } from '../definitions.js';
 import { BillingDateParser } from '../definitions.js';
 
-export class KorBillingDateParser implements BillingDateParser {
-  constructor(public readonly code: 'kor') {}
+export class ChiSimBillingDateParser implements BillingDateParser {
+  constructor(public readonly code: 'chi_sim') {}
   parse(lines: string[]): RecognizedDate {
-    const regex = /다음결제일:(\d{1,2})월(\d{1,2})일/g;
+    const regex = /结算日期:(\d{1,2})月(\d{1,2})日/;
     for (const line of lines) {
-      const match = line.match(regex);
+      const match = regex.exec(line);
       if (match !== null) {
         const [month, day] = match.slice(1, 3).map((s) => parseInt(s, 10));
         return { month, day };

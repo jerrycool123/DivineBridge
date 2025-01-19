@@ -1,4 +1,4 @@
-import { type Logger as L, type LevelWithSilentOrString, pino } from 'pino';
+import { Logger as L, LevelWithSilentOrString, pino } from 'pino';
 import build from 'pino-abstract-transport';
 import { build as pretty } from 'pino-pretty';
 import { z } from 'zod';
