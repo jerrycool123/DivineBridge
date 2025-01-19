@@ -26,10 +26,7 @@
     },
     "lint": {},
     "format": {},
-    "test": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.test"]
-    },
+    "test": {},
     "check-types": {}
   }
 }
