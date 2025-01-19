@@ -19,7 +19,8 @@
         "mongodump",
         ".env.production.local",
         ".env"
-      ]
+      ],
+      "env": ["SERVERLESS_ACCESS_KEY"]
     },
     "start": {
       "dependsOn": ["^build"]
