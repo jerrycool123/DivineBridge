@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noEmit": false,
     "declaration": true,
     "declarationMap": true,
     "declarationDir": "./dist"
