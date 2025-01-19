@@ -1,5 +1,5 @@
 /** @type {import('esbuild').BuildOptions} */
-const config = {
+export default () => ({
   bundle: true,
   minify: true,
   format: 'esm',
@@ -7,6 +7,4 @@ const config = {
     '.js': '.mjs',
   },
   inject: ['./cjs-shim.ts'],
-};
-
-module.exports = () => config;
+});

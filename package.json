@@ -9,9 +9,6 @@
   },
   "license": "MIT",
   "lint-staged": {
-    "*.{mjs,cjs,js,ts,tsx,jsx}": [
-      "eslint --flag unstable_config_lookup_from_file ./packages/eslint-config-custom/eslint.config.js"
-    ],
     "*.{json,md,html,mjs,cjs,js,jsx,ts,tsx}": [
       "prettier --write"
     ]

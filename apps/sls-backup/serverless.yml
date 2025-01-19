@@ -2,7 +2,7 @@ service: sls-backup
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs22.x
 
 functions:
   backup:
@@ -11,18 +11,19 @@ functions:
     url: true
 
 package:
-  include:
+  patterns:
     - mongodump
+
+build:
+  esbuild:
+    configFile: esbuild.config.js
 
 plugins:
   - serverless-dotenv-plugin
-  - serverless-esbuild
   - '@divine-bridge/serverless-offline-lambda-function-urls'
   - serverless-offline
 
 custom:
-  esbuild:
-    config: esbuild.config.cjs
   serverless-offline:
     lambdaPort: 3012
     urlLambdaFunctionsHttpPort: 5012

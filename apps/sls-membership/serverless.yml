@@ -2,7 +2,7 @@ service: sls-membership
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs22.x
 
 functions:
   check-auth-membership:
@@ -18,15 +18,16 @@ functions:
     timeout: 900
     url: true
 
+build:
+  esbuild:
+    configFile: esbuild.config.js
+
 plugins:
-  - serverless-esbuild
   - serverless-dotenv-plugin
   - '@divine-bridge/serverless-offline-lambda-function-urls'
   - serverless-offline
 
 custom:
-  esbuild:
-    config: esbuild.config.cjs
   serverless-offline:
     lambdaPort: 3011
     urlLambdaFunctionsHttpPort: 5011

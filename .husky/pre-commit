@@ -5,4 +5,6 @@ pnpm check-types
 pnpm syncpack list-mismatches
 pnpm syncpack format && git add .
 
+# Temporary workaround for eslint error
+pnpm run lint
 pnpm lint-staged

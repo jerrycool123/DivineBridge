@@ -65,7 +65,7 @@ export const updateMemberOnlyVideos = async (
       });
       if (differenceRatio >= 0.5) {
         logger.error(
-          `⚠️⚠️⚠️ ALERT ⚠️⚠️⚠️ The difference ratio of the member only videos for the YouTube channel ${youtubeChannelDoc._id} is ${differenceRatio}%, which is higher than 50%.`,
+          `⚠️⚠️⚠️ ALERT ⚠️⚠️⚠️ The difference ratio of the member only videos for the YouTube channel ${youtubeChannelDoc._id} is ${Math.floor(differenceRatio * 100)}%, which is higher than 50%.`,
         );
         continue;
       }

@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
-import tar from 'tar';
+import * as tar from 'tar';
 
 // ? Note: you might need to download your platform-specific version of mongodump in order to do local testing
 // ? Here: https://www.mongodb.com/download-center/database-tools/releases/archive
