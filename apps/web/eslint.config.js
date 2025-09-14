@@ -8,7 +8,7 @@ const compat = new FlatCompat({
 const config = [
   ...defaultConfig,
   ...compat.config({
-    extends: ['next/core-web-vitals', 'next/typescript'],
+    extends: ['plugin:@next/next/recommended'],
     rules: {
       '@next/next/no-html-link-for-pages': 'off',
     },
