@@ -79,7 +79,9 @@ export class Bot extends Core {
           cached = true;
         }
       } catch (error) {
-        this.context.logger.error('Failed to read the previous hash', error);
+        this.context.logger.error(
+          `Failed to read the previous hash: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
     }
 

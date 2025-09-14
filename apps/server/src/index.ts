@@ -43,6 +43,8 @@ await initI18n({ debug: Env.NODE_ENV === 'development' });
 
 registerProcessEventListeners(logger, httpServer);
 
+console.log('after reg...');
+
 const eventHandlers = [
   new DebugEventHandler(),
   new ErrorEventHandler(),
@@ -76,6 +78,8 @@ const buttons = [
   new MembershipRejectButton(),
 ];
 
+console.log('Starting bot...');
+
 export const bot = new Bot({
   options: { intents: Constants.intents },
   logger,
@@ -84,8 +88,10 @@ export const bot = new Bot({
   buttons,
 });
 
+console.log('before Connected to MongoDB');
 await mongoose.connect(Env.MONGO_URI);
 logger.debug('Connected to MongoDB');
+console.log('after Connected to MongoDB');
 
 await bot.start(Env.DISCORD_BOT_TOKEN);
 

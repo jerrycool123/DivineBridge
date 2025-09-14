@@ -1,4 +1,5 @@
-import { Logger as L, LevelWithSilentOrString, pino } from 'pino';
+/* eslint-disable turbo/no-undeclared-env-vars */
+import { Logger as L, LevelWithSilentOrString, multistream, pino } from 'pino';
 import build from 'pino-abstract-transport';
 import { build as pretty } from 'pino-pretty';
 import { z } from 'zod';
@@ -25,84 +26,75 @@ export class SystemLogService {
   });
 
   public instance: L;
-  private readonly username: string;
-  private readonly password: string;
-  private readonly domain: string;
-  private readonly organization: string;
-  private readonly streamName: string;
-  private readonly identifier: string;
 
-  constructor(uri: string, identifier: string, defaultLogLevel: LevelWithSilentOrString = 'info') {
-    // The URL class will throw an error if the URI is not valid
-    const parsedUrl = new URL(uri);
-    this.identifier = identifier;
-
-    // Extract the username and password from the URL
-    this.username = decodeURIComponent(parsedUrl.username);
-    this.password = decodeURIComponent(parsedUrl.password);
-
-    // Extract the hostname (without the scheme)
-    this.domain = parsedUrl.hostname;
-
-    // Extract the path segments
-    const pathSegments = parsedUrl.pathname.split('/').filter((segment) => segment.length > 0);
-
-    // Ensure the path has the expected number of segments for org and stream_name
-    if (pathSegments.length !== 3 || pathSegments[0] !== 'api') {
-      throw new Error('Invalid path in the URI. Expected format: /api/{org}/{stream_name}');
-    }
-
-    // Extract org and stream_name from the path
-    this.organization = pathSegments[1];
-    this.streamName = pathSegments[2];
-
+  constructor(
+    webhookUrl: string,
+    identifier: string,
+    defaultLogLevel: LevelWithSilentOrString = 'info',
+  ) {
     this.instance = pino(
       { level: defaultLogLevel },
-      pino.multistream([{ stream: pretty({}), level: defaultLogLevel }, this.openObserve()]),
+      multistream([
+        {
+          stream: pretty({}),
+          level: defaultLogLevel,
+        },
+        {
+          stream: this.discord(webhookUrl, identifier),
+          level: 'info',
+        },
+      ]),
     );
   }
 
-  private openObserve() {
+  private discord(webhookUrl: string, identifier: string) {
     return build(async (source) => {
       for await (const log of source) {
-        void this.sendLog(log);
+        try {
+          const { time, level, msg } = this.logSchema.parse(log);
+
+          const date = new Date(time).toISOString();
+
+          const levelName =
+            level in this.defaultLevelMap
+              ? this.defaultLevelMap[level as keyof typeof this.defaultLevelMap]
+              : 'unknown';
+
+          let message = '';
+          if (typeof msg === 'string') {
+            message = msg;
+          } else {
+            try {
+              message = JSON.stringify(msg);
+            } catch {
+              message = '(Failed to serialize log message)';
+            }
+          }
+
+          const nodeEnv =
+            'NODE_ENV' in process.env && typeof process.env.NODE_ENV === 'string'
+              ? process.env.NODE_ENV
+              : 'unknown environment';
+
+          const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content: `\`[${levelName}][${identifier}] @ ${date} (${nodeEnv})\`\n${message}`,
+            }),
+          });
+
+          if (response.ok) {
+            return;
+          } else {
+            console.error('Failed to send logs:', response.status, response.statusText);
+          }
+        } catch (error) {
+          console.error('Failed to send logs:', error);
+        }
       }
     });
-  }
-
-  private async sendLog(log: unknown) {
-    try {
-      const { time, level, msg } = this.logSchema.parse(log);
-
-      const response = await fetch(
-        `https://${this.domain}/api/${this.organization}/${this.streamName}/_multi`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            _timestamp: time,
-            date: new Date(time).toISOString(),
-            identifier: this.identifier,
-            level,
-            level_name:
-              level in this.defaultLevelMap
-                ? this.defaultLevelMap[level as keyof typeof this.defaultLevelMap]
-                : 'unknown',
-            msg,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        return;
-      } else {
-        console.error('Failed to send logs:', response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error('Failed to send logs:', error);
-    }
   }
 }

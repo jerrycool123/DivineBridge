@@ -49,7 +49,7 @@ export class GuildCreateEventHandler extends EventHandler<Events.GuildCreate> {
         aliasCommand.toJSON(),
       );
       if (!createResult.success) {
-        logger.error('Failed to create alias command', createResult.error);
+        logger.error(`Failed to create alias command: ${createResult.error}`);
         continue;
       }
       const aliasCommandId = createResult.command.id;
