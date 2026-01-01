@@ -70,9 +70,30 @@ export const updateMemberOnlyVideos = async (
         continue;
       }
 
+      let updatePayload: Record<string, unknown> = {
+        memberOnlyVideoIds,
+      };
+
+      // Try to get the channel metadata to sync with the latest profile
+      const channelResult = await youtubeApiKeyApi.getChannel(youtubeChannelDoc._id);
+      if (channelResult.success) {
+        const { channel: parsedChannel } = channelResult;
+        updatePayload = {
+          ...updatePayload,
+          'profile.title': parsedChannel.snippet.title,
+          'profile.description': parsedChannel.snippet.description,
+          'profile.customUrl': parsedChannel.snippet.customUrl,
+          'profile.thumbnail': parsedChannel.snippet.thumbnails.high.url,
+        };
+      } else {
+        logger.error(
+          `⚠️ Error while fetching channel metadata for YouTube channel ${youtubeChannelDoc.profile.title} (${youtubeChannelDoc._id})`,
+        );
+      }
+
       // Update member only videos in DB
       await youtubeChannelDoc.updateOne({
-        $set: { memberOnlyVideoIds },
+        $set: updatePayload,
       });
     } catch (error) {
       logger.error(error);

@@ -136,7 +136,7 @@ export const checkAuthMembership = async (
           const googleOAuth = new GoogleOAuth(Env.GOOGLE_CLIENT_ID, Env.GOOGLE_CLIENT_SECRET);
           const youtubeOAuthApi = new YouTubeOAuthAPI(logger, googleOAuth, refreshToken);
           const result = await youtubeOAuthApi.verifyMembership(randomVideoId);
-          logger.debug(randomVideoId, result.success ? 'success' : result.error);
+          logger.debug(`${randomVideoId}: ${result.success ? 'success' : result.error}`);
           if (result.success) {
             verifySuccess = true;
           } else if (
